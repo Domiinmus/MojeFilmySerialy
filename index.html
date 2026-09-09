@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-    <title>My Films and Serials v4.0</title>
+    <title>My Films and Serials v4.2</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -261,6 +261,112 @@
         .result-card{transition:.2s;border:1px solid rgba(148,163,184,.14)}.result-card:hover{transform:translateY(-1px);border-color:rgba(245,158,11,.38);box-shadow:0 12px 30px rgba(15,23,42,.10)}
         .manual-input{display:block;width:100%;background:rgba(248,250,252,.9);color:#0f172a;border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:.8rem .9rem;font-size:.85rem;outline:none;transition:.2s}.dark .manual-input{background:rgba(2,6,23,.65);color:#fff;border-color:rgba(148,163,184,.16)}.manual-input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.10)}
         .manual-season{background:rgba(248,250,252,.55);border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:14px}.dark .manual-season{background:rgba(2,6,23,.38)}
+        .theme-swatch{transition:transform .18s,box-shadow .18s}.theme-swatch:hover{transform:scale(1.08)} 
+        .home-page{max-width:100%}
+        .home-hero{position:relative;min-height:175px;background:radial-gradient(circle at 82% 20%,rgba(168,85,247,.32),transparent 27%),radial-gradient(circle at 62% 100%,rgba(37,99,235,.22),transparent 35%),linear-gradient(120deg,#081426 0%,#101d3a 52%,#27133d 100%)}
+        .home-hero:before{content:'';position:absolute;inset:auto 0 0;height:62%;background:linear-gradient(180deg,transparent,rgba(2,6,23,.78)),radial-gradient(ellipse at 58% 100%,rgba(30,64,175,.6),transparent 42%);opacity:.9}
+        .home-hero:after{content:'';position:absolute;right:8%;bottom:-55px;width:300px;height:150px;background:linear-gradient(145deg,transparent 45%,rgba(15,23,42,.8) 46% 55%,transparent 56%),linear-gradient(35deg,transparent 40%,rgba(30,41,59,.9) 41% 59%,transparent 60%);filter:blur(.2px);opacity:.8}
+        .home-hero-glow{position:absolute;right:-90px;top:-120px;width:380px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(217,70,239,.38),rgba(59,130,246,.14) 42%,transparent 68%);filter:blur(8px)}
+        .home-date-card{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:linear-gradient(135deg,rgba(59,130,246,.30),rgba(217,70,239,.26));backdrop-filter:blur(14px);box-shadow:0 18px 45px rgba(0,0,0,.18)}
+        .home-section{box-shadow:0 22px 65px rgba(0,0,0,.18)}
+        .home-section-icon{width:48px;height:48px;border-radius:18px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:19px}
+        .home-spark{border-radius:50%}
+        .home-link-btn{font-size:11px;font-weight:800;color:#60a5fa;white-space:nowrap;transition:.2s}.home-link-btn:hover{transform:translateX(2px);filter:brightness(1.15)}
+        .home-refresh-btn{width:48px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:white;border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 28px rgba(59,130,246,.18);transition:transform .2s,filter .2s}.home-refresh-btn:hover{transform:rotate(20deg) scale(1.04);filter:brightness(1.1)}.home-refresh-btn:active{transform:rotate(140deg) scale(.96)}
+        .home-continue-card{position:relative;display:block;overflow:hidden;aspect-ratio:1.52/1;border-radius:16px;background:#020617;border:1px solid rgba(148,163,184,.12);box-shadow:0 12px 30px rgba(0,0,0,.25);transition:transform .22s,box-shadow .22s,border-color .22s}.home-continue-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(0,0,0,.35);border-color:rgba(99,102,241,.55)}
+        .home-continue-card img{transition:transform .35s}.home-continue-card:hover img{transform:scale(1.05)}
+        .home-recommend-card{position:relative;overflow:hidden;text-align:left;border-radius:14px;background:rgba(2,6,23,.68);border:1px solid rgba(148,163,184,.12);transition:transform .2s,border-color .2s,box-shadow .2s}.home-recommend-card:hover{transform:translateY(-3px);border-color:rgba(99,102,241,.42);box-shadow:0 15px 32px rgba(0,0,0,.25)}
+        .home-recommend-card img{aspect-ratio:2/3;object-fit:cover;width:100%;display:block}.home-recommend-info{padding:9px 9px 10px}.home-recommend-title{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.home-recommend-meta{font-size:9px;color:#94a3b8;margin-top:5px}.home-recommend-rating{font-size:10px;font-weight:900;color:#fbbf24;margin-top:5px}
+        @media (max-width:639px){.home-hero{min-height:155px}.home-date-card{padding:10px 12px}.home-date-card .text-base{font-size:12px}.home-section-icon{width:42px;height:42px;border-radius:15px}.home-refresh-btn{width:42px;height:38px}.home-recommend-grid{gap:.5rem}.home-recommend-info{padding:7px}.home-recommend-title{font-size:10px}.home-recommend-meta{font-size:8px}.home-recommend-rating{font-size:9px}}
+        #home-continue-grid button{min-width:0}
+
+        /* ===== KOMPAKTNĚJŠÍ DOMOVSKÁ OBRAZOVKA ===== */
+        #section-home{gap:1.15rem}
+        #section-home .home-hero{min-height:125px;border-radius:1.35rem}
+        #section-home .home-hero .relative.z-10{padding:1rem 1.35rem;gap:1rem}
+        #section-home .home-hero h2{font-size:clamp(1.55rem,2.5vw,2.5rem)}
+        #section-home .home-hero p{font-size:.78rem;margin-top:.2rem}
+        #section-home .home-hero .text-\[10px\]{font-size:8px;margin-bottom:.35rem}
+        #section-home .home-date-card{padding:9px 12px;border-radius:15px;gap:8px}
+        #section-home .home-date-card > div:first-child{width:34px;height:34px;border-radius:11px;font-size:15px}
+        #section-home .home-date-card .text-base{font-size:12px}
+        #section-home .home-section{border-radius:1.35rem;padding:12px 14px}
+        #section-home .home-section-icon{width:38px;height:38px;border-radius:13px;font-size:15px}
+        #section-home .home-section h3{font-size:1.05rem}
+        #section-home .home-section h4{font-size:1rem}
+        #section-home .home-section p{font-size:9px}
+        #section-home .home-section > .flex{margin-bottom:.7rem}
+        #section-home .home-continue-grid{gap:.55rem}
+        #section-home .home-continue-card{border-radius:11px}
+        #section-home .home-recommend-grid{gap:.55rem}
+        #section-home .home-recommend-card{border-radius:10px}
+        #section-home .home-recommend-info{padding:6px 7px 7px}
+        #section-home .home-recommend-title{font-size:9px}
+        #section-home .home-recommend-meta{font-size:8px;margin-top:3px}
+        #section-home .home-recommend-rating{font-size:9px;margin-top:3px}
+        #section-home .home-refresh-btn{width:36px;height:34px}
+        #section-home .pt-1{padding-top:0}
+        #section-home .space-y-5 > :not([hidden]) ~ :not([hidden]){margin-top:.8rem}
+        /* Nastavitelná velikost náhledů v Pokračovat ve sledování + větší datum */
+        #section-home .home-date-card{padding:11px 15px;gap:10px}
+        #section-home .home-date-card > div:first-child{width:40px;height:40px;border-radius:12px;font-size:17px}
+        #section-home .home-date-card .text-base{font-size:15px}
+        #section-home .home-date-card .text-\[10px\]{font-size:10px}
+        #section-home .home-date-card > div:last-child > div:last-child{font-size:9px}
+        #section-home.home-continue-size-small .home-continue-grid{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+        #section-home.home-continue-size-normal .home-continue-grid{grid-template-columns:repeat(5,minmax(0,1fr)) !important}
+        #section-home.home-continue-size-large .home-continue-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+        #section-home.home-continue-size-small .home-continue-card{aspect-ratio:1.72/1}
+        #section-home.home-continue-size-normal .home-continue-card{aspect-ratio:1.58/1}
+        #section-home.home-continue-size-large .home-continue-card{aspect-ratio:1.45/1}
+        @media (max-width:639px){
+            #section-home.home-continue-size-small .home-continue-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+            #section-home.home-continue-size-normal .home-continue-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+            #section-home.home-continue-size-large .home-continue-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+        }
+        /* Menší a přehlednější Pokračovat ve sledování + volitelná velikost náhledů Domů */
+        #section-home .home-continue-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:.5rem}
+        #section-home .home-continue-card{aspect-ratio:1.72/1;border-radius:10px}
+        #section-home .home-continue-card .p-2\.5{padding:.5rem}
+        #section-home .home-continue-card .text-xs{font-size:9px}
+        #section-home .home-continue-card .text-\[9px\]{font-size:7px}
+        #section-home .home-continue-card .h-1\.5{height:4px}
+        #section-home .home-recommend-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+        #section-home.home-size-small .home-recommend-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+        #section-home.home-size-normal .home-recommend-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+        #section-home.home-size-large .home-recommend-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+        #section-home.home-size-small .home-recommend-info{padding:5px 6px 6px}
+        #section-home.home-size-small .home-recommend-title{font-size:8px}
+        #section-home.home-size-small .home-recommend-meta{font-size:7px}
+        #section-home.home-size-small .home-recommend-rating{font-size:8px}
+        #section-home.home-size-large .home-recommend-info{padding:9px}
+        #section-home.home-size-large .home-recommend-title{font-size:11px}
+        @media (min-width:640px){
+            #section-home .home-continue-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+            #section-home.home-size-small .home-recommend-grid{grid-template-columns:repeat(5,minmax(0,1fr)) !important}
+            #section-home.home-size-normal .home-recommend-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+            #section-home.home-size-large .home-recommend-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+        }
+        @media (min-width:768px){
+            #section-home .home-hero{min-height:118px}
+            #section-home .home-hero .relative.z-10{padding:1rem 1.4rem}
+            #section-home .home-section{padding:13px 15px}
+            #section-home .home-continue-grid{gap:.65rem}
+            #section-home .home-recommend-grid{gap:.6rem}
+        }
+        @media (min-width:1024px){
+            #section-home .home-continue-grid{grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:.6rem}
+            #section-home.home-size-small .home-recommend-grid{grid-template-columns:repeat(7,minmax(0,1fr)) !important}
+            #section-home.home-size-normal .home-recommend-grid{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+            #section-home.home-size-large .home-recommend-grid{grid-template-columns:repeat(5,minmax(0,1fr)) !important}
+            #section-home{gap:1rem}
+            #section-home .home-hero{min-height:112px}
+            #section-home .home-hero .relative.z-10{padding:.9rem 1.35rem}
+            #section-home .home-section{padding:12px 14px}
+            #section-home .home-section-icon{width:36px;height:36px}
+            #section-home .home-recommend-title{font-size:10px}
+        }
+
     </style>
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
@@ -268,18 +374,21 @@
     <!-- Navigační panel -->
     <nav class="bg-white/90 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('watchlist')">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
                 <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-black text-xl tracking-tighter theme-bg theme-text">MFS</div>
                 <div>
                     <span class="text-xl font-bold tracking-wider text-slate-900 dark:text-white">My Films <span class="text-amber-500 theme-text">& Serials</span></span>
-                    <span class="block text-[10px] text-amber-500 theme-text font-mono uppercase tracking-widest">TVŮJ OSOBNÍ KATALOG v4.1</span>
+                    <span class="block text-[10px] text-amber-500 theme-text font-mono uppercase tracking-widest">TVŮJ OSOBNÍ KATALOG v4.2</span>
                 </div>
             </div>
             
             <div class="flex items-center gap-3">
                 <!-- Hlavní záložky -->
                 <div class="flex flex-wrap gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-                    <button onclick="switchTab('watchlist')" id="tab-watchlist" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all bg-amber-500 text-slate-950 theme-bg theme-text">
+                    <button onclick="switchTab('home')" id="tab-home" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all bg-amber-500 text-slate-950 theme-bg theme-text">
+                        <i class="fa-solid fa-house mr-1.5"></i>Domů
+                    </button>
+                    <button onclick="switchTab('watchlist')" id="tab-watchlist" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                         <i class="fa-solid fa-clapperboard mr-1.5"></i>Knihovna
                     </button>
                     <button onclick="switchTab('upcoming')" id="tab-upcoming" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
@@ -329,6 +438,86 @@
                 <i class="fa-solid fa-bolt mr-1.5"></i>Vygenerovat testovací data
             </button>
         </div>
+
+        <!-- TAB: DOMŮ -->
+        <section id="section-home" class="home-page space-y-7">
+            <div class="home-hero rounded-[2rem] overflow-hidden border border-slate-800/80 shadow-2xl">
+                <div class="home-hero-glow"></div>
+                <div class="relative z-10 p-6 sm:p-8 lg:p-9 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-[.22em] text-slate-300/80 mb-2"><i class="fa-solid fa-clapperboard mr-1.5"></i> Tvůj osobní katalog</div>
+                        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight">Vítej zpět! <span aria-hidden="true">👋</span></h2>
+                        <p class="text-sm sm:text-base text-slate-300 mt-2">Tvoje filmy a seriály, vše na jednom místě.</p>
+                    </div>
+                    <div class="home-date-card shrink-0">
+                        <div class="w-11 h-11 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-xl"><i class="fa-regular fa-calendar"></i></div>
+                        <div>
+                            <div class="text-[10px] text-slate-300/80 uppercase tracking-wider font-bold">Dnes je</div>
+                            <div id="home-date" class="font-black text-base">—</div>
+                            <div class="text-[10px] text-slate-300 mt-1">„Dobré příběhy nikdy nekončí.“</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel home-section rounded-[2rem] p-4 sm:p-6">
+                <div class="flex items-center justify-between gap-3 mb-5">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="home-section-icon bg-indigo-500/15 text-indigo-400"><i class="fa-solid fa-play"></i></span>
+                        <div class="min-w-0">
+                            <h3 class="text-xl sm:text-2xl font-black truncate">Pokračovat ve sledování</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tam, kde jsi skončil.</p>
+                        </div>
+                    </div>
+                    <button onclick="switchTab('watchlist')" class="home-link-btn shrink-0">Zobrazit vše <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                </div>
+                <div id="home-continue-grid" class="home-continue-grid grid gap-3"></div>
+            </div>
+
+            <div class="pt-1">
+                <div class="flex items-center gap-3 px-1 mb-4">
+                    <span class="home-section-icon home-spark bg-fuchsia-500/15 text-fuchsia-400"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-black">Co si pustit</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Objev nové příběhy, které by se ti mohly líbit.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="glass-panel home-section rounded-[2rem] p-4 sm:p-6">
+                        <div class="flex items-center justify-between gap-4 mb-5">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="home-section-icon bg-emerald-500/15 text-emerald-400"><i class="fa-solid fa-tv"></i></span>
+                                <div class="min-w-0">
+                                    <h4 class="font-black text-lg sm:text-xl">Seriály</h4>
+                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nejlepší seriály podle hodnocení a novosti.</p>
+                                </div>
+                            </div>
+                            <button onclick="refreshHomeRecommendations('shows')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </div>
+                        <div id="home-shows-grid" class="home-recommend-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
+                    </div>
+
+                    <div class="glass-panel home-section rounded-[2rem] p-4 sm:p-6">
+                        <div class="flex items-center justify-between gap-4 mb-5">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="home-section-icon bg-pink-500/15 text-pink-400"><i class="fa-solid fa-clapperboard"></i></span>
+                                <div class="min-w-0">
+                                    <h4 class="font-black text-lg sm:text-xl">Filmy</h4>
+                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nejlépe hodnocené filmy, které nesmíš minout.</p>
+                                </div>
+                            </div>
+                            <button onclick="refreshHomeRecommendations('movies')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </div>
+                        <div id="home-movies-grid" class="home-recommend-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- TAB: SLEDOVÁNÍ (KNIHOVNA) -->
         <section id="section-watchlist" class="space-y-6">
@@ -621,12 +810,38 @@
                     <div class="settings-card">
                         <div class="flex items-center gap-3 mb-4"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-palette"></i></span><div><h3 class="text-sm font-black">Vzhled</h3><p class="text-[10px] text-slate-500">Barvy a režim aplikace</p></div></div>
                         <div class="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800"><button id="theme-btn-light" onclick="setThemeMode('light')" class="flex-1 py-2.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-sun mr-1.5"></i>Světlý</button><button id="theme-btn-dark" onclick="setThemeMode('dark')" class="flex-1 py-2.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-moon mr-1.5"></i>Tmavý</button></div>
-                        <div class="mt-4"><p class="text-[10px] text-slate-500 mb-2 uppercase tracking-wider font-bold">Akcent</p><div class="flex gap-3"><button onclick="changeThemeColor('amber')" class="w-9 h-9 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 ring-amber-500"></button><button onclick="changeThemeColor('indigo')" class="w-9 h-9 rounded-full bg-indigo-500"></button><button onclick="changeThemeColor('emerald')" class="w-9 h-9 rounded-full bg-emerald-500"></button><button onclick="changeThemeColor('rose')" class="w-9 h-9 rounded-full bg-rose-500"></button></div></div>
+                        <div class="mt-4"><p class="text-[10px] text-slate-500 mb-2 uppercase tracking-wider font-bold">Akcent</p><div class="flex flex-wrap gap-3">
+                            <button onclick="changeThemeColor('amber')" data-theme-color="amber" class="theme-swatch w-9 h-9 rounded-full bg-amber-500"></button>
+                            <button onclick="changeThemeColor('indigo')" data-theme-color="indigo" class="theme-swatch w-9 h-9 rounded-full bg-indigo-500"></button>
+                            <button onclick="changeThemeColor('emerald')" data-theme-color="emerald" class="theme-swatch w-9 h-9 rounded-full bg-emerald-500"></button>
+                            <button onclick="changeThemeColor('rose')" data-theme-color="rose" class="theme-swatch w-9 h-9 rounded-full bg-rose-500"></button>
+                            <button onclick="changeThemeColor('blue')" data-theme-color="blue" class="theme-swatch w-9 h-9 rounded-full bg-blue-500"></button>
+                            <button onclick="changeThemeColor('purple')" data-theme-color="purple" class="theme-swatch w-9 h-9 rounded-full bg-purple-500"></button>
+                            <button onclick="changeThemeColor('cyan')" data-theme-color="cyan" class="theme-swatch w-9 h-9 rounded-full bg-cyan-500"></button>
+                            <button onclick="changeThemeColor('pink')" data-theme-color="pink" class="theme-swatch w-9 h-9 rounded-full bg-pink-500"></button>
+                            <button onclick="changeThemeColor('violet')" data-theme-color="violet" class="theme-swatch w-9 h-9 rounded-full bg-violet-500"></button>
+                        </div></div>
                     </div>
                     <div class="settings-card">
                         <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-display"></i></span><div><h3 class="text-sm font-black">Rozložení knihovny</h3><p class="text-[10px] text-slate-500">Kolik titulů chceš vidět najednou</p></div></div>
                         <div class="grid grid-cols-3 gap-2 mt-4"><button onclick="setCardSize('small')" data-card-size="small" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800"><i class="fa-solid fa-grip mr-1"></i>Malé</button><button onclick="setCardSize('normal')" data-card-size="normal" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">Normální</button><button onclick="setCardSize('large')" data-card-size="large" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">Velké</button></div>
                         <div class="setting-row mt-2"><div><b class="text-xs">Jemné animace</b><p class="text-[10px] text-slate-500">Pohyby a přechody v rozhraní</p></div><label class="switch"><input id="setting-animations" type="checkbox" onchange="setAnimations(this.checked)"><span></span></label></div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-images"></i></span><div><h3 class="text-sm font-black">Náhledy na Domů</h3><p class="text-[10px] text-slate-500">Velikost posterů v doporučeních</p></div></div>
+                        <div class="grid grid-cols-3 gap-2 mt-3">
+                            <button type="button" data-home-card-size="small" onclick="setHomeCardSize('small')" class="home-card-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Malé</button>
+                            <button type="button" data-home-card-size="normal" onclick="setHomeCardSize('normal')" class="home-card-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Střední</button>
+                            <button type="button" data-home-card-size="large" onclick="setHomeCardSize('large')" class="home-card-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Velké</button>
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="fa-solid fa-play"></i></span><div><h3 class="text-sm font-black">Pokračovat ve sledování</h3><p class="text-[10px] text-slate-500">Velikost náhledů na domovské obrazovce</p></div></div>
+                        <div class="grid grid-cols-3 gap-2 mt-3">
+                            <button type="button" data-home-continue-size="small" onclick="setHomeContinueSize('small')" class="home-continue-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Malé</button>
+                            <button type="button" data-home-continue-size="normal" onclick="setHomeContinueSize('normal')" class="home-continue-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Střední</button>
+                            <button type="button" data-home-continue-size="large" onclick="setHomeContinueSize('large')" class="home-continue-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Velké</button>
+                        </div>
                     </div>
                     <div class="settings-card">
                         <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-rotate"></i></span><div><h3 class="text-sm font-black">Synchronizace</h3><p class="text-[10px] text-slate-500">Aktualizace seriálů z TMDb</p></div></div>
@@ -642,7 +857,7 @@
                 <div class="settings-card">
                     <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-sliders"></i></span><div><h3 class="text-sm font-black">Chování aplikace</h3><p class="text-[10px] text-slate-500">Drobnosti, které ovlivní používání</p></div></div>
                     <div class="setting-row"><div><b class="text-xs">Potvrdit mazání</b><p class="text-[10px] text-slate-500">Před odstraněním titulu zobrazit potvrzení</p></div><label class="switch"><input id="setting-confirm-delete" type="checkbox" onchange="setConfirmDelete(this.checked)"><span></span></label></div>
-                    <div class="mt-3"><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Po spuštění otevřít</label><select id="setting-start-tab" onchange="setStartTab(this.value)" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs"><option value="watchlist">Knihovnu</option><option value="upcoming">Nadcházející</option><option value="creator">Přidat / Vytvořit</option><option value="stats">Statistiky</option></select></div>
+                    <div class="mt-3"><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Po spuštění otevřít</label><select id="setting-start-tab" onchange="setStartTab(this.value)" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs"><option value="home">Domů</option><option value="watchlist">Knihovnu</option><option value="upcoming">Nadcházející</option><option value="creator">Přidat / Vytvořit</option><option value="stats">Statistiky</option></select></div>
                 </div>
                 <div class="settings-card">
                     <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-key"></i></span><div><h3 class="text-sm font-black">TMDb API</h3><p class="text-[10px] text-slate-500">Klíč je uložen pouze v tomto prohlížeči.</p></div></div>
@@ -660,18 +875,29 @@
         let state = {
             watchlist: JSON.parse(localStorage.getItem('mfs_watchlist')) || [],
             apiKey: localStorage.getItem('mfs_api_key') || '',
-            activeTab: 'watchlist',
+            activeTab: 'home',
             currentDetailId: null,
+            homeRefresh: { shows: 0, movies: 0 },
             themeColor: localStorage.getItem('mfs_theme_color') || 'amber',
             themeMode: localStorage.getItem('mfs_theme_mode') || 'dark',
             cardSize: localStorage.getItem('mfs_card_size') || 'normal',
+            homeCardSize: localStorage.getItem('mfs_home_card_size') || 'normal',
+            homeContinueSize: localStorage.getItem('mfs_home_continue_size') || 'normal',
             animations: localStorage.getItem('mfs_animations') !== 'false',
             autoSync: localStorage.getItem('mfs_auto_sync') === 'true',
             notifications: localStorage.getItem('mfs_notifications') !== 'false',
             notificationDays: Number(localStorage.getItem('mfs_notification_days') || 3),
             confirmDelete: localStorage.getItem('mfs_confirm_delete') !== 'false',
-            startTab: localStorage.getItem('mfs_start_tab') || 'watchlist',
+            startTab: localStorage.getItem('mfs_start_tab') || 'home',
         };
+
+        // Migrace starého hodnocení 0–5 na nový rozsah 0–10.
+        state.watchlist.forEach(item => {
+            if (Number.isFinite(Number(item.rating)) && Number(item.rating) > 0 && Number(item.rating) <= 5) {
+                item.rating = Number(item.rating) * 2;
+            }
+        });
+        localStorage.setItem('mfs_watchlist', JSON.stringify(state.watchlist));
 
         // Globální stav vyhledávání
         let currentSearchMode = 'title'; // 'title' nebo 'actor'
@@ -691,17 +917,20 @@
             
             checkDemoBanner();
             renderWatchlist();
+            renderHome();
             applyThemeColor(state.themeColor);
             setThemeMode(state.themeMode, true); // Inicializace tlačítek režimu
             document.getElementById('api-key-input').value = state.apiKey;
             applyCardSize(state.cardSize);
+            applyHomeCardSize(state.homeCardSize);
+            applyHomeContinueSize(state.homeContinueSize);
             document.getElementById('setting-animations').checked = state.animations;
             document.getElementById('setting-auto-sync').checked = state.autoSync;
             document.getElementById('setting-notifications').checked = state.notifications;
             document.getElementById('setting-notification-days').value = String(state.notificationDays);
             document.getElementById('setting-confirm-delete').checked = state.confirmDelete;
             document.getElementById('setting-start-tab').value = state.startTab;
-            if (state.startTab !== 'watchlist') switchTab(state.startTab);
+            if (['home','watchlist','upcoming','creator','stats'].includes(state.startTab)) switchTab(state.startTab);
             updateNotificationBell();
             if (state.autoSync && state.apiKey) setTimeout(() => syncAllShowsSilently(), 500);
         };
@@ -718,7 +947,7 @@
         // Přepínání záložek
         function switchTab(tabId) {
             state.activeTab = tabId;
-            const tabs = ['watchlist', 'upcoming', 'creator', 'stats'];
+            const tabs = ['home', 'watchlist', 'upcoming', 'creator', 'stats'];
             
             tabs.forEach(t => {
                 document.getElementById(`section-${t}`).classList.add('hidden');
@@ -728,11 +957,14 @@
             document.getElementById(`section-${tabId}`).classList.remove('hidden');
             
             const activeTabBtn = document.getElementById(`tab-${tabId}`);
-            const activeClasses = state.themeColor === 'indigo' || state.themeColor === 'rose' 
+            const activeClasses = ['indigo','rose','blue','purple','pink','violet'].includes(state.themeColor) 
                 ? `bg-${state.themeColor}-500 text-white` 
                 : `bg-${state.themeColor}-500 text-slate-950`;
             activeTabBtn.className = `px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${activeClasses}`;
 
+            if (tabId === 'home') {
+                renderHome();
+            }
             if (tabId === 'stats') {
                 calculateStats();
             }
@@ -793,36 +1025,49 @@
                 amber: { bg: 'bg-amber-500', text: 'text-amber-500', hoverText: 'hover:text-amber-500', focusBorder: 'focus:border-amber-500', textOnBg: 'text-slate-950' },
                 indigo: { bg: 'bg-indigo-500', text: 'text-indigo-500', hoverText: 'hover:text-indigo-500', focusBorder: 'focus:border-indigo-500', textOnBg: 'text-white' },
                 emerald: { bg: 'bg-emerald-500', text: 'text-emerald-500', hoverText: 'hover:text-emerald-500', focusBorder: 'focus:border-emerald-500', textOnBg: 'text-slate-950' },
-                rose: { bg: 'bg-rose-500', text: 'text-rose-500', hoverText: 'hover:text-rose-500', focusBorder: 'focus:border-rose-500', textOnBg: 'text-white' }
+                rose: { bg: 'bg-rose-500', text: 'text-rose-500', hoverText: 'hover:text-rose-500', focusBorder: 'focus:border-rose-500', textOnBg: 'text-white' },
+                blue: { bg: 'bg-blue-500', text: 'text-blue-500', hoverText: 'hover:text-blue-500', focusBorder: 'focus:border-blue-500', textOnBg: 'text-white' },
+                purple: { bg: 'bg-purple-500', text: 'text-purple-500', hoverText: 'hover:text-purple-500', focusBorder: 'focus:border-purple-500', textOnBg: 'text-white' },
+                cyan: { bg: 'bg-cyan-500', text: 'text-cyan-500', hoverText: 'hover:text-cyan-500', focusBorder: 'focus:border-cyan-500', textOnBg: 'text-slate-950' },
+                pink: { bg: 'bg-pink-500', text: 'text-pink-500', hoverText: 'hover:text-pink-500', focusBorder: 'focus:border-pink-500', textOnBg: 'text-white' },
+                violet: { bg: 'bg-violet-500', text: 'text-violet-500', hoverText: 'hover:text-violet-500', focusBorder: 'focus:border-violet-500', textOnBg: 'text-white' }
             };
             const activeColor = colors[color] || colors.amber;
 
             // Aplikace na dynamické prvky
             document.querySelectorAll('.theme-bg').forEach(el => {
-                el.className = el.className.replace(/bg-(amber|indigo|emerald|rose)-500/g, activeColor.bg);
+                el.className = el.className.replace(/bg-(amber|indigo|emerald|rose|blue|purple|cyan|pink|violet)-500/g, activeColor.bg);
                 el.classList.remove('text-slate-950', 'text-white');
                 el.classList.add(activeColor.textOnBg);
             });
             document.querySelectorAll('.theme-text').forEach(el => {
-                el.className = el.className.replace(/text-(amber|indigo|emerald|rose)-500/g, activeColor.text);
+                el.className = el.className.replace(/text-(amber|indigo|emerald|rose|blue|purple|cyan|pink|violet)-500/g, activeColor.text);
             });
             document.querySelectorAll('.theme-hover-text').forEach(el => {
-                el.className = el.className.replace(/hover:text-(amber|indigo|emerald|rose)-500/g, activeColor.hoverText);
+                el.className = el.className.replace(/hover:text-(amber|indigo|emerald|rose|blue|purple|cyan|pink|violet)-500/g, activeColor.hoverText);
             });
             document.querySelectorAll('.theme-focus-border').forEach(el => {
-                el.className = el.className.replace(/focus:border-(amber|indigo|emerald|rose)-500/g, activeColor.focusBorder);
+                el.className = el.className.replace(/focus:border-(amber|indigo|emerald|rose|blue|purple|cyan|pink|violet)-500/g, activeColor.focusBorder);
             });
             document.querySelectorAll('.theme-group-hover-text').forEach(el => {
-                el.className = el.className.replace(/group-hover:text-(amber|indigo|emerald|rose)-500/g, `group-hover:${activeColor.text}`);
+                el.className = el.className.replace(/group-hover:text-(amber|indigo|emerald|rose|blue|purple|cyan|pink|violet)-500/g, `group-hover:${activeColor.text}`);
             });
             
             // Aktualizace aktivního tlačítka v nastavení vzhledu
             const activeThemeBtn = state.themeMode === 'light' ? document.getElementById('theme-btn-light') : document.getElementById('theme-btn-dark');
             if (activeThemeBtn) {
-                activeThemeBtn.className = activeThemeBtn.className.replace(/bg-(amber|indigo|emerald|rose)-500/g, activeColor.bg);
+                activeThemeBtn.className = activeThemeBtn.className.replace(/bg-(amber|indigo|emerald|rose|blue|purple|cyan|pink|violet)-500/g, activeColor.bg);
                 activeThemeBtn.classList.remove('text-slate-950', 'text-white');
                 activeThemeBtn.classList.add(activeColor.textOnBg);
             }
+            document.querySelectorAll('.theme-swatch').forEach(btn => {
+                const active = btn.dataset.themeColor === state.themeColor;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-offset-2', active);
+                btn.classList.toggle('ring-slate-400', active);
+                btn.classList.toggle('ring-offset-white', active && state.themeMode === 'light');
+                btn.classList.toggle('dark:ring-offset-slate-900', active && state.themeMode === 'dark');
+            });
         }
 
         // Aplikace používá pro TMDb data češtinu.
@@ -914,7 +1159,7 @@
             const typeSelect = document.getElementById('search-type-select');
             const searchInput = document.getElementById('search-input');
 
-            const activeBg = state.themeColor === 'indigo' || state.themeColor === 'rose' ? `bg-${state.themeColor}-500 text-white` : `bg-${state.themeColor}-500 text-slate-950`;
+            const activeBg = ['indigo','rose','blue','purple','pink','violet'].includes(state.themeColor) ? `bg-${state.themeColor}-500 text-white` : `bg-${state.themeColor}-500 text-slate-950`;
             const inactiveClasses = "flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
 
             if (mode === 'title') {
@@ -943,7 +1188,7 @@
                     genres: ["Drama", "Krimi"],
                     poster_path: "/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
                     backdrop_path: "/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
-                    rating: 5,
+                    rating: 10,
                     notes: "Nejlepší seriál všech dob!",
                     addedAt: Date.now() - 20000,
                     seasons: [
@@ -984,7 +1229,7 @@
                     genres: ["Sci-Fi & Fantasy", "Akční & Dobrodružný", "Western"],
                     poster_path: "/eU1i6eHXlzMOlEq0ku1Rzq7aV2n.jpg",
                     backdrop_path: "/9ijMGlJKqcslswWUzPOuDmbynMi.jpg",
-                    rating: 4,
+                    rating: 8,
                     notes: "This is the way.",
                     addedAt: Date.now(),
                     seasons: [
@@ -1059,7 +1304,7 @@
                             <img src="${posterUrl}" alt="${item.originalTitle || item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300">
                             <span class="absolute top-2 left-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm ${item.type === 'movie' ? 'text-purple-500' : 'text-blue-500'}">${item.type === 'movie' ? 'Film' : 'Seriál'}</span>
                             ${percent === 100 ? `<div class="absolute top-2 right-2 w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg border-2 border-white/80 dark:border-slate-950/80 z-10" title="Zhlédnuto"><i class="fa-solid fa-check text-sm"></i></div>` : ''}
-                            ${item.rating > 0 ? `<div class="absolute bottom-2 right-2 bg-slate-950/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-amber-300 text-xs font-black poster-rating border border-amber-400/20"><i class="fa-solid fa-star"></i><span>${Number(item.rating).toFixed(1)}</span></div>` : ''}
+                            ${item.rating > 0 ? `<div class="absolute bottom-2 right-2 bg-slate-950/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-amber-300 text-xs font-black poster-rating border border-amber-400/20"><i class="fa-solid fa-star"></i><span>${Number(item.rating).toFixed(0) + '/10'}</span></div>` : ''}
                             <div class="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/20 transition-all duration-300 flex items-center justify-center pointer-events-none">
                                 <span class="opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-slate-950/85 text-white text-[10px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm"><i class="fa-solid fa-circle-info mr-1"></i>Detail</span>
                             </div>
@@ -1088,6 +1333,90 @@
             if (totalEpisodes === 0) return 0;
             const watchedEpisodes = item.seasons.reduce((acc, s) => acc + s.episodes.filter(e => e.watched).length, 0);
             return Math.round((watchedEpisodes / totalEpisodes) * 100);
+        }
+
+        // --- DOMŮ / DOPORUČENÍ ---
+        function getItemPoster(item, size = 'w185') {
+            if (item.poster_url) return item.poster_url;
+            if (item.poster_path) return item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/${size}${item.poster_path}`;
+            return 'https://via.placeholder.com/185x278?text=N/A';
+        }
+
+        function homeItemProgress(item) {
+            return getProgressPercent(item);
+        }
+
+        function refreshHomeRecommendations(type) {
+            if (!state.homeRefresh) state.homeRefresh = { shows: 0, movies: 0 };
+            state.homeRefresh[type] = (state.homeRefresh[type] || 0) + 1;
+            renderHome();
+        }
+
+        function renderHome() {
+            const continueGrid = document.getElementById('home-continue-grid');
+            const showsGrid = document.getElementById('home-shows-grid');
+            const moviesGrid = document.getElementById('home-movies-grid');
+            if (!continueGrid || !showsGrid || !moviesGrid) return;
+
+            const dateEl = document.getElementById('home-date');
+            if (dateEl) {
+                const now = new Date();
+                dateEl.textContent = new Intl.DateTimeFormat('cs-CZ', { day:'numeric', month:'long', year:'numeric' }).format(now);
+            }
+
+            const continueItems = state.watchlist
+                .filter(item => {
+                    const p = homeItemProgress(item);
+                    return p > 0 && p < 100;
+                })
+                .sort((a,b) => homeItemProgress(b) - homeItemProgress(a))
+                .slice(0, 6);
+
+            continueGrid.innerHTML = continueItems.length ? continueItems.map(item => {
+                const p = homeItemProgress(item);
+                return `<button onclick="openDetail('${item.id}')" class="text-left group min-w-0">
+                    <div class="relative aspect-[2/3] rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
+                        <img src="${getItemPoster(item, 'w342')}" alt="${escapeHtml(item.title || item.originalTitle)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent pt-10">
+                            <div class="text-xs font-bold text-white truncate">${escapeHtml(item.title || item.originalTitle)}</div>
+                            <div class="mt-1.5 h-1.5 bg-white/20 rounded-full overflow-hidden"><div class="h-full bg-amber-500 theme-bg rounded-full" style="width:${p}%"></div></div>
+                            <div class="text-[9px] text-slate-300 mt-1">${p}% dokončeno</div>
+                        </div>
+                    </div>
+                </button>`;
+            }).join('') : `<div class="col-span-full rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 py-10 text-center text-xs text-slate-500"><i class="fa-solid fa-play-circle text-3xl mb-2 block"></i>Nemáš žádný rozkoukaný titul.</div>`;
+
+            const unfinished = state.watchlist.filter(item => homeItemProgress(item) < 100);
+            const rank = (a,b) => (Number(b.rating)||0) - (Number(a.rating)||0) || (Number(b.addedAt)||0) - (Number(a.addedAt)||0);
+            const pickRecommendations = (type, key) => {
+                const candidates = unfinished.filter(i => i.type === type).sort(rank);
+                if (candidates.length <= 5) return candidates;
+                const offset = (state.homeRefresh?.[key] || 0) * 5;
+                const rotated = candidates.slice(offset % candidates.length).concat(candidates.slice(0, offset % candidates.length));
+                return rotated.slice(0, 5);
+            };
+            const shows = pickRecommendations('show', 'shows');
+            const movies = pickRecommendations('movie', 'movies');
+
+            const recommendationHtml = (items, emptyText) => items.length ? items.map(item => {
+                const title = escapeHtml(item.title || item.originalTitle || 'Bez názvu');
+                const year = item.release_date ? String(item.release_date).slice(0,4) : (item.first_air_date ? String(item.first_air_date).slice(0,4) : (item.year || ''));
+                return `<button onclick="openDetail('${item.id}')" class="home-recommend-card group">
+                    <div class="relative">
+                        <img src="${getItemPoster(item, 'w342')}" alt="${title}" loading="lazy">
+                        ${item.rating > 0 ? `<span class="absolute left-2 bottom-2 rounded-lg bg-slate-950/90 backdrop-blur px-2 py-1 home-recommend-rating"><i class="fa-solid fa-star mr-1"></i>${Number(item.rating).toFixed(1)}</span>` : ''}
+                    </div>
+                    <div class="home-recommend-info">
+                        <div class="home-recommend-title group-hover:text-indigo-400">${title}</div>
+                        <div class="home-recommend-meta">${year || '—'}</div>
+                    </div>
+                </button>`;
+            }).join('') : `<div class="col-span-full text-xs text-slate-500 py-8 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl">${emptyText}</div>`;
+
+            showsGrid.innerHTML = recommendationHtml(shows, 'Nemáš žádné nedokončené seriály.');
+            moviesGrid.innerHTML = recommendationHtml(movies, 'Nemáš žádné nedokončené filmy.');
+            applyThemeColor(state.themeColor);
+            applyHomeCardSize(state.homeCardSize);
         }
 
         // --- NADCHÁZEJÍCÍ EPIZODY ---
@@ -1299,7 +1628,7 @@
                 previewInfo.innerHTML += `<div class="text-emerald-500 font-bold mt-2"><i class="fa-solid fa-circle-check"></i> Tento titul již máš ve své knihovně.</div>`;
                 previewAddBtn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg";
                 previewAddBtn.innerHTML = `<i class="fa-solid fa-folder-open mr-1.5"></i> Otevřít správu titulu`;
-                previewAddBtn.onclick = () => openDetail(existingItem.id);
+                previewAddBtn.onclick = () => openExistingTitleFromSearch(existingItem.id);
             } else {
                 previewAddBtn.className = "bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-amber-500/10 theme-bg theme-text";
                 previewAddBtn.innerHTML = `<i class="fa-solid fa-plus mr-1.5"></i> Přidat do mé knihovny`;
@@ -1316,16 +1645,30 @@
             applyThemeColor(state.themeColor);
         }
 
-        // Vykreslení hvězdiček hodnocení
+        function openExistingTitleFromSearch(id) {
+            const existing = state.watchlist.find(item => item.id === id);
+            if (!existing) {
+                alert('Titul už není v knihovně.');
+                return;
+            }
+            const previewContainer = document.getElementById('modal-preview-container');
+            if (previewContainer) previewContainer.classList.add('hidden');
+            state.currentDetailId = id;
+            openDetail(id);
+        }
+
+        // Vykreslení hodnocení 0–10
         function renderRatingStars(rating) {
             const container = document.getElementById('modal-rating-stars');
-            let html = '';
-            for (let i = 1; i <= 5; i++) {
-                const isFilled = i <= rating;
-                html += `<button onclick="saveRating(${i})" class="text-xl transition-all focus:outline-none ${isFilled ? 'text-amber-500 theme-text hover:text-amber-400' : 'text-slate-300 dark:text-slate-700 hover:text-amber-500 theme-hover-text'}"><i class="${isFilled ? 'fa-solid' : 'fa-regular'} fa-star"></i></button>`;
+            const value = Math.max(0, Math.min(10, Number(rating) || 0));
+            let html = `<div class="flex flex-wrap items-center gap-1">`;
+            for (let i = 1; i <= 10; i++) {
+                const isFilled = i <= value;
+                html += `<button onclick="saveRating(${i})" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-black transition-all focus:outline-none ${isFilled ? 'bg-amber-500/15 text-amber-500 theme-text hover:bg-amber-500/25' : 'bg-slate-200/70 dark:bg-slate-900 text-slate-400 dark:text-slate-600 hover:text-amber-500 theme-hover-text'}" title="${i}/10">${i}</button>`;
             }
-            if (rating > 0) {
-                html += `<button onclick="saveRating(0)" class="text-slate-500 hover:text-red-400 text-xs ml-2" title="Zrušit hodnocení"><i class="fa-solid fa-circle-xmark"></i></button>`;
+            html += `</div><span class="text-sm font-black text-slate-700 dark:text-slate-200 ml-2 min-w-12">${value}/10</span>`;
+            if (value > 0) {
+                html += `<button onclick="saveRating(0)" class="text-slate-500 hover:text-red-400 text-xs ml-1" title="Zrušit hodnocení"><i class="fa-solid fa-circle-xmark"></i></button>`;
             }
             container.innerHTML = html;
         }
@@ -1845,6 +2188,41 @@
                 btn.classList.toggle('ring-2', active); btn.classList.toggle('ring-amber-500', active);
             });
         }
+        function setHomeCardSize(size) {
+            state.homeCardSize = ['small','normal','large'].includes(size) ? size : 'normal';
+            localStorage.setItem('mfs_home_card_size', state.homeCardSize);
+            applyHomeCardSize(state.homeCardSize);
+        }
+        function applyHomeCardSize(size) {
+            const home = document.getElementById('section-home');
+            if (!home) return;
+            home.classList.remove('home-size-small','home-size-normal','home-size-large');
+            home.classList.add(`home-size-${size}`);
+            document.querySelectorAll('.home-card-size-btn').forEach(btn => {
+                const active = btn.dataset.homeCardSize === size;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-amber-500', active);
+                btn.classList.toggle('theme-ring', active);
+            });
+        }
+        function setHomeContinueSize(size) {
+            state.homeContinueSize = ['small','normal','large'].includes(size) ? size : 'normal';
+            localStorage.setItem('mfs_home_continue_size', state.homeContinueSize);
+            applyHomeContinueSize(state.homeContinueSize);
+        }
+        function applyHomeContinueSize(size) {
+            const home = document.getElementById('section-home');
+            if (!home) return;
+            home.classList.remove('home-continue-size-small','home-continue-size-normal','home-continue-size-large');
+            home.classList.add(`home-continue-size-${size}`);
+            document.querySelectorAll('.home-continue-size-btn').forEach(btn => {
+                const active = btn.dataset.homeContinueSize === size;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-amber-500', active);
+                btn.classList.toggle('theme-ring', active);
+            });
+        }
+
         function setAnimations(enabled) {
             state.animations = enabled; localStorage.setItem('mfs_animations', enabled);
             document.documentElement.classList.toggle('reduce-motion', !enabled);
