@@ -1,3 +1,4 @@
+Zkontroluj tento kod.
 <!DOCTYPE html>
 <html lang="cs" class="dark"> <!-- Výchozí režim je tmavý, JS to může změnit -->
 <head>
@@ -6,6 +7,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0b1020">
+    <meta name="application-name" content="My Films and Serials">
+    <meta name="apple-mobile-web-app-title" content="My Films & Serials">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
     <title>My Films and Serials v4.0</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1822,6 +1829,25 @@
                 }
             };
             reader.readAsText(file);
+        }
+
+        // ===== PWA / OFFLINE PODPORA =====
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+                    .then(registration => {
+                        registration.addEventListener('updatefound', () => {
+                            const worker = registration.installing;
+                            if (!worker) return;
+                            worker.addEventListener('statechange', () => {
+                                if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('Nová verze aplikace je připravena. Obnovte stránku.');
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => console.warn('PWA Service Worker se nepodařilo zaregistrovat:', error));
+            });
         }
 
         function resetDatabase() {

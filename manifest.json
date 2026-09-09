@@ -1,0 +1,19 @@
+{
+  "name": "My Films and Serials",
+  "short_name": "My Films & Serials",
+  "description": "Osobní knihovna filmů a seriálů s přehledem epizod a upozorněními.",
+  "lang": "cs",
+  "dir": "ltr",
+  "start_url": "./PRODu2(1).html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "icons": [
+    {"src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
