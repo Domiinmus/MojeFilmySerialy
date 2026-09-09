@@ -1,27 +1,35 @@
-const CACHE_NAME = 'my-films-serials-v1';
+const CACHE_NAME = 'my-films-serials-v5';
 const APP_SHELL = [
   './',
-  './PRODu2(1).html',
+  './index.html',
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
+const CDN_ASSETS = [
+  'https://cdn.tailwindcss.com/',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+  'https://cdn.jsdelivr.net/npm/chart.js'
+];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(APP_SHELL);
+    await Promise.allSettled(CDN_ASSETS.map(url => fetch(url, { mode: 'cors' }).then(r => {
+      if (r.ok) return cache.put(url, r);
+    })));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-    )).then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', event => {
@@ -29,45 +37,42 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+  const sameOrigin = url.origin === self.location.origin;
 
-  // App shell/navigation: network first, then cached app.
+  // Navigace: síť jako první, při offline použij uložené index.html.
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./PRODu2(1).html', copy));
-          return response;
-        })
-        .catch(() => caches.match('./PRODu2(1).html'))
-    );
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put('./index.html', response.clone());
+        return response;
+      } catch (_) {
+        return (await caches.match(request)) || (await caches.match('./index.html'));
+      }
+    })());
     return;
   }
 
-  // Same-origin files: cache first, then network and save the result.
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      caches.match(request).then(cached => cached || fetch(request).then(response => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+  // Lokální soubory a knihovny: cache-first, poté síť.
+  if (sameOrigin || url.hostname === 'cdn.tailwindcss.com' || url.hostname === 'cdnjs.cloudflare.com' || url.hostname === 'cdn.jsdelivr.net') {
+    event.respondWith((async () => {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+      try {
+        const response = await fetch(request);
+        if (response.ok || response.type === 'opaque') {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, response.clone());
         }
         return response;
-      }))
-    );
-    return;
+      } catch (_) {
+        return cached || Response.error();
+      }
+    })());
   }
+});
 
-  // CDN assets: cache after first successful online load so the UI can work offline.
-  if (url.hostname.includes('cdnjs.cloudflare.com') || url.hostname.includes('cdn.jsdelivr.net') || url.hostname.includes('cdn.tailwindcss.com')) {
-    event.respondWith(
-      caches.match(request).then(cached => cached || fetch(request).then(response => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        }
-        return response;
-      }))
-    );
-  }
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
