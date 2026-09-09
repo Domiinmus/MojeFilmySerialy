@@ -1,11 +1,15 @@
-const CACHE_NAME = 'my-films-serials-v5';
+const CACHE_NAME = 'my-films-serials-v7';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './icons/icon-192-maskable.png',
+  './icons/icon-512-maskable.png',
+  './screenshots/desktop.png',
+  './screenshots/mobile.png'
 ];
 const CDN_ASSETS = [
   'https://cdn.tailwindcss.com/',
