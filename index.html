@@ -262,6 +262,7 @@
         .manual-input{display:block;width:100%;background:rgba(248,250,252,.9);color:#0f172a;border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:.8rem .9rem;font-size:.85rem;outline:none;transition:.2s}.dark .manual-input{background:rgba(2,6,23,.65);color:#fff;border-color:rgba(148,163,184,.16)}.manual-input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.10)}
         .manual-season{background:rgba(248,250,252,.55);border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:14px}.dark .manual-season{background:rgba(2,6,23,.38)}
         .theme-swatch{transition:transform .18s,box-shadow .18s}.theme-swatch:hover{transform:scale(1.08)} 
+        .provider-chip{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.14);font-size:10px;font-weight:800;color:#475569;transition:.2s}.dark .provider-chip{color:#e2e8f0;background:rgba(15,23,42,.72)}.provider-chip:hover{transform:translateY(-1px);border-color:rgba(99,102,241,.45)}.provider-chip img{width:24px;height:24px;border-radius:6px;object-fit:cover}.provider-chip i{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(99,102,241,.18);color:#818cf8}
         .home-page{max-width:100%}
         .home-hero{position:relative;min-height:175px;background:radial-gradient(circle at 82% 20%,rgba(168,85,247,.32),transparent 27%),radial-gradient(circle at 62% 100%,rgba(37,99,235,.22),transparent 35%),linear-gradient(120deg,#081426 0%,#101d3a 52%,#27133d 100%)}
         .home-hero:before{content:'';position:absolute;inset:auto 0 0;height:62%;background:linear-gradient(180deg,transparent,rgba(2,6,23,.78)),radial-gradient(ellipse at 58% 100%,rgba(30,64,175,.6),transparent 42%);opacity:.9}
@@ -542,6 +543,9 @@
                         <option value="completed">Dokončené</option>
                         <option value="not_started">Nezačaté</option>
                     </select>
+                    <select id="filter-genre" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                        <option value="all">Všechny žánry</option>
+                    </select>
                     <select id="sort-library" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
                         <option value="newest">Nejnovější</option>
                         <option value="oldest">Nejstarší</option>
@@ -724,6 +728,17 @@
             <!-- Obsah modalu -->
             <div class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
                 
+                <!-- Kde sledovat -->
+                <div id="modal-providers-container" class="bg-slate-100/50 dark:bg-slate-950/50 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 theme-text"><i class="fa-solid fa-tv mr-1.5"></i>Kde sledovat</h3>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">TMDb · Česko</span>
+                    </div>
+                    <div id="modal-providers" class="flex flex-wrap gap-2">
+                        <span class="text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Načítám služby…</span>
+                    </div>
+                </div>
+
                 <!-- Netflix-style Shrnutí / Popis děje celého pořadu -->
                 <div class="bg-slate-100/50 dark:bg-slate-950/50 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 theme-text mb-2">O pořadu</h3>
@@ -1253,14 +1268,26 @@
         }
 
         // --- VYKRESLENÍ KNIHOVNY ---
+        function updateLibrarySmartFilters() {
+            const genreSelect = document.getElementById('filter-genre');
+            if (!genreSelect) return;
+            const oldGenre = genreSelect.value || 'all';
+            const genres = [...new Set(state.watchlist.flatMap(item => Array.isArray(item.genres) ? item.genres : []))]
+                .filter(Boolean).sort((a,b) => a.localeCompare(b, 'cs'));
+            genreSelect.innerHTML = '<option value="all">Všechny žánry</option>' + genres.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+            genreSelect.value = genres.includes(oldGenre) ? oldGenre : 'all';
+        }
+
         function renderWatchlist() {
             const grid = document.getElementById('watchlist-grid');
             const creatorCount = document.getElementById('creator-library-count');
             if (creatorCount) creatorCount.textContent = state.watchlist.length;
             const filterType = document.getElementById('filter-type').value;
             const filterStatus = document.getElementById('filter-status').value;
+            const filterGenre = document.getElementById('filter-genre')?.value || 'all';
             const searchQuery = document.getElementById('search-library').value.toLowerCase().trim();
             const sortBy = document.getElementById('sort-library').value;
+            updateLibrarySmartFilters();
             
             grid.innerHTML = '';
 
@@ -1268,7 +1295,15 @@
 
             // Filtrování
             if (filterType !== 'all') filteredList = filteredList.filter(item => item.type === filterType);
-            if (searchQuery) filteredList = filteredList.filter(item => (item.originalTitle || '').toLowerCase().includes(searchQuery) || (item.title || '').toLowerCase().includes(searchQuery));
+            if (searchQuery) filteredList = filteredList.filter(item => {
+                const haystack = [
+                    item.originalTitle, item.title,
+                    ...(Array.isArray(item.genres) ? item.genres : []),
+                    ...(Array.isArray(item.cast) ? item.cast.map(c => c?.name || '') : [])
+                ].filter(Boolean).join(' ').toLowerCase();
+                return haystack.includes(searchQuery);
+            });
+            if (filterGenre !== 'all') filteredList = filteredList.filter(item => Array.isArray(item.genres) && item.genres.includes(filterGenre));
             if (filterStatus !== 'all') {
                 filteredList = filteredList.filter(item => {
                     const percent = getProgressPercent(item);
@@ -1481,6 +1516,42 @@
         }
 
         // --- DETAIL MODAL & OVLÁDÁNÍ ---
+        async function loadWatchProviders(item) {
+            const container = document.getElementById('modal-providers');
+            const section = document.getElementById('modal-providers-container');
+            if (!container || !section) return;
+            if (!state.apiKey || !item.tmdbId) {
+                container.innerHTML = '<span class="text-xs text-slate-500 dark:text-slate-400">Streamovací služby nejsou k dispozici bez TMDb API klíče.</span>';
+                return;
+            }
+            container.innerHTML = '<span class="text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Načítám…</span>';
+            try {
+                const endpoint = item.type === 'movie' ? `movie/${item.tmdbId}/watch/providers` : `tv/${item.tmdbId}/watch/providers`;
+                const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${state.apiKey}`);
+                if (!res.ok) throw new Error(`Providers ${res.status}`);
+                const data = await res.json();
+                const region = data.results?.CZ || data.results?.AT || Object.values(data.results || {})[0];
+                const providers = [
+                    ...(region?.flatrate || []),
+                    ...(region?.free || []),
+                    ...(region?.ads || [])
+                ].filter((p, i, arr) => p && arr.findIndex(x => x.provider_id === p.provider_id) === i);
+                if (!providers.length) {
+                    container.innerHTML = '<span class="text-xs text-slate-500 dark:text-slate-400">Pro tento titul teď není dostupná streamovací služba v databázi TMDb.</span>';
+                    return;
+                }
+                container.innerHTML = providers.slice(0, 8).map(p => `
+                    <div class="provider-chip" title="${escapeHtml(p.provider_name)}">
+                        ${p.logo_path ? `<img src="https://image.tmdb.org/t/p/w92${p.logo_path}" alt="${escapeHtml(p.provider_name)}">` : '<i class="fa-solid fa-play"></i>'}
+                        <span>${escapeHtml(p.provider_name)}</span>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<span class="text-xs text-slate-500 dark:text-slate-400">Streamovací služby se nepodařilo načíst.</span>';
+            }
+        }
+
         function openDetail(id) {
             state.currentDetailId = id;
             const item = state.watchlist.find(w => w.id === id);
@@ -1497,6 +1568,7 @@
             const bulkActions = document.getElementById('modal-bulk-actions');
 
             document.getElementById('modal-preview-container').classList.add('hidden');
+            document.getElementById('modal-providers-container').classList.remove('hidden');
             document.getElementById('modal-library-meta-container').classList.remove('hidden');
             document.getElementById('modal-library-actions-container').classList.remove('hidden');
             document.getElementById('modal-title-edit-btn').classList.remove('hidden');
@@ -1520,6 +1592,7 @@
             document.getElementById('modal-notes').value = item.notes || '';
             renderRatingStars(item.rating || 0);
             renderCast(item.cast || []);
+            loadWatchProviders(item);
 
             const seasonsContainer = document.getElementById('modal-seasons-container');
             const movieContainer = document.getElementById('modal-movie-container');
@@ -1591,6 +1664,7 @@
             const overview = document.getElementById('modal-overview');
 
             document.getElementById('modal-library-meta-container').classList.add('hidden');
+            document.getElementById('modal-providers-container').classList.add('hidden');
             document.getElementById('modal-library-actions-container').classList.add('hidden');
             document.getElementById('modal-seasons-container').classList.add('hidden');
             document.getElementById('modal-movie-container').classList.add('hidden');
