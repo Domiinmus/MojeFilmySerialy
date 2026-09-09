@@ -26,6 +26,55 @@
     <!-- Chart.js pro grafy -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ===== DETAIL MODAL – iPhone / Dynamic Island ===== */
+        #detail-modal {
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        #detail-modal > div {
+            min-height: 0;
+        }
+        #detail-modal .custom-scrollbar {
+            min-height: 0;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+        #modal-hero {
+            flex: 0 0 auto;
+        }
+        @media (max-width: 639px) {
+            #detail-modal {
+                padding: max(12px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom)) !important;
+                align-items: flex-start !important;
+                overflow-y: auto;
+            }
+            #detail-modal > div {
+                width: 100% !important;
+                max-width: none !important;
+                max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px) !important;
+                border-radius: 20px !important;
+                margin: 0 !important;
+            }
+            #detail-modal #modal-hero {
+                min-height: 180px;
+                padding: 52px 16px 16px !important;
+            }
+            #detail-modal #modal-hero > button {
+                top: 10px !important;
+                right: 10px !important;
+                width: 44px !important;
+                height: 44px !important;
+                z-index: 30;
+                touch-action: manipulation;
+            }
+            #detail-modal .custom-scrollbar {
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                min-height: 0 !important;
+                padding: 16px !important;
+            }
+        }
+
         /* ===== MOBILNÍ / iPHONE OPTIMALIZACE ===== */
         html {
             width: 100%;
