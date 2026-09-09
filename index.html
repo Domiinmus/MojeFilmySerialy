@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="cs" class="dark"> <!-- Výchozí režim je tmavý, JS to může změnit -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>My Films and Serials v4.0</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Konfigurace pro Tailwind, aby fungoval dark mode
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <!-- FontAwesome Ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js pro grafy -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ===== MOBILNÍ / iPHONE OPTIMALIZACE ===== */
+        html {
+            width: 100%;
+            min-width: 0;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        body {
+            width: 100%;
+            min-width: 0;
+            max-width: 100vw;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        img, video, canvas, svg { max-width: 100%; }
+        button, input, select, textarea { max-width: 100%; font: inherit; }
+        main, header, section, nav, footer, .max-w-7xl { min-width: 0; }
+        .max-w-7xl { width: 100%; }
+        #notification-panel { max-width: calc(100vw - 20px); }
+
+        /* Safe areas pro iPhone s výřezem / Dynamic Island */
+        header {
+            padding-top: max(0px, env(safe-area-inset-top));
+        }
+        main {
+            padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
+
+        /* Na úzkém displeji pouze 2 karty vedle sebe. */
+        @media (max-width: 639px) {
+            #watchlist-grid.grid-card-small,
+            #watchlist-grid.grid-card-normal,
+            #watchlist-grid.grid-card-large {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: .75rem !important;
+            }
+            #watchlist-grid .media-card { min-width: 0; }
+            .creator-hero:after {
+                width: 180px; height: 180px;
+                right: -90px; top: -70px;
+            }
+            .creator-hero {
+                padding: 1.25rem !important;
+            }
+            /* Modální okna využijí celou šířku telefonu. */
+            .fixed.inset-0 > div {
+                width: min(100% - 1rem, 64rem) !important;
+                max-width: calc(100vw - 1rem) !important;
+                max-height: calc(100dvh - 1rem) !important;
+            }
+            /* Ovládací lišty se na telefonu zalomí místo vodorovného scrollu. */
+            .overflow-x-auto {
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            .overflow-x-auto::-webkit-scrollbar { display: none; }
+            input, select, textarea { font-size: 16px !important; }
+        }
+
+        /* Extra úzké iPhony */
+        @media (max-width: 380px) {
+            #watchlist-grid.grid-card-small,
+            #watchlist-grid.grid-card-normal,
+            #watchlist-grid.grid-card-large {
+                gap: .55rem !important;
+            }
+            .px-4 { padding-left: .75rem !important; padding-right: .75rem !important; }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .dark .custom-scrollbar::-webkit-scrollbar-track { background: #0b0f19; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+        .media-card {
+            box-shadow: 0 10px 30px rgba(0,0,0,.10);
+        }
+        .dark .media-card {
+            box-shadow: 0 14px 35px rgba(0,0,0,.22);
+        }
+        .media-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 40px rgba(0,0,0,.18);
+        }
+        .dark .media-card:hover {
+            box-shadow: 0 20px 45px rgba(0,0,0,.38);
+        }
+        .poster-rating {
+            box-shadow: 0 8px 18px rgba(0,0,0,.35);
+        }
+        #watchlist-grid.grid-card-small { grid-template-columns: repeat(3, minmax(0,1fr)); }
+        #watchlist-grid.grid-card-normal { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        #watchlist-grid.grid-card-large { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        @media (min-width: 640px) { #watchlist-grid.grid-card-small { grid-template-columns: repeat(5,minmax(0,1fr)); } #watchlist-grid.grid-card-normal { grid-template-columns: repeat(4,minmax(0,1fr)); } #watchlist-grid.grid-card-large { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+        @media (min-width: 1024px) { #watchlist-grid.grid-card-small { grid-template-columns: repeat(6,minmax(0,1fr)); } #watchlist-grid.grid-card-normal { grid-template-columns: repeat(5,minmax(0,1fr)); } #watchlist-grid.grid-card-large { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+        .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+
+        .glass-panel{background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(248,250,252,.68));border:1px solid rgba(148,163,184,.20);box-shadow:0 20px 60px rgba(15,23,42,.08)}
+        .dark .glass-panel{background:linear-gradient(145deg,rgba(15,23,42,.94),rgba(2,6,23,.82));border-color:rgba(148,163,184,.13);box-shadow:0 25px 70px rgba(0,0,0,.30)}
+        .settings-card{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(248,250,252,.9),rgba(255,255,255,.7));border:1px solid rgba(148,163,184,.20);border-radius:18px;padding:18px}
+        .dark .settings-card{background:linear-gradient(145deg,rgba(15,23,42,.82),rgba(2,6,23,.72));border-color:rgba(148,163,184,.12)}
+        .settings-card:before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#f59e0b,transparent);opacity:.8}
+        .setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+        .setting-row+.setting-row{border-top:1px solid rgba(148,163,184,.12)}
+        .switch{position:relative;width:44px;height:24px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:999px;background:#cbd5e1;transition:.2s}.dark .switch span{background:#334155}.switch span:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s;box-shadow:0 2px 5px rgba(0,0,0,.25)}.switch input:checked+span{background:#f59e0b}.switch input:checked+span:before{transform:translateX(20px)}
+        .creator-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 85% 20%,rgba(245,158,11,.25),transparent 28%),linear-gradient(135deg,#111827,#020617 72%);color:white}
+        .creator-hero:after{content:'';position:absolute;width:280px;height:280px;border-radius:50%;border:1px solid rgba(245,158,11,.15);right:-100px;top:-120px;box-shadow:0 0 0 35px rgba(245,158,11,.03),0 0 0 70px rgba(245,158,11,.02)}
+        .search-shell{box-shadow:0 18px 50px rgba(15,23,42,.10)}
+        .dark .search-shell{box-shadow:0 22px 60px rgba(0,0,0,.30)}
+        .creator-mode{transition:.2s}.creator-mode.active{background:#f59e0b;color:#0f172a;box-shadow:0 8px 20px rgba(245,158,11,.18)}
+        .quick-chip{border:1px solid rgba(148,163,184,.16);background:rgba(148,163,184,.06)}
+        .result-card{transition:.2s;border:1px solid rgba(148,163,184,.14)}.result-card:hover{transform:translateY(-1px);border-color:rgba(245,158,11,.38);box-shadow:0 12px 30px rgba(15,23,42,.10)}
+        .manual-input{display:block;width:100%;background:rgba(248,250,252,.9);color:#0f172a;border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:.8rem .9rem;font-size:.85rem;outline:none;transition:.2s}.dark .manual-input{background:rgba(2,6,23,.65);color:#fff;border-color:rgba(148,163,184,.16)}.manual-input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.10)}
+        .manual-season{background:rgba(248,250,252,.55);border:1px solid rgba(148,163,184,.16);border-radius:18px;padding:14px}.dark .manual-season{background:rgba(2,6,23,.38)}
+    </style>
+</head>
+<body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
+
+    <!-- Navigační panel -->
+    <nav class="bg-white/90 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('watchlist')">
+                <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-black text-xl tracking-tighter theme-bg theme-text">MFS</div>
+                <div>
+                    <span class="text-xl font-bold tracking-wider text-slate-900 dark:text-white">My Films <span class="text-amber-500 theme-text">& Serials</span></span>
+                    <span class="block text-[10px] text-amber-500 theme-text font-mono uppercase tracking-widest">TVŮJ OSOBNÍ KATALOG v4.1</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Hlavní záložky -->
+                <div class="flex flex-wrap gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <button onclick="switchTab('watchlist')" id="tab-watchlist" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all bg-amber-500 text-slate-950 theme-bg theme-text">
+                        <i class="fa-solid fa-clapperboard mr-1.5"></i>Knihovna
+                    </button>
+                    <button onclick="switchTab('upcoming')" id="tab-upcoming" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                        <i class="fa-solid fa-calendar-days mr-1.5"></i>Nadcházející
+                    </button>
+                    <button onclick="switchTab('creator')" id="tab-creator" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                        <i class="fa-solid fa-square-plus mr-1.5"></i>Přidat / Vytvořit
+                    </button>
+                    <button onclick="switchTab('stats')" id="tab-stats" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                        <i class="fa-solid fa-chart-line mr-1.5"></i>Statistiky
+                    </button>
+                </div>
+
+                <!-- Upozornění na nadcházející epizody -->
+                <div class="relative">
+                    <button onclick="toggleNotifications()" id="notification-btn" class="relative bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-amber-500 theme-hover-text border border-slate-200 dark:border-slate-800 w-10 h-10 rounded-xl flex items-center justify-center transition-all" title="Nadcházející epizody">
+                        <i class="fa-regular fa-bell text-lg"></i>
+                        <span id="notification-count" class="hidden absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center border-2 border-white dark:border-slate-950">0</span>
+                    </button>
+                    <div id="notification-panel" class="hidden absolute right-0 top-12 w-[min(360px,calc(100vw-2rem))] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50">
+                        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                            <div><h3 class="font-bold text-sm">Nadcházející epizody</h3><p class="text-[10px] text-slate-500 mt-0.5">Podle uložených termínů</p></div>
+                            <button onclick="switchTab('upcoming'); toggleNotifications(false)" class="text-[10px] font-bold text-amber-500 theme-text">Zobrazit vše</button>
+                        </div>
+                        <div id="notification-list" class="max-h-80 overflow-y-auto custom-scrollbar p-2"></div>
+                    </div>
+                </div>
+
+                <!-- Ozubené kolečko (Nastavení) -->
+                <button onclick="openSettingsModal()" class="bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-amber-500 theme-hover-text border border-slate-200 dark:border-slate-800 w-10 h-10 rounded-xl flex items-center justify-center transition-all" title="Nastavení aplikace">
+                    <i class="fa-solid fa-gear text-lg animate-hover-spin"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hlavní obsah -->
+    <main class="max-w-7xl mx-auto px-4 mt-8">
+
+        <!-- RYCHLÝ TESTOVACÍ PANEL -->
+        <div id="demo-banner" class="hidden bg-gradient-to-r from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20 border border-amber-500/30 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h3 class="text-lg font-bold text-amber-600 dark:text-amber-400 theme-text"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Chcete aplikaci hned otestovat?</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Nemáte přidané žádné filmy ani seriály. Vygenerujte si okamžitě testovací databázi s popisy pořadů a přesnými časy.</p>
+            </div>
+            <button onclick="generateDemoData()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-amber-500/10 theme-bg theme-text whitespace-nowrap">
+                <i class="fa-solid fa-bolt mr-1.5"></i>Vygenerovat testovací data
+            </button>
+        </div>
+
+        <!-- TAB: SLEDOVÁNÍ (KNIHOVNA) -->
+        <section id="section-watchlist" class="space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/60">
+                <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-list text-amber-500 theme-text"></i> Moje Sledování
+                </h2>
+                <!-- Vyhledávání, Filtry a Řazení -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <div class="relative flex-1 sm:flex-none">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                        <input type="text" id="search-library" oninput="renderWatchlist()" placeholder="Hledat v knihovně..." class="w-full sm:w-48 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                    </div>
+                    <select id="filter-type" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                        <option value="all">Všechny typy</option>
+                        <option value="show">Seriály</option>
+                        <option value="movie">Filmy</option>
+                    </select>
+                    <select id="filter-status" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                        <option value="all">Všechny stavy</option>
+                        <option value="watching">Rozkoukané</option>
+                        <option value="completed">Dokončené</option>
+                        <option value="not_started">Nezačaté</option>
+                    </select>
+                    <select id="sort-library" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                        <option value="newest">Nejnovější</option>
+                        <option value="oldest">Nejstarší</option>
+                        <option value="title">Podle názvu (A-Z)</option>
+                        <option value="rating">Podle hodnocení</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <!-- Zde se vygenerují položky -->
+            </div>
+        </section>
+
+        <!-- TAB: NADCHÁZEJÍCÍ EPIZODY -->
+        <section id="section-upcoming" class="hidden space-y-6">
+            <div class="bg-slate-100/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days text-amber-500 theme-text"></i> Nadcházející epizody
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Zobrazují se všechny známé budoucí epizody z tvých rozkoukaných seriálů.</p>
+                </div>
+                <button onclick="syncUpcomingEpisodes()" id="sync-upcoming-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition-all theme-bg theme-text whitespace-nowrap">
+                    <i class="fa-solid fa-rotate mr-1.5"></i> Synchronizovat
+                </button>
+            </div>
+            <div id="upcoming-list" class="space-y-4">
+                <!-- Zde se vygeneruje seznam nadcházejících epizod -->
+            </div>
+        </section>
+
+        <!-- TAB: PŘIDAT / VYTVOŘIT -->
+        <section id="section-creator" class="hidden space-y-5">
+            <div class="creator-hero rounded-[2rem] p-5 sm:p-8 border border-slate-800 shadow-2xl">
+                <div class="relative z-10 max-w-3xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-amber-400 text-[10px] font-black uppercase tracking-[.18em]"><i class="fa-solid fa-wand-magic-sparkles"></i> Přidávání titulů</div>
+                    <h2 class="text-3xl sm:text-4xl font-black tracking-tight mt-4">Přidej cokoliv, co sleduješ.</h2>
+                    <p class="text-sm sm:text-base text-slate-300 mt-2 max-w-2xl">Vyhledej titul přes TMDb, nebo si vytvoř vlastní seriál ručně. Vlastní seriály můžeš později rozšiřovat o další série a epizody.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2 p-1.5 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <button id="creator-tab-search" onclick="setCreatorMode('search')" class="creator-main-tab flex-1 px-4 py-3 rounded-xl text-sm font-black bg-amber-500 text-slate-950 theme-bg theme-text"><i class="fa-solid fa-magnifying-glass mr-2"></i>Vyhledat přes TMDb</button>
+                <button id="creator-tab-manual" onclick="setCreatorMode('manual')" class="creator-main-tab flex-1 px-4 py-3 rounded-xl text-sm font-black text-slate-500 dark:text-slate-400"><i class="fa-solid fa-pen-ruler mr-2"></i>Vytvořit vlastní</button>
+            </div>
+
+            <div id="creator-search-panel" class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-5">
+                <div class="glass-panel search-shell rounded-3xl p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div><h3 class="font-black text-lg">Vyhledávání</h3><p class="text-xs text-slate-500 mt-0.5">Hledej podle názvu nebo herce.</p></div>
+                        <div class="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                            <button type="button" id="search-mode-title" onclick="setSearchMode('title')" class="creator-mode active px-3.5 py-2 rounded-lg text-xs font-bold"><i class="fa-solid fa-film mr-1.5"></i>Název</button>
+                            <button type="button" id="search-mode-actor" onclick="setSearchMode('actor')" class="creator-mode px-3.5 py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-user mr-1.5"></i>Herec</button>
+                        </div>
+                    </div>
+                    <form onsubmit="searchTMDb(event)" class="relative">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="relative flex-1"><i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="search-input" placeholder="Např. Interstellar, Wednesday..." class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 theme-focus-border"></div>
+                            <select id="search-type-select" class="sm:w-32 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-3 py-3 text-xs font-semibold focus:outline-none focus:border-amber-500 theme-focus-border"><option value="multi">Vše</option><option value="movie">Filmy</option><option value="tv">Seriály</option></select>
+                            <button type="submit" class="sm:w-28 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/15 theme-bg theme-text"><i class="fa-solid fa-arrow-right mr-1.5"></i>Hledat</button>
+                        </div>
+                    </form>
+                    <div id="search-results" class="space-y-3 max-h-[520px] overflow-y-auto custom-scrollbar pr-1 mt-5"></div>
+                </div>
+                <aside class="space-y-5">
+                    <div class="glass-panel rounded-3xl p-5"><div class="flex items-center justify-between"><h3 class="font-black">Rychlý start</h3><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-route"></i></span></div><div class="mt-4 space-y-4"><div class="flex gap-3"><span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-950 flex items-center justify-center text-[10px] font-black text-amber-500">01</span><div><b class="text-xs">Vyhledej</b><p class="text-[11px] text-slate-500 mt-0.5">Najdi film nebo seriál.</p></div></div><div class="flex gap-3"><span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-950 flex items-center justify-center text-[10px] font-black text-amber-500">02</span><div><b class="text-xs">Prohlédni detail</b><p class="text-[11px] text-slate-500 mt-0.5">Zkontroluj plakát, popis a obsazení.</p></div></div><div class="flex gap-3"><span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-950 flex items-center justify-center text-[10px] font-black text-amber-500">03</span><div><b class="text-xs">Přidej</b><p class="text-[11px] text-slate-500 mt-0.5">Titul se uloží do knihovny.</p></div></div></div></div>
+                    <div class="glass-panel rounded-3xl p-5"><div class="flex items-end justify-between gap-3"><div><p class="text-[10px] uppercase tracking-[.16em] text-slate-500 font-bold">Tvoje knihovna</p><p id="creator-library-count" class="text-4xl font-black mt-1">0</p></div><span class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-layer-group"></i></span></div><button onclick="switchTab('watchlist')" class="mt-4 w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-xs font-bold transition-all"><i class="fa-solid fa-arrow-left mr-1.5"></i>Otevřít knihovnu</button></div>
+                </aside>
+            </div>
+
+            <div id="creator-manual-panel" class="hidden">
+                <div class="glass-panel rounded-3xl p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5"><div><h3 class="font-black text-xl">Vlastní seriál</h3><p class="text-xs text-slate-500 mt-1">Ideální pro seriály, u kterých TMDb nemá aktuální série nebo epizody.</p></div><span class="px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-500 theme-text text-[10px] font-black"><i class="fa-solid fa-database mr-1"></i>Uloží se lokálně</span></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="text-xs font-bold">Název seriálu<input id="manual-show-title" type="text" placeholder="Např. Můj oblíbený seriál" class="manual-input mt-1.5"></label>
+                        <label class="text-xs font-bold">Originální název <span class="text-slate-500 font-normal">(volitelné)</span><input id="manual-show-original" type="text" placeholder="Originální název" class="manual-input mt-1.5"></label>
+                        <label class="text-xs font-bold md:col-span-2">Popis <textarea id="manual-show-overview" rows="3" placeholder="Krátký popis seriálu..." class="manual-input mt-1.5"></textarea></label>
+                        <label class="text-xs font-bold">Žánry <input id="manual-show-genres" type="text" placeholder="Drama, Komedie" class="manual-input mt-1.5"></label>
+                        <label class="text-xs font-bold">URL plakátu <span class="text-slate-500 font-normal">(volitelné)</span><input id="manual-show-poster" type="url" placeholder="https://..." class="manual-input mt-1.5"></label>
+                    </div>
+                    <div class="mt-6 border-t border-slate-200 dark:border-slate-800 pt-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h4 class="font-black">Série a epizody</h4><p class="text-[11px] text-slate-500">U každé epizody můžeš zadat délku, datum vydání a stav.</p></div><button onclick="addManualSeason()" class="px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs font-black theme-bg theme-text"><i class="fa-solid fa-plus mr-1.5"></i>Přidat sérii</button></div>
+                        <div id="manual-seasons-builder" class="mt-4 space-y-4"></div>
+                    </div>
+                    <div class="mt-6 flex flex-col sm:flex-row justify-end gap-2"><button onclick="resetManualBuilder()" class="px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Vyčistit</button><button onclick="saveManualShow()" class="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black"><i class="fa-solid fa-floppy-disk mr-1.5"></i>Uložit seriál do knihovny</button></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: STATISTIKY -->
+        <section id="section-stats" class="hidden space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Časová statistika -->
+                <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 text-center flex flex-col justify-center">
+                    <i class="fa-solid fa-hourglass-half text-amber-500 theme-text text-4xl mb-3"></i>
+                    <h3 class="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">Celkový strávený čas</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-white dark:bg-slate-950 p-2 rounded-lg">
+                            <div class="text-2xl font-extrabold text-amber-500 theme-text" id="stat-days">0</div>
+                            <div class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Dny</div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-950 p-2 rounded-lg">
+                            <div class="text-2xl font-extrabold text-amber-500 theme-text" id="stat-hours">0</div>
+                            <div class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Hod</div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-950 p-2 rounded-lg">
+                            <div class="text-2xl font-extrabold text-amber-500 theme-text" id="stat-mins">0</div>
+                            <div class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Min</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Počty -->
+                <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-4">
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                        <span class="text-slate-600 dark:text-slate-400 text-sm font-medium">Zhlédnuté filmy:</span>
+                        <span class="text-2xl font-bold text-slate-900 dark:text-white" id="stat-movies-count">0</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-950 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                        <span class="text-slate-600 dark:text-slate-400 text-sm font-medium">Zhlédnuté epizody:</span>
+                        <span class="text-2xl font-bold text-slate-900 dark:text-white" id="stat-episodes-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Poměr -->
+                <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-center">
+                    <div class="w-full max-w-[180px]">
+                        <canvas id="ratioChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graf žánrů -->
+            <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <h3 class="text-lg font-bold mb-4"><i class="fa-solid fa-chart-bar text-amber-500 theme-text mr-2"></i>Sledované Žánry</h3>
+                <div class="h-64">
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black/80 dark:bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <!-- Hlavička s pozadím -->
+            <div id="modal-hero" class="relative h-48 sm:h-64 bg-cover bg-center flex items-end p-6">
+                <div class="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 via-white/40 dark:via-slate-900/40 to-transparent"></div>
+                <button onclick="closeModal()" class="absolute top-4 right-4 bg-white/80 dark:bg-slate-950/80 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="relative z-10 flex gap-4 items-end w-full">
+                    <img id="modal-poster" src="" alt="Poster" class="w-20 sm:w-28 rounded-lg shadow-lg border border-slate-300 dark:border-slate-700 hidden sm:block">
+                    <div class="flex-1 min-w-0">
+                        <span id="modal-type" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded"></span>
+                        
+                        <!-- Originální název + Ikonka pro úpravu -->
+                        <div class="flex items-center gap-2 mt-1">
+                            <h2 id="modal-title" class="text-xl sm:text-3xl font-bold text-slate-900 dark:text-white truncate"></h2>
+                            <button id="modal-title-edit-btn" onclick="triggerEditTitle('original')" class="text-slate-500 dark:text-slate-400 hover:text-amber-500 theme-hover-text transition-all text-sm sm:text-base" title="Upravit originální název">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Český název + Ikonka pro úpravu -->
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <p id="modal-subtitle" class="text-sm sm:text-lg text-amber-500 theme-text font-semibold truncate"></p>
+                            <button onclick="triggerEditTitle('czech')" id="modal-subtitle-edit-btn" class="text-slate-500 dark:text-slate-400 hover:text-amber-500 theme-hover-text transition-all text-xs sm:text-sm" title="Upravit český název">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                        
+                        <p id="modal-genres" class="text-xs text-slate-500 dark:text-slate-400 mt-1"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Obsah modalu -->
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
+                
+                <!-- Netflix-style Shrnutí / Popis děje celého pořadu -->
+                <div class="bg-slate-100/50 dark:bg-slate-950/50 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 theme-text mb-2">O pořadu</h3>
+                    <p id="modal-overview" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic"></p>
+                </div>
+
+                <!-- OBSAZENÍ -->
+                <div id="modal-cast-container" class="bg-slate-100/50 dark:bg-slate-950/50 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 theme-text"><i class="fa-solid fa-users mr-1.5"></i>Obsazení</h3>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400" id="modal-cast-count"></span>
+                    </div>
+                    <div id="modal-cast" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+                </div>
+
+                <!-- SEKCE PRO NÁHLED PŘED PŘIDÁNÍM (Zobrazí se pouze při vyhledávání) -->
+                <div id="modal-preview-container" class="hidden bg-slate-100/40 dark:bg-slate-950/40 p-6 rounded-xl border border-dashed border-slate-300 dark:border-slate-800 text-center space-y-4">
+                    <div class="text-sm text-slate-700 dark:text-slate-300" id="modal-preview-info">
+                        <!-- Zde se zobrazí např. "Délka filmu: 120 min" nebo "Obsahuje 3 série" -->
+                    </div>
+                    <div class="flex justify-center gap-3">
+                        <button id="modal-preview-add-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-amber-500/10 theme-bg theme-text">
+                            <i class="fa-solid fa-plus mr-1.5"></i> Přidat do mé knihovny
+                        </button>
+                        <button onclick="closeModal()" class="bg-slate-300 dark:bg-slate-800 hover:bg-slate-400 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold px-6 py-3 rounded-xl text-sm transition-all">
+                            Zpět na vyhledávání
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SEKCE PRO KNIHOVNU (Hodnocení a Moje poznámky) -->
+                <div id="modal-library-meta-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Hodnocení hvězdičkami -->
+                    <div class="bg-slate-100/50 dark:bg-slate-950/50 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50 flex flex-col justify-center">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 theme-text mb-2">Moje Hodnocení</h3>
+                        <div class="flex items-center gap-2" id="modal-rating-stars">
+                            <!-- Hvězdičky budou generovány JS -->
+                        </div>
+                    </div>
+                    <!-- Poznámky -->
+                    <div class="bg-slate-100/50 dark:bg-slate-950/50 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 theme-text mb-1">Osobní poznámky</h3>
+                        <textarea id="modal-notes" oninput="saveNotes(this.value)" rows="2" placeholder="Sem si napiš poznámky, vlastní recenzi nebo kde jsi skončil..." class="w-full bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:border-amber-500 theme-focus-border"></textarea>
+                    </div>
+                </div>
+
+                <!-- Rychlé akce (Knihovna) -->
+                <div id="modal-library-actions-container" class="flex flex-wrap gap-3 items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                    <div class="text-sm text-slate-500 dark:text-slate-400">
+                        Celkový pokrok: <span id="modal-progress-text" class="font-bold text-slate-900 dark:text-white">0%</span>
+                    </div>
+                    <div class="flex gap-2" id="modal-bulk-actions">
+                        <!-- Dynamicky generovaná hromadná tlačítka -->
+                    </div>
+                </div>
+
+                <!-- Seznam epizod (pro seriály v knihovně) -->
+                <div id="modal-seasons-container" class="space-y-4">
+                    <!-- Dynamicky generované řady a epizody -->
+                </div>
+
+                <!-- Sekce pro filmy (v knihovně) -->
+                <div id="modal-movie-container" class="hidden text-center py-8 space-y-4">
+                    <div class="flex justify-center items-center gap-3">
+                        <label class="text-sm text-slate-500 dark:text-slate-400">Délka filmu:</label>
+                        <input type="number" id="modal-movie-runtime-input" onchange="updateMovieRuntime(this.value)" class="w-20 bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-center text-sm rounded py-1 text-slate-800 dark:text-white focus:border-amber-500 theme-focus-border">
+                        <span class="text-sm text-slate-500 dark:text-slate-400">minut</span>
+                    </div>
+                    <button id="modal-movie-btn" class="px-8 py-4 rounded-xl font-bold text-lg transition-all"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NASTAVENÍ MODAL -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5">
+        <div class="glass-panel w-full max-w-4xl max-h-[92vh] rounded-3xl overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-sliders"></i></div><div><h2 class="text-xl font-black">Nastavení</h2><p class="text-xs text-slate-500 mt-0.5">Přizpůsob si My Films & Serials podle sebe.</p></div></div>
+                <button onclick="closeSettingsModal()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="settings-card">
+                        <div class="flex items-center gap-3 mb-4"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-palette"></i></span><div><h3 class="text-sm font-black">Vzhled</h3><p class="text-[10px] text-slate-500">Barvy a režim aplikace</p></div></div>
+                        <div class="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800"><button id="theme-btn-light" onclick="setThemeMode('light')" class="flex-1 py-2.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-sun mr-1.5"></i>Světlý</button><button id="theme-btn-dark" onclick="setThemeMode('dark')" class="flex-1 py-2.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-moon mr-1.5"></i>Tmavý</button></div>
+                        <div class="mt-4"><p class="text-[10px] text-slate-500 mb-2 uppercase tracking-wider font-bold">Akcent</p><div class="flex gap-3"><button onclick="changeThemeColor('amber')" class="w-9 h-9 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 ring-amber-500"></button><button onclick="changeThemeColor('indigo')" class="w-9 h-9 rounded-full bg-indigo-500"></button><button onclick="changeThemeColor('emerald')" class="w-9 h-9 rounded-full bg-emerald-500"></button><button onclick="changeThemeColor('rose')" class="w-9 h-9 rounded-full bg-rose-500"></button></div></div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-display"></i></span><div><h3 class="text-sm font-black">Rozložení knihovny</h3><p class="text-[10px] text-slate-500">Kolik titulů chceš vidět najednou</p></div></div>
+                        <div class="grid grid-cols-3 gap-2 mt-4"><button onclick="setCardSize('small')" data-card-size="small" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800"><i class="fa-solid fa-grip mr-1"></i>Malé</button><button onclick="setCardSize('normal')" data-card-size="normal" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">Normální</button><button onclick="setCardSize('large')" data-card-size="large" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">Velké</button></div>
+                        <div class="setting-row mt-2"><div><b class="text-xs">Jemné animace</b><p class="text-[10px] text-slate-500">Pohyby a přechody v rozhraní</p></div><label class="switch"><input id="setting-animations" type="checkbox" onchange="setAnimations(this.checked)"><span></span></label></div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-rotate"></i></span><div><h3 class="text-sm font-black">Synchronizace</h3><p class="text-[10px] text-slate-500">Aktualizace seriálů z TMDb</p></div></div>
+                        <div class="setting-row"><div><b class="text-xs">Synchronizovat automaticky</b><p class="text-[10px] text-slate-500">Po otevření aplikace</p></div><label class="switch"><input id="setting-auto-sync" type="checkbox" onchange="setAutoSync(this.checked)"><span></span></label></div>
+                        <button onclick="syncAllShowsSilently()" class="w-full mt-2 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-800"><i class="fa-solid fa-rotate mr-1.5"></i>Synchronizovat teď</button>
+                    </div>
+                    <div class="settings-card">
+                        <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-regular fa-bell"></i></span><div><h3 class="text-sm font-black">Upozornění</h3><p class="text-[10px] text-slate-500">Nadcházející epizody</p></div></div>
+                        <div class="setting-row"><div><b class="text-xs">Zobrazovat upozornění</b><p class="text-[10px] text-slate-500">Počet čekajících epizod u zvonku</p></div><label class="switch"><input id="setting-notifications" type="checkbox" onchange="setNotifications(this.checked)"><span></span></label></div>
+                        <div class="mt-3"><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Upozornit předem</label><select id="setting-notification-days" onchange="setNotificationDays(this.value)" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs"><option value="0">V den vydání</option><option value="1">1 den předem</option><option value="3">3 dny předem</option><option value="7">7 dní předem</option><option value="14">14 dní předem</option><option value="30">30 dní předem</option><option value="60">2 měsíce předem</option><option value="90">3 měsíce předem</option></select></div>
+                    </div>
+                </div>
+                <div class="settings-card">
+                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-sliders"></i></span><div><h3 class="text-sm font-black">Chování aplikace</h3><p class="text-[10px] text-slate-500">Drobnosti, které ovlivní používání</p></div></div>
+                    <div class="setting-row"><div><b class="text-xs">Potvrdit mazání</b><p class="text-[10px] text-slate-500">Před odstraněním titulu zobrazit potvrzení</p></div><label class="switch"><input id="setting-confirm-delete" type="checkbox" onchange="setConfirmDelete(this.checked)"><span></span></label></div>
+                    <div class="mt-3"><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Po spuštění otevřít</label><select id="setting-start-tab" onchange="setStartTab(this.value)" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs"><option value="watchlist">Knihovnu</option><option value="upcoming">Nadcházející</option><option value="creator">Přidat / Vytvořit</option><option value="stats">Statistiky</option></select></div>
+                </div>
+                <div class="settings-card">
+                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-key"></i></span><div><h3 class="text-sm font-black">TMDb API</h3><p class="text-[10px] text-slate-500">Klíč je uložen pouze v tomto prohlížeči.</p></div></div>
+                    <div class="flex flex-col sm:flex-row gap-2 mt-3"><input type="password" id="api-key-input" placeholder="Vložte TMDb API klíč..." class="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-amber-500 theme-focus-border"><button onclick="saveApiKey()" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs theme-bg theme-text">Uložit klíč</button></div>
+                </div>
+                <div class="settings-card">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-950 flex items-center justify-center"><i class="fa-solid fa-database"></i></span><div><h3 class="text-sm font-black">Data aplikace</h3><p class="text-[10px] text-slate-500">Záloha nebo úplné vymazání knihovny</p></div></div><div class="flex flex-wrap gap-2"><button onclick="exportDatabase()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold"><i class="fa-solid fa-download mr-1"></i>Export</button><label class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Import<input type="file" id="import-file" class="hidden" onchange="importDatabase(event)"></label><button onclick="resetDatabase()" class="px-3 py-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Reset</button></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globální stav aplikace
+        let state = {
+            watchlist: JSON.parse(localStorage.getItem('mfs_watchlist')) || [],
+            apiKey: localStorage.getItem('mfs_api_key') || '',
+            activeTab: 'watchlist',
+            currentDetailId: null,
+            themeColor: localStorage.getItem('mfs_theme_color') || 'amber',
+            themeMode: localStorage.getItem('mfs_theme_mode') || 'dark',
+            cardSize: localStorage.getItem('mfs_card_size') || 'normal',
+            animations: localStorage.getItem('mfs_animations') !== 'false',
+            autoSync: localStorage.getItem('mfs_auto_sync') === 'true',
+            notifications: localStorage.getItem('mfs_notifications') !== 'false',
+            notificationDays: Number(localStorage.getItem('mfs_notification_days') || 3),
+            confirmDelete: localStorage.getItem('mfs_confirm_delete') !== 'false',
+            startTab: localStorage.getItem('mfs_start_tab') || 'watchlist',
+        };
+
+        // Globální stav vyhledávání
+        let currentSearchMode = 'title'; // 'title' nebo 'actor'
+
+        // Grafy
+        let ratioChart = null;
+        let genreChart = null;
+
+        // Inicializace při načtení
+        window.onload = function() {
+            // Aplikace světlého/tmavého režimu jako první
+            if (state.themeMode === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            
+            checkDemoBanner();
+            renderWatchlist();
+            applyThemeColor(state.themeColor);
+            setThemeMode(state.themeMode, true); // Inicializace tlačítek režimu
+            document.getElementById('api-key-input').value = state.apiKey;
+            applyCardSize(state.cardSize);
+            document.getElementById('setting-animations').checked = state.animations;
+            document.getElementById('setting-auto-sync').checked = state.autoSync;
+            document.getElementById('setting-notifications').checked = state.notifications;
+            document.getElementById('setting-notification-days').value = String(state.notificationDays);
+            document.getElementById('setting-confirm-delete').checked = state.confirmDelete;
+            document.getElementById('setting-start-tab').value = state.startTab;
+            if (state.startTab !== 'watchlist') switchTab(state.startTab);
+            updateNotificationBell();
+            if (state.autoSync && state.apiKey) setTimeout(() => syncAllShowsSilently(), 500);
+        };
+
+        function checkDemoBanner() {
+            const banner = document.getElementById('demo-banner');
+            if (state.watchlist.length === 0) {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        // Přepínání záložek
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            const tabs = ['watchlist', 'upcoming', 'creator', 'stats'];
+            
+            tabs.forEach(t => {
+                document.getElementById(`section-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = "px-3.5 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+            });
+
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            
+            const activeTabBtn = document.getElementById(`tab-${tabId}`);
+            const activeClasses = state.themeColor === 'indigo' || state.themeColor === 'rose' 
+                ? `bg-${state.themeColor}-500 text-white` 
+                : `bg-${state.themeColor}-500 text-slate-950`;
+            activeTabBtn.className = `px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${activeClasses}`;
+
+            if (tabId === 'stats') {
+                calculateStats();
+            }
+            if (tabId === 'upcoming') {
+                renderUpcomingEpisodes();
+            }
+        }
+
+        // Otevření a zavření Nastavení
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // --- VZHLED A BAREVNÝ MOTIV ---
+        function setThemeMode(mode, isInit = false) {
+            const lightBtn = document.getElementById('theme-btn-light');
+            const darkBtn = document.getElementById('theme-btn-dark');
+            const activeClasses = `flex-1 py-2 rounded-lg text-xs font-bold transition-all`;
+            const inactiveClasses = `flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white`;
+
+            if (mode === 'light') {
+                document.documentElement.classList.remove('dark');
+                lightBtn.className = activeClasses;
+                darkBtn.className = inactiveClasses;
+            } else {
+                document.documentElement.classList.add('dark');
+                darkBtn.className = activeClasses;
+                lightBtn.className = inactiveClasses;
+            }
+
+            if (!isInit) {
+                state.themeMode = mode;
+                localStorage.setItem('mfs_theme_mode', mode);
+            }
+            
+            applyThemeColor(state.themeColor); // Znovu aplikuje barvy, aby se správně nastavil text na aktivním tlačítku
+            if (state.activeTab === 'stats') calculateStats(); // Překreslí grafy s novými barvami
+        }
+
+        function changeThemeColor(color) {
+            state.themeColor = color;
+            localStorage.setItem('mfs_theme_color', color);
+            applyThemeColor(color);
+            switchTab(state.activeTab); // Znovu aplikuje barvu na aktivní záložku
+            renderWatchlist(); // Překreslí knihovnu s novými barvami pokroku
+            if (state.activeTab === 'stats') calculateStats(); // Překreslí grafy
+        }
+
+        function applyThemeColor(color) {
+            // Mapování barev
+            const colors = {
+                amber: { bg: 'bg-amber-500', text: 'text-amber-500', hoverText: 'hover:text-amber-500', focusBorder: 'focus:border-amber-500', textOnBg: 'text-slate-950' },
+                indigo: { bg: 'bg-indigo-500', text: 'text-indigo-500', hoverText: 'hover:text-indigo-500', focusBorder: 'focus:border-indigo-500', textOnBg: 'text-white' },
+                emerald: { bg: 'bg-emerald-500', text: 'text-emerald-500', hoverText: 'hover:text-emerald-500', focusBorder: 'focus:border-emerald-500', textOnBg: 'text-slate-950' },
+                rose: { bg: 'bg-rose-500', text: 'text-rose-500', hoverText: 'hover:text-rose-500', focusBorder: 'focus:border-rose-500', textOnBg: 'text-white' }
+            };
+            const activeColor = colors[color] || colors.amber;
+
+            // Aplikace na dynamické prvky
+            document.querySelectorAll('.theme-bg').forEach(el => {
+                el.className = el.className.replace(/bg-(amber|indigo|emerald|rose)-500/g, activeColor.bg);
+                el.classList.remove('text-slate-950', 'text-white');
+                el.classList.add(activeColor.textOnBg);
+            });
+            document.querySelectorAll('.theme-text').forEach(el => {
+                el.className = el.className.replace(/text-(amber|indigo|emerald|rose)-500/g, activeColor.text);
+            });
+            document.querySelectorAll('.theme-hover-text').forEach(el => {
+                el.className = el.className.replace(/hover:text-(amber|indigo|emerald|rose)-500/g, activeColor.hoverText);
+            });
+            document.querySelectorAll('.theme-focus-border').forEach(el => {
+                el.className = el.className.replace(/focus:border-(amber|indigo|emerald|rose)-500/g, activeColor.focusBorder);
+            });
+            document.querySelectorAll('.theme-group-hover-text').forEach(el => {
+                el.className = el.className.replace(/group-hover:text-(amber|indigo|emerald|rose)-500/g, `group-hover:${activeColor.text}`);
+            });
+            
+            // Aktualizace aktivního tlačítka v nastavení vzhledu
+            const activeThemeBtn = state.themeMode === 'light' ? document.getElementById('theme-btn-light') : document.getElementById('theme-btn-dark');
+            if (activeThemeBtn) {
+                activeThemeBtn.className = activeThemeBtn.className.replace(/bg-(amber|indigo|emerald|rose)-500/g, activeColor.bg);
+                activeThemeBtn.classList.remove('text-slate-950', 'text-white');
+                activeThemeBtn.classList.add(activeColor.textOnBg);
+            }
+        }
+
+        // Aplikace používá pro TMDb data češtinu.
+        function apiLanguage() {
+            return 'cs-CZ';
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        async function fetchCast(type, tmdbId) {
+            if (!state.apiKey || !tmdbId) return [];
+            const endpoint = type === 'movie' ? `movie/${tmdbId}/credits` : `tv/${tmdbId}/aggregate_credits`;
+            const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
+            if (!res.ok) throw new Error(`TMDb credits ${res.status}`);
+            const data = await res.json();
+            return (data.cast || []).filter(c => c && c.name).sort((a,b) => (a.order ?? 999) - (b.order ?? 999)).slice(0, 12).map(c => ({
+                id: c.id,
+                name: c.name,
+                character: c.character || (Array.isArray(c.roles) ? c.roles[0]?.character : '') || '',
+                profile_path: c.profile_path || null
+            }));
+        }
+
+        function renderCast(cast = []) {
+            const container = document.getElementById('modal-cast');
+            const count = document.getElementById('modal-cast-count');
+            if (!container) return;
+            count.textContent = cast.length ? `${cast.length} hlavních` : '';
+            if (!cast.length) {
+                container.innerHTML = '<p class="col-span-full text-xs text-slate-500 dark:text-slate-400">Obsazení není k dispozici. Zkus synchronizaci.</p>';
+                return;
+            }
+            container.innerHTML = cast.map(actor => {
+                const photo = actor.profile_path ? `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 'https://via.placeholder.com/185x278?text=N/A';
+                return `<div class="flex items-center gap-2 bg-white dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800 min-w-0">
+                    <img src="${photo}" alt="${escapeHtml(actor.name)}" class="w-10 h-14 object-cover rounded flex-shrink-0">
+                    <div class="min-w-0"><div class="text-xs font-bold text-slate-800 dark:text-white truncate">${escapeHtml(actor.name)}</div><div class="text-[10px] text-slate-500 dark:text-slate-400 truncate" title="${escapeHtml(actor.character)}">${escapeHtml(actor.character || '—')}</div></div>
+                </div>`;
+            }).join('');
+        }
+
+        let creatorMode = 'search';
+        let manualSeasonCounter = 0;
+        function setCreatorMode(mode) {
+            creatorMode = mode;
+            document.getElementById('creator-search-panel').classList.toggle('hidden', mode !== 'search');
+            document.getElementById('creator-manual-panel').classList.toggle('hidden', mode !== 'manual');
+            document.querySelectorAll('.creator-main-tab').forEach(btn => btn.classList.remove('bg-amber-500','text-slate-950','theme-bg','theme-text'));
+            const active = document.getElementById(mode === 'search' ? 'creator-tab-search' : 'creator-tab-manual');
+            active.classList.add('bg-amber-500','text-slate-950','theme-bg','theme-text');
+            if (mode === 'manual' && !document.querySelector('.manual-season')) addManualSeason();
+        }
+        function addManualSeason() {
+            manualSeasonCounter++;
+            const number = document.querySelectorAll('.manual-season').length + 1;
+            const container = document.getElementById('manual-seasons-builder');
+            const season = document.createElement('div');
+            season.className = 'manual-season';
+            season.dataset.season = number;
+            season.innerHTML = `<div class="flex flex-col sm:flex-row gap-2 sm:items-center justify-between"><div class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center text-xs font-black">S${number}</span><input type="text" value="Série ${number}" class="manual-input manual-season-name !w-auto flex-1 sm:w-56"></div><button type="button" onclick="this.closest('.manual-season').remove()" class="text-xs font-bold text-red-500 px-2 py-2 rounded-lg hover:bg-red-500/10">Odstranit</button></div><div class="manual-episodes mt-3 space-y-2"></div><button type="button" onclick="addManualEpisode(this.closest('.manual-season'))" class="mt-3 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] font-bold"><i class="fa-solid fa-plus mr-1"></i>Přidat epizodu</button>`;
+            container.appendChild(season);
+            addManualEpisode(season);
+        }
+        function addManualEpisode(season) {
+            const list = season.querySelector('.manual-episodes');
+            const epNum = list.children.length + 1;
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-1 sm:grid-cols-[52px_minmax(0,1fr)_95px_145px_32px] gap-2 items-center';
+            row.innerHTML = `<span class="text-[11px] font-mono text-slate-500 text-center">E${String(epNum).padStart(2,'0')}</span><input type="text" placeholder="Název epizody" class="manual-input manual-ep-name"><input type="number" min="1" value="45" placeholder="Min" class="manual-input manual-ep-runtime"><input type="date" class="manual-input manual-ep-date"><button type="button" onclick="this.parentElement.remove(); renumberManualEpisodes(this.closest('.manual-season'))" class="w-8 h-8 rounded-lg text-red-500 hover:bg-red-500/10"><i class="fa-solid fa-xmark"></i></button>`;
+            list.appendChild(row);
+        }
+        function renumberManualEpisodes(season) { season.querySelectorAll('.manual-episodes > div').forEach((row,i)=>{ const s=row.querySelector('span'); if(s) s.textContent='E'+String(i+1).padStart(2,'0'); }); }
+        function resetManualBuilder() { document.getElementById('manual-show-title').value=''; document.getElementById('manual-show-original').value=''; document.getElementById('manual-show-overview').value=''; document.getElementById('manual-show-genres').value=''; document.getElementById('manual-show-poster').value=''; document.getElementById('manual-seasons-builder').innerHTML=''; manualSeasonCounter=0; addManualSeason(); }
+        function saveManualShow() {
+            const title = document.getElementById('manual-show-title').value.trim();
+            if (!title) { alert('Zadej název seriálu.'); return; }
+            const seasons = [...document.querySelectorAll('#manual-seasons-builder .manual-season')].map((season,idx)=>({ season_number: idx+1, name: season.querySelector('.manual-season-name').value.trim() || `Série ${idx+1}`, episodes: [...season.querySelectorAll('.manual-episodes > div')].map((row,i)=>({ episode_number:i+1, name:row.querySelector('.manual-ep-name').value.trim() || `Epizoda ${i+1}`, runtime:parseInt(row.querySelector('.manual-ep-runtime').value)||45, air_date:row.querySelector('.manual-ep-date').value||null, overview:'', watched:false })) }));
+            const item = { id:`manual_${Date.now()}`, tmdbId:null, type:'show', originalTitle:document.getElementById('manual-show-original').value.trim() || title, title, overview:document.getElementById('manual-show-overview').value.trim() || 'Vlastní seriál bez popisu.', genres:document.getElementById('manual-show-genres').value.split(',').map(x=>x.trim()).filter(Boolean), poster_path:null, poster_url:document.getElementById('manual-show-poster').value.trim() || null, backdrop_path:null, rating:0, notes:'', addedAt:Date.now(), seasons, cast:[] };
+            state.watchlist.push(item); saveToLocalStorage(); checkDemoBanner(); renderWatchlist(); resetManualBuilder(); switchTab('watchlist'); alert('Vlastní seriál byl přidán do knihovny.');
+        }
+
+        // Přepínání režimu vyhledávání (Podle názvu / Podle herce)
+        function setSearchMode(mode) {
+            currentSearchMode = mode;
+            const btnTitle = document.getElementById('search-mode-title');
+            const btnActor = document.getElementById('search-mode-actor');
+            const typeSelect = document.getElementById('search-type-select');
+            const searchInput = document.getElementById('search-input');
+
+            const activeBg = state.themeColor === 'indigo' || state.themeColor === 'rose' ? `bg-${state.themeColor}-500 text-white` : `bg-${state.themeColor}-500 text-slate-950`;
+            const inactiveClasses = "flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+
+            if (mode === 'title') {
+                btnTitle.className = `flex-1 py-2 rounded-lg text-xs font-bold transition-all ${activeBg}`;
+                btnActor.className = inactiveClasses;
+                typeSelect.classList.remove('hidden');
+                searchInput.placeholder = "Zadej název filmu nebo seriálu...";
+            } else {
+                btnTitle.className = inactiveClasses;
+                btnActor.className = `flex-1 py-2 rounded-lg text-xs font-bold transition-all ${activeBg}`;
+                typeSelect.classList.add('hidden');
+                searchInput.placeholder = "Zadej jméno herce...";
+            }
+        }
+
+        // --- GENERÁTOR TESTOVACÍCH DAT (DEMO) ---
+        function generateDemoData() {
+            const demoData = [
+                {
+                    id: "tv_1396",
+                    tmdbId: 1396,
+                    originalTitle: "Breaking Bad",
+                    title: "Perníkový táta",
+                    type: "show",
+                    overview: "Když je středoškolskému učiteli chemie Walteru Whiteovi diagnostikována rakovina, rozhodne se využít své znalosti k výrobě a prodeji metamfetaminu se svým bývalým studentem Jessem Pinkmanem, aby zajistil finanční budoucnost své rodiny.",
+                    genres: ["Drama", "Krimi"],
+                    poster_path: "/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+                    backdrop_path: "/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+                    rating: 5,
+                    notes: "Nejlepší seriál všech dob!",
+                    addedAt: Date.now() - 20000,
+                    seasons: [
+                        {
+                            season_number: 1, name: "Série 1",
+                            episodes: [
+                                { episode_number: 1, name: "Pilot", runtime: 58, watched: true },
+                                { episode_number: 2, name: "Kočka je v pytli...", runtime: 48, watched: true },
+                                { episode_number: 3, name: "...a pytel v řece", runtime: 48, watched: false },
+                                { episode_number: 4, name: "Muž jménem Rakovina", runtime: 48, watched: false },
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: "movie_155",
+                    tmdbId: 155,
+                    originalTitle: "The Dark Knight",
+                    title: "Temný rytíř",
+                    type: "movie",
+                    overview: "Když se objeví nová hrozba známá jako Joker, Batman musí přijmout jednu z největších psychologických a fyzických zkoušek své schopnosti bojovat proti nespravedlnosti.",
+                    genres: ["Drama", "Akční", "Krimi", "Thriller"],
+                    poster_path: "/e1mjopzAS2KNsvpWHPVojSJnvrx.jpg",
+                    backdrop_path: "/dqK9Hag1054tghRQSqLSfrkvQnA.jpg",
+                    runtime: 152,
+                    watched: true,
+                    rating: 5,
+                    notes: "Heath Ledger jako Joker je legendární.",
+                    addedAt: Date.now() - 10000
+                },
+                {
+                    id: "tv_82856",
+                    tmdbId: 82856,
+                    originalTitle: "The Mandalorian",
+                    title: "Mandalorian",
+                    type: "show",
+                    overview: "Po pádu Impéria se osamělý mandalorianský pistolník prodírá bezprávím vnějšího okraje galaxie.",
+                    genres: ["Sci-Fi & Fantasy", "Akční & Dobrodružný", "Western"],
+                    poster_path: "/eU1i6eHXlzMOlEq0ku1Rzq7aV2n.jpg",
+                    backdrop_path: "/9ijMGlJKqcslswWUzPOuDmbynMi.jpg",
+                    rating: 4,
+                    notes: "This is the way.",
+                    addedAt: Date.now(),
+                    seasons: [
+                        {
+                            season_number: 1, name: "Série 1",
+                            episodes: [ { episode_number: 1, name: "Kapitola 1: Mandalorian", runtime: 39, watched: true } ]
+                        },
+                        {
+                            season_number: 2, name: "Série 2",
+                            episodes: [ { episode_number: 1, name: "Kapitola 9: Maršál", runtime: 54, watched: false } ]
+                        }
+                    ]
+                }
+            ];
+
+            state.watchlist = demoData;
+            saveToLocalStorage();
+            checkDemoBanner();
+            switchTab('watchlist');
+            alert('Testovací databáze byla úspěšně nahrána!');
+        }
+
+        // --- VYKRESLENÍ KNIHOVNY ---
+        function renderWatchlist() {
+            const grid = document.getElementById('watchlist-grid');
+            const creatorCount = document.getElementById('creator-library-count');
+            if (creatorCount) creatorCount.textContent = state.watchlist.length;
+            const filterType = document.getElementById('filter-type').value;
+            const filterStatus = document.getElementById('filter-status').value;
+            const searchQuery = document.getElementById('search-library').value.toLowerCase().trim();
+            const sortBy = document.getElementById('sort-library').value;
+            
+            grid.innerHTML = '';
+
+            let filteredList = [...state.watchlist];
+
+            // Filtrování
+            if (filterType !== 'all') filteredList = filteredList.filter(item => item.type === filterType);
+            if (searchQuery) filteredList = filteredList.filter(item => (item.originalTitle || '').toLowerCase().includes(searchQuery) || (item.title || '').toLowerCase().includes(searchQuery));
+            if (filterStatus !== 'all') {
+                filteredList = filteredList.filter(item => {
+                    const percent = getProgressPercent(item);
+                    if (filterStatus === 'completed') return percent === 100;
+                    if (filterStatus === 'watching') return percent > 0 && percent < 100;
+                    if (filterStatus === 'not_started') return percent === 0;
+                    return true;
+                });
+            }
+
+            // Řazení
+            filteredList.sort((a, b) => {
+                if (sortBy === 'title') return (a.originalTitle || a.title).localeCompare(b.originalTitle || b.title);
+                if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+                if (sortBy === 'oldest') return (a.addedAt || 0) - (b.addedAt || 0);
+                return (b.addedAt || 0) - (a.addedAt || 0); // newest
+            });
+
+            if (filteredList.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500"><i class="fa-solid fa-film text-5xl mb-4"></i><p>Žádné tituly neodpovídají vybranému filtru.</p></div>`;
+                return;
+            }
+
+            filteredList.forEach(item => {
+                const percent = getProgressPercent(item);
+                const posterUrl = item.poster_url || (item.poster_path && !item.poster_path.startsWith('http') ? `https://image.tmdb.org/t/p/w342${item.poster_path}` : (item.poster_path || 'https://via.placeholder.com/342x513?text=Bez+Plakatu'));
+                const progressColors = { amber: 'bg-amber-500', indigo: 'bg-indigo-500', emerald: 'bg-emerald-500', rose: 'bg-rose-500' };
+                const activeProgressColor = percent === 100 ? 'bg-emerald-500' : (progressColors[state.themeColor] || 'bg-amber-500');
+
+                grid.innerHTML += `
+                    <div onclick="openDetail('${item.id}')" class="media-card bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden border ${percent === 100 ? 'border-emerald-500/30' : 'border-slate-200 dark:border-slate-800'} flex flex-col justify-between cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition-all group relative">
+                        <div class="relative aspect-[2/3] overflow-hidden bg-slate-200 dark:bg-slate-950">
+                            <img src="${posterUrl}" alt="${item.originalTitle || item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300">
+                            <span class="absolute top-2 left-2 text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm ${item.type === 'movie' ? 'text-purple-500' : 'text-blue-500'}">${item.type === 'movie' ? 'Film' : 'Seriál'}</span>
+                            ${percent === 100 ? `<div class="absolute top-2 right-2 w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg border-2 border-white/80 dark:border-slate-950/80 z-10" title="Zhlédnuto"><i class="fa-solid fa-check text-sm"></i></div>` : ''}
+                            ${item.rating > 0 ? `<div class="absolute bottom-2 right-2 bg-slate-950/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-amber-300 text-xs font-black poster-rating border border-amber-400/20"><i class="fa-solid fa-star"></i><span>${Number(item.rating).toFixed(1)}</span></div>` : ''}
+                            <div class="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                                <span class="opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-slate-950/85 text-white text-[10px] font-bold px-3 py-1.5 rounded-full backdrop-blur-sm"><i class="fa-solid fa-circle-info mr-1"></i>Detail</span>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <h4 class="font-bold text-sm line-clamp-1 text-slate-800 dark:text-white group-hover:text-amber-500 theme-group-hover-text transition-colors">${item.originalTitle || item.title}</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">${item.title !== item.originalTitle ? item.title : ''}</p>
+                            <div class="mt-2">
+                                <div class="flex justify-between text-[10px] text-slate-500 mb-1"><span>Pokrok</span><span>${percent}%</span></div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-950 rounded-full h-1.5 overflow-hidden"><div class="h-full rounded-full ${activeProgressColor}" style="width: ${percent}%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            applyThemeColor(state.themeColor);
+            applyCardSize(state.cardSize);
+            updateNotificationBell();
+        }
+
+        function getProgressPercent(item) {
+            if (item.type === 'movie') {
+                return item.watched ? 100 : 0;
+            }
+            const totalEpisodes = item.seasons?.reduce((acc, s) => acc + s.episodes.length, 0) || 0;
+            if (totalEpisodes === 0) return 0;
+            const watchedEpisodes = item.seasons.reduce((acc, s) => acc + s.episodes.filter(e => e.watched).length, 0);
+            return Math.round((watchedEpisodes / totalEpisodes) * 100);
+        }
+
+        // --- NADCHÁZEJÍCÍ EPIZODY ---
+        async function renderUpcomingEpisodes() {
+            const container = document.getElementById('upcoming-list');
+            container.innerHTML = `<div class="text-center text-slate-500 dark:text-slate-400 py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Načítám nadcházející epizody...</div>`;
+
+            if (!state.apiKey) {
+                container.innerHTML = `<div class="text-center text-red-500 py-8"><i class="fa-solid fa-key mr-2"></i>Pro tuto funkci je nutné nastavit TMDb API klíč v nastavení.</div>`;
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const upcoming = [];
+            state.watchlist.filter(item => item.type === 'show' && item.tmdbId && getProgressPercent(item) < 100).forEach(show => {
+                (show.seasons || []).forEach(season => (season.episodes || []).forEach(ep => {
+                    if (!ep.air_date) return;
+                    const date = new Date(`${ep.air_date}T00:00:00`);
+                    if (!Number.isNaN(date.getTime()) && date >= today) {
+                        upcoming.push({
+                            showId: show.id,
+                            showName: show.title || show.originalTitle,
+                            showPoster: show.poster_path,
+                            seasonNumber: season.season_number,
+                            episodeNumber: ep.episode_number,
+                            name: ep.name || `Epizoda ${ep.episode_number}`,
+                            overview: ep.overview || '',
+                            air_date: ep.air_date,
+                            runtime: ep.runtime
+                        });
+                    }
+                }));
+            });
+
+            upcoming.sort((a, b) => new Date(a.air_date) - new Date(b.air_date) || a.showName.localeCompare(b.showName));
+
+            if (!upcoming.length) {
+                container.innerHTML = `<div class="text-center text-slate-500 dark:text-slate-400 py-8"><i class="fa-solid fa-calendar-xmark mr-2"></i>Žádné budoucí epizody nejsou v uložených datech. Klikni na Synchronizovat.</div>`;
+                return;
+            }
+
+            container.innerHTML = upcoming.map(ep => {
+                const posterUrl = ep.showPoster ? (ep.showPoster.startsWith('http') ? ep.showPoster : `https://image.tmdb.org/t/p/w92${ep.showPoster}`) : 'https://via.placeholder.com/92x138?text=N/A';
+                const airDate = new Date(`${ep.air_date}T00:00:00`);
+                return `<div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-start gap-4">
+                    <img src="${posterUrl}" alt="${escapeHtml(ep.showName)}" class="w-16 rounded-md shadow-md hidden sm:block">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-amber-500 theme-text font-bold truncate">${escapeHtml(ep.showName)}</p>
+                        <h4 class="text-lg font-bold text-slate-900 dark:text-white">${escapeHtml(ep.name)}</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 font-mono">S${String(ep.seasonNumber).padStart(2, '0')}E${String(ep.episodeNumber).padStart(2, '0')} · ${ep.runtime || '—'} min</p>
+                        ${ep.overview ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2">${escapeHtml(ep.overview)}</p>` : ''}
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-lg font-bold text-slate-900 dark:text-white">${airDate.toLocaleDateString(apiLanguage(), { day: 'numeric', month: 'long' })}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">${airDate.toLocaleDateString(apiLanguage(), { weekday: 'long' })}</p>
+                    </div>
+                </div>`;
+            }).join('');
+            applyThemeColor(state.themeColor);
+            updateNotificationBell();
+        }
+
+        // --- DETAIL MODAL & OVLÁDÁNÍ ---
+        function openDetail(id) {
+            state.currentDetailId = id;
+            const item = state.watchlist.find(w => w.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('detail-modal');
+            const hero = document.getElementById('modal-hero');
+            const poster = document.getElementById('modal-poster');
+            const typeSpan = document.getElementById('modal-type');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const genres = document.getElementById('modal-genres');
+            const overview = document.getElementById('modal-overview');
+            const bulkActions = document.getElementById('modal-bulk-actions');
+
+            document.getElementById('modal-preview-container').classList.add('hidden');
+            document.getElementById('modal-library-meta-container').classList.remove('hidden');
+            document.getElementById('modal-library-actions-container').classList.remove('hidden');
+            document.getElementById('modal-title-edit-btn').classList.remove('hidden');
+
+            let posterUrl = item.poster_path;
+            if (posterUrl && !posterUrl.startsWith('http')) posterUrl = `https://image.tmdb.org/t/p/w185${posterUrl}`;
+            hero.style.backgroundImage = item.backdrop_path ? `url(https://image.tmdb.org/t/p/w1280${item.backdrop_path})` : 'none';
+            hero.style.backgroundColor = item.backdrop_path ? '' : (state.themeMode === 'dark' ? '#1e293b' : '#e2e8f0');
+
+            poster.src = posterUrl || 'https://via.placeholder.com/185x278?text=N/A';
+            typeSpan.innerText = item.type === 'movie' ? 'Film' : 'Seriál';
+            typeSpan.className = `text-[10px] font-bold uppercase px-2 py-0.5 rounded ${item.type === 'movie' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`;
+            
+            title.innerText = item.originalTitle || item.title;
+            subtitle.innerText = (item.title && item.title !== item.originalTitle) ? item.title : "Přidat český název";
+            subtitle.classList.remove('hidden');
+            document.getElementById('modal-subtitle-edit-btn').classList.remove('hidden');
+
+            genres.innerText = item.genres?.join(', ') || '';
+            overview.innerText = item.overview || 'Popis děje není k dispozici.';
+            document.getElementById('modal-notes').value = item.notes || '';
+            renderRatingStars(item.rating || 0);
+            renderCast(item.cast || []);
+
+            const seasonsContainer = document.getElementById('modal-seasons-container');
+            const movieContainer = document.getElementById('modal-movie-container');
+
+            if (item.type === 'movie') {
+                seasonsContainer.classList.add('hidden');
+                movieContainer.classList.remove('hidden');
+                document.getElementById('modal-movie-runtime-input').value = item.runtime;
+                bulkActions.innerHTML = `<button onclick="deleteItem('${item.id}')" class="bg-red-100 dark:bg-red-950 hover:bg-red-200 dark:hover:bg-red-900 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fa-regular fa-trash-can mr-1"></i> Smazat</button>`;
+                updateMovieButton(item);
+            } else {
+                seasonsContainer.classList.remove('hidden');
+                movieContainer.classList.add('hidden');
+                bulkActions.innerHTML = `
+                    <button onclick="toggleAllShow('${item.id}', true)" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fa-solid fa-check-double mr-1"></i> Vše zhlédnuto</button>
+                    <button onclick="toggleAllShow('${item.id}', false)" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fa-solid fa-xmark mr-1"></i> Zrušit vše</button>
+                    <button onclick="deleteItem('${item.id}')" class="bg-red-100 dark:bg-red-950 hover:bg-red-200 dark:hover:bg-red-900 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fa-regular fa-trash-can mr-1"></i> Smazat</button>`;
+                renderSeasons(item);
+            }
+
+            updateModalProgress(item);
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            applyThemeColor(state.themeColor);
+        }
+
+        // --- NÁHLED TITULU PŘED PŘIDÁNÍM (PREVIEW) ---
+        async function openTMDbPreview(tmdbId, type) {
+            if (!state.apiKey) {
+                alert('Pro zobrazení detailu si nejprve nastavte API klíč v Nastavení.');
+                return;
+            }
+
+            try {
+                const endpoint = type === 'movie' ? `movie/${tmdbId}` : `tv/${tmdbId}`;
+                const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
+                const data = await res.json();
+                const cast = await fetchCast(type, tmdbId).catch(() => []);
+                
+                const tempItem = {
+                    tmdbId,
+                    type,
+                    originalTitle: data.original_title || data.original_name,
+                    title: data.title || data.name,
+                    overview: data.overview || 'Popis děje není k dispozici.',
+                    poster_path: data.poster_path,
+                    backdrop_path: data.backdrop_path,
+                    genres: data.genres.map(g => g.name),
+                    runtime: data.runtime,
+                    seasonsCount: data.number_of_seasons,
+                    episodesCount: data.number_of_episodes,
+                    cast
+                };
+                renderPreviewModal(tempItem);
+            } catch (error) {
+                console.error(error);
+                alert('Chyba při načítání detailů z TMDb.');
+            }
+        }
+
+        function renderPreviewModal(item) {
+            const modal = document.getElementById('detail-modal');
+            const hero = document.getElementById('modal-hero');
+            const poster = document.getElementById('modal-poster');
+            const typeSpan = document.getElementById('modal-type');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const genres = document.getElementById('modal-genres');
+            const overview = document.getElementById('modal-overview');
+
+            document.getElementById('modal-library-meta-container').classList.add('hidden');
+            document.getElementById('modal-library-actions-container').classList.add('hidden');
+            document.getElementById('modal-seasons-container').classList.add('hidden');
+            document.getElementById('modal-movie-container').classList.add('hidden');
+            document.getElementById('modal-title-edit-btn').classList.add('hidden');
+
+            const previewContainer = document.getElementById('modal-preview-container');
+            const previewInfo = document.getElementById('modal-preview-info');
+            const previewAddBtn = document.getElementById('modal-preview-add-btn');
+            previewContainer.classList.remove('hidden');
+
+            let posterUrl = item.poster_url || (item.poster_path ? `https://image.tmdb.org/t/p/w185${item.poster_path}` : 'https://via.placeholder.com/185x278?text=N/A');
+            hero.style.backgroundImage = item.backdrop_path ? `url(https://image.tmdb.org/t/p/w1280${item.backdrop_path})` : 'none';
+            hero.style.backgroundColor = item.backdrop_path ? '' : (state.themeMode === 'dark' ? '#1e293b' : '#e2e8f0');
+
+            poster.src = posterUrl;
+            typeSpan.innerText = item.type === 'movie' ? 'Film' : 'Seriál';
+            typeSpan.className = `text-[10px] font-bold uppercase px-2 py-0.5 rounded ${item.type === 'movie' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`;
+            
+            title.innerText = item.originalTitle || item.title;
+            subtitle.innerText = (item.title && item.title !== item.originalTitle) ? item.title : '';
+            subtitle.classList.toggle('hidden', !subtitle.innerText);
+            document.getElementById('modal-subtitle-edit-btn').classList.add('hidden');
+
+            genres.innerText = item.genres.join(', ');
+            overview.innerText = item.overview;
+            renderCast(item.cast || []);
+
+            const existingItem = state.watchlist.find(w => w.tmdbId === item.tmdbId && w.type === item.type);
+
+            previewInfo.innerHTML = item.type === 'movie'
+                ? `<i class="fa-solid fa-clock text-amber-500 theme-text mr-1"></i> Délka filmu: <strong>${item.runtime} minut</strong>`
+                : `<i class="fa-solid fa-tv text-amber-500 theme-text mr-1"></i> Seriál obsahuje <strong>${item.seasonsCount} sérií</strong> a <strong>${item.episodesCount} epizod</strong>`;
+
+            if (existingItem) {
+                previewInfo.innerHTML += `<div class="text-emerald-500 font-bold mt-2"><i class="fa-solid fa-circle-check"></i> Tento titul již máš ve své knihovně.</div>`;
+                previewAddBtn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg";
+                previewAddBtn.innerHTML = `<i class="fa-solid fa-folder-open mr-1.5"></i> Otevřít správu titulu`;
+                previewAddBtn.onclick = () => openDetail(existingItem.id);
+            } else {
+                previewAddBtn.className = "bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-amber-500/10 theme-bg theme-text";
+                previewAddBtn.innerHTML = `<i class="fa-solid fa-plus mr-1.5"></i> Přidat do mé knihovny`;
+                previewAddBtn.onclick = async () => {
+                    previewAddBtn.disabled = true;
+                    previewAddBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Importuji...`;
+                    await addTMDbItem(item.tmdbId, item.type);
+                    closeModal();
+                };
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            applyThemeColor(state.themeColor);
+        }
+
+        // Vykreslení hvězdiček hodnocení
+        function renderRatingStars(rating) {
+            const container = document.getElementById('modal-rating-stars');
+            let html = '';
+            for (let i = 1; i <= 5; i++) {
+                const isFilled = i <= rating;
+                html += `<button onclick="saveRating(${i})" class="text-xl transition-all focus:outline-none ${isFilled ? 'text-amber-500 theme-text hover:text-amber-400' : 'text-slate-300 dark:text-slate-700 hover:text-amber-500 theme-hover-text'}"><i class="${isFilled ? 'fa-solid' : 'fa-regular'} fa-star"></i></button>`;
+            }
+            if (rating > 0) {
+                html += `<button onclick="saveRating(0)" class="text-slate-500 hover:text-red-400 text-xs ml-2" title="Zrušit hodnocení"><i class="fa-solid fa-circle-xmark"></i></button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function saveRating(rating) {
+            const item = state.watchlist.find(w => w.id === state.currentDetailId);
+            if (item) {
+                item.rating = rating;
+                saveToLocalStorage();
+                renderRatingStars(rating);
+                renderWatchlist();
+            }
+        }
+
+        function saveNotes(notes) {
+            const item = state.watchlist.find(w => w.id === state.currentDetailId);
+            if (item) {
+                item.notes = notes;
+                saveToLocalStorage();
+            }
+        }
+
+        function triggerEditTitle(type) {
+            const item = state.watchlist.find(w => w.id === state.currentDetailId);
+            if (!item) return;
+
+            const promptText = type === 'original' ? "Upravit originální název (Anglicky):" : "Upravit český název:";
+            const currentVal = type === 'original' ? (item.originalTitle || item.title) : item.title;
+            const newTitle = prompt(promptText, currentVal);
+            
+            if (newTitle !== null) {
+                if (type === 'original') item.originalTitle = newTitle.trim();
+                else item.title = newTitle.trim();
+                saveToLocalStorage();
+                openDetail(item.id);
+                renderWatchlist();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            renderWatchlist();
+        }
+
+        function updateMovieRuntime(val) {
+            const item = state.watchlist.find(w => w.id === state.currentDetailId);
+            if (item && item.type === 'movie') {
+                item.runtime = parseInt(val) || 120;
+                saveToLocalStorage();
+            }
+        }
+
+        function updateMovieButton(item) {
+            const btn = document.getElementById('modal-movie-btn');
+            if (item.watched) {
+                btn.className = "px-8 py-4 rounded-xl font-bold text-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all";
+                btn.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i> Zhlédnuto (Kliknutím zrušíte)`;
+            } else {
+                btn.className = `px-8 py-4 rounded-xl font-bold text-lg bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-lg transition-all theme-bg theme-text`;
+                btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Označit jako zhlédnuté`;
+            }
+            btn.onclick = () => {
+                item.watched = !item.watched;
+                saveToLocalStorage();
+                updateMovieButton(item);
+                updateModalProgress(item);
+            };
+        }
+
+        function renderSeasons(item) {
+            const container = document.getElementById('modal-seasons-container');
+            const seasons = item.seasons || [];
+            const addSeasonButton = `<div class="flex justify-between items-center gap-3 mb-2"><div><h3 class="text-xs font-bold uppercase tracking-wider text-amber-500 theme-text">Série a epizody</h3><p class="text-[10px] text-slate-500">Můžeš ručně doplnit chybějící série i epizody.</p></div><button onclick="addSeasonToShow('${item.id}')" class="px-3 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-black theme-bg theme-text"><i class="fa-solid fa-plus mr-1"></i>Přidat sérii</button></div>`;
+            if (!seasons.length) { container.innerHTML = addSeasonButton + `<div class="text-center py-8 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-xs text-slate-500">Tento seriál zatím nemá žádné série.</div>`; return; }
+            container.innerHTML = addSeasonButton + seasons.map(season => {
+                const totalEp = season.episodes.length;
+                const watchedEp = season.episodes.filter(e => e.watched).length;
+                const isSeasonCompleted = totalEp > 0 && totalEp === watchedEp;
+
+                const episodesHtml = season.episodes.map(ep => `
+                    <div class="p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleEpisode('${item.id}', ${season.season_number}, ${ep.episode_number})" 
+                                class="w-5 h-5 rounded border-slate-400 dark:border-slate-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-white dark:focus:ring-offset-slate-950 bg-slate-100 dark:bg-slate-900">
+                            <div>
+                                <span class="text-xs text-slate-500 font-mono">E${String(ep.episode_number).padStart(2, '0')}</span>
+                                <h5 class="text-sm font-semibold text-slate-700 dark:text-slate-200 inline-block ml-1">${ep.name}</h5>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <input type="number" value="${ep.runtime}" onchange="updateEpisodeRuntime('${item.id}', ${season.season_number}, ${ep.episode_number}, this.value)" 
+                                class="w-12 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-center text-xs rounded py-0.5 text-slate-600 dark:text-slate-300 focus:border-amber-500 focus:outline-none">
+                            <span class="text-[10px] text-slate-500">min</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                        <div class="p-4 bg-slate-200/50 dark:bg-slate-900 flex flex-wrap justify-between items-center gap-2 border-b border-slate-200 dark:border-slate-800">
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">${season.name}</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">${watchedEp} z ${totalEp} epizod zhlédnuto</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="addEpisodeToSeason('${item.id}', ${season.season_number})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-500 theme-text border border-amber-500/20"><i class="fa-solid fa-plus mr-1"></i>Epizoda</button>
+                                <button onclick="toggleSeason('${item.id}', ${season.season_number}, ${!isSeasonCompleted})" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isSeasonCompleted ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/50' : 'bg-slate-300 dark:bg-slate-800 hover:bg-slate-400 dark:hover:bg-slate-700 text-slate-800 dark:text-white'}">
+                                    ${isSeasonCompleted ? '<i class="fa-solid fa-check mr-1"></i> Celá řada viděna' : 'Označit celou řadu'}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3 space-y-2 max-h-80 overflow-y-auto custom-scrollbar">${episodesHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addSeasonToShow(itemId) {
+            const item = state.watchlist.find(w=>w.id===itemId); if(!item || item.type!=='show') return;
+            const next = Math.max(0, ...(item.seasons||[]).map(s=>Number(s.season_number)||0)) + 1;
+            const name = prompt('Název nové série:', `Série ${next}`); if(name===null) return;
+            item.seasons = item.seasons || []; item.seasons.push({season_number:next,name:name.trim()||`Série ${next}`,episodes:[]});
+            saveToLocalStorage(); renderSeasons(item); renderWatchlist();
+        }
+        function addEpisodeToSeason(itemId, seasonNum) {
+            const item = state.watchlist.find(w=>w.id===itemId); const season=item?.seasons?.find(s=>s.season_number===seasonNum); if(!season) return;
+            const num=season.episodes.length+1; const name=prompt('Název epizody:', `Epizoda ${num}`); if(name===null) return;
+            const runtime=prompt('Délka epizody v minutách:', '45'); if(runtime===null) return;
+            const air=prompt('Datum vydání (RRRR-MM-DD), nebo nechej prázdné:', '');
+            season.episodes.push({episode_number:num,name:name.trim()||`Epizoda ${num}`,runtime:parseInt(runtime)||45,air_date:(air||'').trim()||null,overview:'',watched:false});
+            saveToLocalStorage(); renderSeasons(item); renderWatchlist(); updateNotificationBell();
+        }
+
+        function updateEpisodeRuntime(itemId, seasonNum, epNum, newVal) {
+            const item = state.watchlist.find(w => w.id === itemId);
+            const season = item?.seasons.find(s => s.season_number === seasonNum);
+            const ep = season?.episodes.find(e => e.episode_number === epNum);
+            if (ep) {
+                ep.runtime = parseInt(newVal) || 45;
+                saveToLocalStorage();
+            }
+        }
+
+        function toggleEpisode(itemId, seasonNum, epNum) {
+            const item = state.watchlist.find(w => w.id === itemId);
+            const season = item?.seasons.find(s => s.season_number === seasonNum);
+            const ep = season?.episodes.find(e => e.episode_number === epNum);
+            if (ep) {
+                ep.watched = !ep.watched;
+                saveToLocalStorage();
+                renderSeasons(item);
+                updateModalProgress(item);
+            }
+        }
+
+        function toggleSeason(itemId, seasonNum, forceState) {
+            const item = state.watchlist.find(w => w.id === itemId);
+            const season = item?.seasons.find(s => s.season_number === seasonNum);
+            if (season) {
+                season.episodes.forEach(ep => ep.watched = forceState);
+                saveToLocalStorage();
+                renderSeasons(item);
+                updateModalProgress(item);
+            }
+        }
+
+        function toggleAllShow(itemId, forceState) {
+            const item = state.watchlist.find(w => w.id === itemId);
+            if (item) {
+                item.seasons.forEach(season => season.episodes.forEach(ep => ep.watched = forceState));
+                saveToLocalStorage();
+                renderSeasons(item);
+                updateModalProgress(item);
+            }
+        }
+
+        function updateModalProgress(item) {
+            document.getElementById('modal-progress-text').innerText = `${getProgressPercent(item)}%`;
+        }
+
+        function deleteItem(id) {
+            if (!state.confirmDelete || confirm('Opravdu smazat z knihovny?')) {
+                state.watchlist = state.watchlist.filter(w => w.id !== id);
+                saveToLocalStorage();
+                closeModal();
+                checkDemoBanner();
+            }
+        }
+
+        // --- STATISTIKY & GRAFY ---
+        function calculateStats() {
+            let totalMinutes = 0, watchedMovies = 0, watchedEpisodes = 0;
+            let genresCount = {};
+
+            state.watchlist.forEach(item => {
+                const processGenres = (genres) => genres.forEach(g => genresCount[g] = (genresCount[g] || 0) + 1);
+                if (item.type === 'movie' && item.watched) {
+                    totalMinutes += item.runtime;
+                    watchedMovies++;
+                    processGenres(item.genres);
+                } else if (item.type === 'show') {
+                    item.seasons.forEach(season => {
+                        season.episodes.forEach(ep => {
+                            if (ep.watched) {
+                                totalMinutes += ep.runtime;
+                                watchedEpisodes++;
+                                processGenres(item.genres);
+                            }
+                        });
+                    });
+                }
+            });
+
+            document.getElementById('stat-days').innerText = Math.floor(totalMinutes / 1440);
+            document.getElementById('stat-hours').innerText = Math.floor((totalMinutes % 1440) / 60);
+            document.getElementById('stat-mins').innerText = totalMinutes % 60;
+            document.getElementById('stat-movies-count').innerText = watchedMovies;
+            document.getElementById('stat-episodes-count').innerText = watchedEpisodes;
+
+            renderCharts(watchedMovies, watchedEpisodes, genresCount);
+        }
+
+        function renderCharts(movies, episodes, genres) {
+            const textColor = state.themeMode === 'dark' ? '#94a3b8' : '#64748b';
+            const gridColor = state.themeMode === 'dark' ? '#1e293b' : '#e2e8f0';
+
+            if (ratioChart) ratioChart.destroy();
+            ratioChart = new Chart(document.getElementById('ratioChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['Filmy', 'Epizody'], datasets: [{ data: [movies, episodes], backgroundColor: ['#a855f7', '#3b82f6'], borderWidth: 0 }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } } } }
+            });
+
+            if (genreChart) genreChart.destroy();
+            const sortedGenres = Object.entries(genres).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            genreChart = new Chart(document.getElementById('genreChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: sortedGenres.map(g => g[0]), datasets: [{ label: 'Počet zhlédnutí', data: sortedGenres.map(g => g[1]), backgroundColor: '#f59e0b', borderRadius: 6 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } }, x: { grid: { display: false }, ticks: { color: textColor } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // --- TMDb API ---
+        async function searchTMDb(e) {
+            if (e) e.preventDefault();
+            if (!state.apiKey) {
+                alert('Pro vyhledávání přes TMDb API si nejprve nastavte API klíč v Nastavení.');
+                return;
+            }
+
+            const query = document.getElementById('search-input').value;
+            const container = document.getElementById('search-results');
+            container.innerHTML = `<div class="text-xs text-slate-500">Vyhledávám...</div>`;
+
+            const searchType = currentSearchMode === 'actor' ? 'person' : document.getElementById('search-type-select').value;
+            const url = `https://api.themoviedb.org/3/search/${searchType}?api_key=${state.apiKey}&query=${encodeURIComponent(query)}&language=${encodeURIComponent(apiLanguage())}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                let results = data.results || [];
+                if (searchType === 'person') {
+                    renderPersonResults(results);
+                } else {
+                    if (searchType === 'movie') results.forEach(item => item.media_type = 'movie');
+                    if (searchType === 'tv') results.forEach(item => item.media_type = 'tv');
+                    renderMediaResults(results.filter(item => item.media_type === 'movie' || item.media_type === 'tv'));
+                }
+            } catch {
+                container.innerHTML = '<div class="text-xs text-red-400">Chyba při vyhledávání.</div>';
+            }
+        }
+
+        function renderPersonResults(results) {
+            const container = document.getElementById('search-results');
+            if (results.length === 0) {
+                container.innerHTML = '<div class="text-xs text-slate-500">Žádní herci nebyli nalezeni.</div>';
+                return;
+            }
+            container.innerHTML = results.map(person => {
+                const photoUrl = person.profile_path ? `https://image.tmdb.org/t/p/w92${person.profile_path}` : 'https://via.placeholder.com/92x138?text=N/A';
+                const knownFor = person.known_for?.map(m => m.title || m.name).join(', ') || 'Neznámé projekty';
+                return `
+                    <div class="flex items-center gap-3 p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                        <img src="${photoUrl}" alt="${person.name}" class="w-10 h-14 object-cover rounded border border-slate-200 dark:border-slate-800 flex-shrink-0 block">
+                        <div class="flex-1 min-w-0">
+                            <span class="font-bold text-slate-800 dark:text-white text-sm block truncate">${person.name}</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block truncate mt-0.5" title="${knownFor}">Známý/á z: ${knownFor}</span>
+                        </div>
+                        <button type="button" onclick="showPersonCredits(${person.id}, '${person.name.replace(/'/g, "\\'")}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-1.5 rounded font-bold transition-all flex-shrink-0 theme-bg theme-text">Zobrazit tvorbu</button>
+                    </div>
+                `;
+            }).join('');
+            applyThemeColor(state.themeColor);
+        }
+
+        function renderMediaResults(results) {
+            const container = document.getElementById('search-results');
+            if (results.length === 0) {
+                container.innerHTML = '<div class="text-xs text-slate-500">Žádné výsledky.</div>';
+                return;
+            }
+            container.innerHTML = results.map(item => {
+                const isMovie = item.media_type === 'movie';
+                const originalTitle = isMovie ? item.original_title : item.original_name;
+                const czechTitle = isMovie ? item.title : item.name;
+                const inWatchlist = state.watchlist.some(w => w.tmdbId === item.id && w.type === item.media_type);
+                const posterUrl = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : 'https://via.placeholder.com/92x138?text=N/A';
+
+                return `
+                    <div onclick="openTMDbPreview(${item.id}, '${item.media_type}')" class="flex items-center gap-3 p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group">
+                        <img src="${posterUrl}" alt="${originalTitle}" class="w-10 h-14 object-cover rounded border border-slate-200 dark:border-slate-800 flex-shrink-0 block">
+                        <div class="flex-1 min-w-0">
+                            <span class="font-bold text-slate-800 dark:text-white text-sm block truncate group-hover:text-amber-500 theme-group-hover-text transition-colors" title="${originalTitle}">${originalTitle}</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 block truncate mt-0.5" title="${czechTitle}">${czechTitle !== originalTitle ? czechTitle : ''}</span>
+                            <span class="block text-[9px] uppercase tracking-wider text-slate-500 mt-1 font-semibold">${isMovie ? 'Film' : 'Seriál'} • <span class="text-amber-500/80 theme-text">Klikni pro detail</span></span>
+                        </div>
+                        <button type="button" onclick="event.stopPropagation(); addTMDbItem(${item.id}, '${item.media_type}')" ${inWatchlist ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 px-3 py-1.5 rounded font-bold transition-all flex-shrink-0 theme-bg theme-text">${inWatchlist ? 'V knihovně' : '+ Přidat'}</button>
+                    </div>
+                `;
+            }).join('');
+            applyThemeColor(state.themeColor);
+        }
+
+        async function showPersonCredits(personId, personName) {
+            const container = document.getElementById('search-results');
+            container.innerHTML = '<div class="text-xs text-slate-500">Načítám tvorbu herce...</div>';
+
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
+                const data = await res.json();
+
+                container.innerHTML = `
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800/80 mb-2">
+                        <span class="text-xs text-slate-500 dark:text-slate-400 truncate">Herec: <strong class="text-slate-800 dark:text-white">${personName}</strong></span>
+                        <button onclick="searchTMDb()" class="text-xs text-amber-500 hover:text-amber-400 theme-text theme-hover-text font-bold flex items-center gap-1"><i class="fa-solid fa-arrow-left-long"></i> Zpět na herce</button>
+                    </div>
+                `;
+
+                const credits = (data.cast || [])
+                    .filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path)
+                    .sort((a, b) => b.popularity - a.popularity)
+                    .slice(0, 40);
+
+                if (credits.length === 0) {
+                    container.innerHTML += '<div class="text-xs text-slate-500">Nebyly nalezeny žádné filmy ani seriály.</div>';
+                    return;
+                }
+                renderMediaResults(credits);
+            } catch {
+                container.innerHTML = '<div class="text-xs text-red-400">Chyba při stahování tvorby herce.</div>';
+            }
+        }
+
+        async function addTMDbItem(tmdbId, type) {
+            try {
+                const existing = state.watchlist.find(w => w.tmdbId === tmdbId && w.type === type);
+                if (existing) {
+                    openDetail(existing.id);
+                    return;
+                }
+
+                const newItem = {
+                    id: `${type}_${tmdbId}`,
+                    tmdbId,
+                    type,
+                    rating: 0,
+                    notes: '',
+                    addedAt: Date.now(),
+                    cast: []
+                };
+
+                if (type === 'movie') {
+                    const res = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
+                    if (!res.ok) throw new Error(`TMDb movie ${res.status}`);
+                    const movie = await res.json();
+                    Object.assign(newItem, {
+                        originalTitle: movie.original_title,
+                        title: movie.title,
+                        overview: movie.overview || 'Popis děje není k dispozici.',
+                        poster_path: movie.poster_path,
+                        backdrop_path: movie.backdrop_path,
+                        runtime: movie.runtime || 120,
+                        genres: (movie.genres || []).map(g => g.name),
+                        watched: false,
+                        cast: await fetchCast('movie', tmdbId).catch(() => [])
+                    });
+                } else {
+                    const res = await fetch(`https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
+                    if (!res.ok) throw new Error(`TMDb TV ${res.status}`);
+                    const show = await res.json();
+
+                    const seasonPromises = (show.seasons || []).filter(s => s.season_number > 0).map(s =>
+                        fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${s.season_number}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`).then(res => res.ok ? res.json() : null)
+                    );
+                    const seasonsData = (await Promise.all(seasonPromises)).filter(Boolean);
+
+                    Object.assign(newItem, {
+                        originalTitle: show.original_name,
+                        title: show.name,
+                        overview: show.overview || 'Popis děje není k dispozici.',
+                        poster_path: show.poster_path,
+                        backdrop_path: show.backdrop_path,
+                        genres: (show.genres || []).map(g => g.name),
+                        seasons: seasonsData.map(s => ({
+                            season_number: s.season_number,
+                            name: s.name,
+                            episodes: (s.episodes || []).map(e => ({
+                                episode_number: e.episode_number,
+                                name: e.name || `Epizoda ${e.episode_number}`,
+                                overview: e.overview || '',
+                                air_date: e.air_date || null,
+                                runtime: e.runtime || show.episode_run_time?.[0] || 45,
+                                watched: false
+                            }))
+                        })),
+                        cast: await fetchCast('show', tmdbId).catch(() => [])
+                    });
+                }
+                state.watchlist.push(newItem);
+                saveToLocalStorage();
+                checkDemoBanner();
+                switchTab('watchlist');
+                alert('Titul byl úspěšně importován z TMDb!');
+            } catch (error) {
+                console.error(error);
+                alert('Chyba při stahování detailů z TMDb.');
+            }
+        }
+
+        async function syncShowData(item) {
+            if (!state.apiKey || !item.tmdbId || item.type !== 'show') return false;
+            const showRes = await fetch(`https://api.themoviedb.org/3/tv/${item.tmdbId}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
+            if (!showRes.ok) throw new Error(`TMDb TV ${showRes.status}`);
+            const show = await showRes.json();
+
+            const oldWatched = new Map();
+            (item.seasons || []).forEach(s => (s.episodes || []).forEach(e => oldWatched.set(`${s.season_number}_${e.episode_number}`, !!e.watched)));
+            const oldRuntimes = new Map();
+            (item.seasons || []).forEach(s => (s.episodes || []).forEach(e => oldRuntimes.set(`${s.season_number}_${e.episode_number}`, e.runtime)));
+
+            const seasonPromises = (show.seasons || []).filter(s => s.season_number > 0).map(s =>
+                fetch(`https://api.themoviedb.org/3/tv/${item.tmdbId}/season/${s.season_number}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`).then(res => res.ok ? res.json() : null)
+            );
+            const seasonsData = (await Promise.all(seasonPromises)).filter(Boolean);
+
+            item.originalTitle = show.original_name || item.originalTitle;
+            item.title = show.name || item.title;
+            item.overview = show.overview || item.overview;
+            item.poster_path = show.poster_path || item.poster_path;
+            item.backdrop_path = show.backdrop_path || item.backdrop_path;
+            item.genres = (show.genres || []).map(g => g.name);
+            item.seasons = seasonsData.map(s => ({
+                season_number: s.season_number,
+                name: s.name,
+                episodes: (s.episodes || []).map(e => ({
+                    episode_number: e.episode_number,
+                    name: e.name || `Epizoda ${e.episode_number}`,
+                    overview: e.overview || '',
+                    air_date: e.air_date || null,
+                    runtime: oldRuntimes.get(`${s.season_number}_${e.episode_number}`) || e.runtime || show.episode_run_time?.[0] || 45,
+                    watched: oldWatched.get(`${s.season_number}_${e.episode_number}`) || false
+                }))
+            }));
+            item.cast = await fetchCast('show', item.tmdbId).catch(() => item.cast || []);
+            return true;
+        }
+
+        async function syncUpcomingEpisodes() {
+            const btn = document.getElementById('sync-upcoming-btn');
+            if (!state.apiKey) {
+                alert('Pro synchronizaci je nutné nastavit TMDb API klíč v Nastavení.');
+                return;
+            }
+            const shows = state.watchlist.filter(item => item.type === 'show' && item.tmdbId);
+            if (!shows.length) {
+                renderUpcomingEpisodes();
+                return;
+            }
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Synchronizuji...';
+            try {
+                for (const show of shows) await syncShowData(show);
+                saveToLocalStorage();
+                renderWatchlist();
+                await renderUpcomingEpisodes();
+            } catch (error) {
+                console.error(error);
+                alert('Synchronizace se nepodařila dokončit. Zkontroluj API klíč a připojení.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+                applyThemeColor(state.themeColor);
+            }
+        }
+
+        // --- NASTAVENÍ ROZHRANÍ A UPOZORNĚNÍ ---
+        function setCardSize(size) {
+            state.cardSize = size;
+            localStorage.setItem('mfs_card_size', size);
+            applyCardSize(size);
+        }
+        function applyCardSize(size) {
+            const grid = document.getElementById('watchlist-grid');
+            if (!grid) return;
+            grid.classList.remove('grid-card-small','grid-card-normal','grid-card-large');
+            grid.classList.add(`grid-card-${size}`);
+            document.querySelectorAll('.card-size-btn').forEach(btn => {
+                const active = btn.dataset.cardSize === size;
+                btn.classList.toggle('ring-2', active); btn.classList.toggle('ring-amber-500', active);
+            });
+        }
+        function setAnimations(enabled) {
+            state.animations = enabled; localStorage.setItem('mfs_animations', enabled);
+            document.documentElement.classList.toggle('reduce-motion', !enabled);
+        }
+        function setAutoSync(enabled) { state.autoSync = enabled; localStorage.setItem('mfs_auto_sync', enabled); }
+        function setNotifications(enabled) { state.notifications = enabled; localStorage.setItem('mfs_notifications', enabled); updateNotificationBell(); }
+        function setNotificationDays(days) { state.notificationDays = Number(days); localStorage.setItem('mfs_notification_days', days); updateNotificationBell(); }
+        function setConfirmDelete(enabled) { state.confirmDelete = !!enabled; localStorage.setItem('mfs_confirm_delete', state.confirmDelete); }
+        function setStartTab(tab) { state.startTab = tab; localStorage.setItem('mfs_start_tab', tab); }
+
+        function getUpcomingNotificationItems() {
+            if (!state.notifications) return [];
+            const today = new Date(); today.setHours(0,0,0,0);
+            const limit = new Date(today); limit.setDate(limit.getDate() + state.notificationDays);
+            const result = [];
+            state.watchlist.filter(i => i.type === 'show').forEach(show => (show.seasons || []).forEach(season => (season.episodes || []).forEach(ep => {
+                if (!ep.air_date || ep.watched) return;
+                const d = new Date(`${ep.air_date}T00:00:00`);
+                if (!Number.isNaN(d.getTime()) && d >= today && d <= limit) result.push({showName: show.title || show.originalTitle, season: season.season_number, episode: ep.episode_number, name: ep.name || `Epizoda ${ep.episode_number}`, date: d});
+            })));
+            return result.sort((a,b) => a.date-b.date);
+        }
+        function updateNotificationBell() {
+            const count = document.getElementById('notification-count');
+            const list = document.getElementById('notification-list');
+            if (!count || !list) return;
+            const items = getUpcomingNotificationItems();
+            count.textContent = items.length;
+            count.classList.toggle('hidden', !items.length);
+            count.classList.toggle('flex', !!items.length);
+            list.innerHTML = items.length ? items.slice(0,8).map(x => `<button onclick="switchTab('upcoming'); toggleNotifications(false)" class="w-full text-left p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"><div class="flex items-start gap-3"><div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-500 theme-text flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-tv text-xs"></i></div><div class="min-w-0"><p class="text-xs font-bold truncate">${escapeHtml(x.showName)}</p><p class="text-[11px] text-slate-500 truncate">S${String(x.season).padStart(2,'0')}E${String(x.episode).padStart(2,'0')} · ${escapeHtml(x.name)}</p><p class="text-[10px] text-amber-500 theme-text mt-1">${x.date.toLocaleDateString(apiLanguage(), {day:'numeric',month:'long'})}</p></div></div></button>`).join('') : '<div class="p-6 text-center text-xs text-slate-500"><i class="fa-regular fa-bell-slash text-2xl mb-2 block"></i>Žádná blízká upozornění.</div>';
+        }
+        function toggleNotifications(force) {
+            const panel = document.getElementById('notification-panel');
+            if (!panel) return;
+            const shouldOpen = typeof force === 'boolean' ? force : panel.classList.contains('hidden');
+            panel.classList.toggle('hidden', !shouldOpen);
+            if (shouldOpen) updateNotificationBell();
+        }
+        document.addEventListener('click', e => {
+            const panel = document.getElementById('notification-panel'); const btn = document.getElementById('notification-btn');
+            if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) panel.classList.add('hidden');
+        });
+        async function syncAllShowsSilently() {
+            try { for (const show of state.watchlist.filter(i => i.type === 'show' && i.tmdbId)) await syncShowData(show); saveToLocalStorage(); renderWatchlist(); updateNotificationBell(); } catch(e) { console.warn('Automatická synchronizace:', e); }
+        }
+
+        // --- POMOCNÉ FUNKCE ---
+        function saveToLocalStorage() {
+            localStorage.setItem('mfs_watchlist', JSON.stringify(state.watchlist));
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            state.apiKey = key;
+            localStorage.setItem('mfs_api_key', key);
+            alert('API klíč uložen.');
+        }
+
+        function exportDatabase() {
+            const backup = { version: 4, watchlist: state.watchlist };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `mfs_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importDatabase(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    const importedWatchlist = Array.isArray(importedData) ? importedData : importedData?.watchlist;
+                    if (Array.isArray(importedWatchlist)) {
+                        if (confirm('Import nahradí všechna vaše stávající data. Chcete pokračovat?')) {
+                            state.watchlist = importedWatchlist;
+                            if (importedData?.language) {
+                                
+                                                }
+                            saveToLocalStorage();
+                            checkDemoBanner();
+                            switchTab('watchlist');
+                            alert('Záloha byla úspěšně nahrána!');
+                        }
+                    } else {
+                        alert('Neplatný formát souboru.');
+                    }
+                } catch {
+                    alert('Chyba při čtení souboru.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetDatabase() {
+            if (confirm('Opravdu chcete kompletně smazat celou databázi? Tato akce je nevratná.')) {
+                state.watchlist = [];
+                saveToLocalStorage();
+                checkDemoBanner();
+                switchTab('watchlist');
+                alert('Databáze byla vymazána.');
+            }
+        }
+    </script>
+</body>
+</html>
