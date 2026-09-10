@@ -1163,7 +1163,7 @@
             if (!title) { alert('Zadej název seriálu.'); return; }
             const seasons = [...document.querySelectorAll('#manual-seasons-builder .manual-season')].map((season,idx)=>({ season_number: idx+1, name: season.querySelector('.manual-season-name').value.trim() || `Série ${idx+1}`, episodes: [...season.querySelectorAll('.manual-episodes > div')].map((row,i)=>({ episode_number:i+1, name:row.querySelector('.manual-ep-name').value.trim() || `Epizoda ${i+1}`, runtime:parseInt(row.querySelector('.manual-ep-runtime').value)||45, air_date:row.querySelector('.manual-ep-date').value||null, overview:'', watched:false })) }));
             const item = { id:`manual_${Date.now()}`, tmdbId:null, type:'show', originalTitle:document.getElementById('manual-show-original').value.trim() || title, title, overview:document.getElementById('manual-show-overview').value.trim() || 'Vlastní seriál bez popisu.', genres:document.getElementById('manual-show-genres').value.split(',').map(x=>x.trim()).filter(Boolean), poster_path:null, poster_url:document.getElementById('manual-show-poster').value.trim() || null, backdrop_path:null, rating:0, notes:'', addedAt:Date.now(), seasons, cast:[] };
-            state.watchlist.push(item); saveToLocalStorage(); checkDemoBanner(); renderWatchlist(); resetManualBuilder(); switchTab('watchlist'); alert('Vlastní seriál byl přidán do knihovny.');
+            state.watchlist.push(item); saveToLocalStorage(); checkDemoBanner(); renderWatchlist(); renderHome(); resetManualBuilder(); switchTab('watchlist'); alert('Vlastní seriál byl přidán do knihovny.');
         }
 
         // Přepínání režimu vyhledávání (Podle názvu / Podle herce)
@@ -2171,6 +2171,7 @@
                 state.watchlist.push(newItem);
                 saveToLocalStorage();
                 checkDemoBanner();
+                renderHome();
                 switchTab('watchlist');
                 alert('Titul byl úspěšně importován z TMDb!');
             } catch (error) {
