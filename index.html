@@ -1421,10 +1421,10 @@
                 </button>`;
             }).join('') : `<div class="col-span-full rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 py-10 text-center text-xs text-slate-500"><i class="fa-solid fa-play-circle text-3xl mb-2 block"></i>Nemáš žádný rozkoukaný titul.</div>`;
 
-            const unfinished = state.watchlist.filter(item => homeItemProgress(item) < 100);
+            const unseen = state.watchlist.filter(item => homeItemProgress(item) === 0);
             const rank = (a,b) => (Number(b.rating)||0) - (Number(a.rating)||0) || (Number(b.addedAt)||0) - (Number(a.addedAt)||0);
             const pickRecommendations = (type, key) => {
-                const candidates = unfinished.filter(i => i.type === type).sort(rank);
+                const candidates = unseen.filter(i => i.type === type).sort(rank);
                 if (candidates.length <= 5) return candidates;
                 const offset = (state.homeRefresh?.[key] || 0) * 5;
                 const rotated = candidates.slice(offset % candidates.length).concat(candidates.slice(0, offset % candidates.length));
@@ -1448,8 +1448,8 @@
                 </button>`;
             }).join('') : `<div class="col-span-full text-xs text-slate-500 py-8 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl">${emptyText}</div>`;
 
-            showsGrid.innerHTML = recommendationHtml(shows, 'Nemáš žádné nedokončené seriály.');
-            moviesGrid.innerHTML = recommendationHtml(movies, 'Nemáš žádné nedokončené filmy.');
+            showsGrid.innerHTML = recommendationHtml(shows, 'Nemáš žádné neviděné seriály.');
+            moviesGrid.innerHTML = recommendationHtml(movies, 'Nemáš žádné neviděné filmy.');
             applyThemeColor(state.themeColor);
             applyHomeCardSize(state.homeCardSize);
         }
