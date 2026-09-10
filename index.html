@@ -1492,10 +1492,9 @@
                         <div class="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent pt-10">
                             <div class="text-xs font-bold text-white truncate">${escapeHtml(item.title || item.originalTitle)}</div>
                             ${item.type === 'show' && getNextEpisode(item) ? `
-                                <div class="mt-1.5 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-black/45 border border-white/10 text-[9px] font-extrabold text-white">
+                                <div class="mt-1.5 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-black/50 border border-white/10 text-[9px] font-extrabold text-white whitespace-nowrap">
                                     <i class="fa-solid fa-forward text-amber-400"></i>
                                     <span>S${String(getNextEpisode(item).season).padStart(2,'0')} · E${String(getNextEpisode(item).episode).padStart(2,'0')}</span>
-                                    <span class="text-slate-300 font-semibold truncate max-w-[120px]">${escapeHtml(getNextEpisode(item).name || 'Další epizoda')}</span>
                                 </div>
                             ` : item.type === 'movie' ? `
                                 <div class="mt-1.5 text-[9px] font-bold text-slate-300"><i class="fa-solid fa-film mr-1 text-amber-400"></i>Pokračovat ve sledování</div>
