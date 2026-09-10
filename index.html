@@ -491,7 +491,7 @@
                                 <span class="home-section-icon bg-emerald-500/15 text-emerald-400"><i class="fa-solid fa-tv"></i></span>
                                 <div class="min-w-0">
                                     <h4 class="font-black text-lg sm:text-xl">Seriály</h4>
-                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nejlepší seriály podle hodnocení a novosti.</p>
+                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nově přidané seriály, které jsi ještě neviděl.</p>
                                 </div>
                             </div>
                             <button onclick="refreshHomeRecommendations('shows')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
@@ -507,7 +507,7 @@
                                 <span class="home-section-icon bg-pink-500/15 text-pink-400"><i class="fa-solid fa-clapperboard"></i></span>
                                 <div class="min-w-0">
                                     <h4 class="font-black text-lg sm:text-xl">Filmy</h4>
-                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nejlépe hodnocené filmy, které nesmíš minout.</p>
+                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nově přidané filmy, které jsi ještě neviděl.</p>
                                 </div>
                             </div>
                             <button onclick="refreshHomeRecommendations('movies')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
@@ -515,6 +515,39 @@
                             </button>
                         </div>
                         <div id="home-movies-grid" class="home-recommend-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
+                    </div>
+
+                    <div class="glass-panel home-section rounded-[2rem] p-4 sm:p-6">
+                        <div class="flex items-center justify-between gap-4 mb-5">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="home-section-icon bg-amber-500/15 text-amber-400"><i class="fa-solid fa-star"></i></span>
+                                <div class="min-w-0">
+                                    <h4 class="font-black text-lg sm:text-xl">Nejlépe hodnocené</h4>
+                                    <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Tvoje nejlépe hodnocené filmy a seriály, které jsi už viděl.</p>
+                                </div>
+                            </div>
+                            <button onclick="refreshHomeRecommendations('topRated')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div>
+                                <div class="flex items-center gap-2 mb-3 px-1">
+                                    <i class="fa-solid fa-clapperboard text-pink-400 text-sm"></i>
+                                    <span class="font-black text-sm sm:text-base">Filmy</span>
+                                </div>
+                                <div id="home-top-rated-movies-grid" class="home-recommend-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center gap-2 mb-3 px-1">
+                                    <i class="fa-solid fa-tv text-emerald-400 text-sm"></i>
+                                    <span class="font-black text-sm sm:text-base">Seriály</span>
+                                </div>
+                                <div id="home-top-rated-shows-grid" class="home-recommend-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1391,7 +1424,9 @@
             const continueGrid = document.getElementById('home-continue-grid');
             const showsGrid = document.getElementById('home-shows-grid');
             const moviesGrid = document.getElementById('home-movies-grid');
-            if (!continueGrid || !showsGrid || !moviesGrid) return;
+            const topRatedMoviesGrid = document.getElementById('home-top-rated-movies-grid');
+            const topRatedShowsGrid = document.getElementById('home-top-rated-shows-grid');
+            if (!continueGrid || !showsGrid || !moviesGrid || !topRatedMoviesGrid || !topRatedShowsGrid) return;
 
             const dateEl = document.getElementById('home-date');
             if (dateEl) {
@@ -1421,17 +1456,37 @@
                 </button>`;
             }).join('') : `<div class="col-span-full rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 py-10 text-center text-xs text-slate-500"><i class="fa-solid fa-play-circle text-3xl mb-2 block"></i>Nemáš žádný rozkoukaný titul.</div>`;
 
+            // Doporučení na Domů jsou vždy pouze zhlédnuté = 0 % a první dvě sekce jsou řazené čistě podle novosti.
             const unseen = state.watchlist.filter(item => homeItemProgress(item) === 0);
-            const rank = (a,b) => (Number(b.rating)||0) - (Number(a.rating)||0) || (Number(b.addedAt)||0) - (Number(a.addedAt)||0);
-            const pickRecommendations = (type, key) => {
-                const candidates = unseen.filter(i => i.type === type).sort(rank);
+            const newest = (a,b) => (Number(b.addedAt)||0) - (Number(a.addedAt)||0);
+            const bestRated = (a,b) => (Number(b.rating)||0) - (Number(a.rating)||0) || (Number(b.addedAt)||0) - (Number(a.addedAt)||0);
+
+            const pickNewest = (type, key) => {
+                const candidates = unseen.filter(i => i.type === type).sort(newest);
                 if (candidates.length <= 5) return candidates;
                 const offset = (state.homeRefresh?.[key] || 0) * 5;
-                const rotated = candidates.slice(offset % candidates.length).concat(candidates.slice(0, offset % candidates.length));
-                return rotated.slice(0, 5);
+                const start = offset % candidates.length;
+                return candidates.slice(start).concat(candidates.slice(0, start)).slice(0, 5);
             };
-            const shows = pickRecommendations('show', 'shows');
-            const movies = pickRecommendations('movie', 'movies');
+
+            const shows = pickNewest('show', 'shows');
+            const movies = pickNewest('movie', 'movies');
+
+            // Nejlépe hodnocené = pouze tituly, které už byly zhlédnuté a mají hodnocení.
+            // Filmy a seriály jsou záměrně oddělené.
+            const watchedRated = state.watchlist
+                .filter(item => homeItemProgress(item) >= 100 && Number(item.rating) > 0)
+                .sort(bestRated);
+            const topRatedOffset = (state.homeRefresh?.topRated || 0) * 6;
+
+            const rotateRated = (items) => {
+                if (!items.length) return [];
+                const start = topRatedOffset % items.length;
+                return items.slice(start).concat(items.slice(0, start)).slice(0, 6);
+            };
+
+            const topRatedMovies = rotateRated(watchedRated.filter(item => item.type === 'movie'));
+            const topRatedShows = rotateRated(watchedRated.filter(item => item.type === 'show'));
 
             const recommendationHtml = (items, emptyText) => items.length ? items.map(item => {
                 const title = escapeHtml(item.title || item.originalTitle || 'Bez názvu');
@@ -1450,8 +1505,11 @@
 
             showsGrid.innerHTML = recommendationHtml(shows, 'Nemáš žádné neviděné seriály.');
             moviesGrid.innerHTML = recommendationHtml(movies, 'Nemáš žádné neviděné filmy.');
+            topRatedMoviesGrid.innerHTML = recommendationHtml(topRatedMovies, 'Zatím nemáš žádné ohodnocené zhlédnuté filmy.');
+            topRatedShowsGrid.innerHTML = recommendationHtml(topRatedShows, 'Zatím nemáš žádné ohodnocené zhlédnuté seriály.');
             applyThemeColor(state.themeColor);
             applyHomeCardSize(state.homeCardSize);
+            applyHomeContinueSize(state.homeContinueSize);
         }
 
         // --- NADCHÁZEJÍCÍ EPIZODY ---
@@ -2105,6 +2163,22 @@
 
         async function addTMDbItem(tmdbId, type) {
             try {
+                // TMDb používá pro seriály typ "tv", ale aplikace interně používá "show".
+                // Bez normalizace se nově přidané seriály neobjevily v doporučeních Domů.
+                const normalizedType = type === 'tv' ? 'show' : 'movie';
+                type = normalizedType;
+
+                // Oprav i případný starší seriál uložený omylem jako "tv".
+                const legacyExisting = state.watchlist.find(w => w.tmdbId === tmdbId && w.type === 'tv');
+                if (legacyExisting) {
+                    legacyExisting.type = 'show';
+                    saveToLocalStorage();
+                    renderWatchlist();
+                    renderHome();
+                    openDetail(legacyExisting.id);
+                    return;
+                }
+
                 const existing = state.watchlist.find(w => w.tmdbId === tmdbId && w.type === type);
                 if (existing) {
                     openDetail(existing.id);
