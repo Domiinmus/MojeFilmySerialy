@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js pro grafy -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS (volitelné: aktivuje cloudové profily a data po zadání URL + anon key v Nastavení) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* ===== DETAIL MODAL – iPhone / Dynamic Island ===== */
         #detail-modal {
@@ -377,9 +379,69 @@
             #section-home .home-recommend-title{font-size:10px}
         }
 
+
+
+        /* ===== ÚVODNÍ VÝBĚR PROFILU ===== */
+        #profile-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 20%,rgba(99,102,241,.18),transparent 36%),radial-gradient(circle at 20% 80%,rgba(56,189,248,.10),transparent 32%),linear-gradient(135deg,#020617 0%,#0b1120 52%,#111827 100%);overflow:auto}
+        #profile-gate.hidden{display:none}
+        .profile-gate-inner{width:min(100%,980px);text-align:center}
+        .profile-gate-brand{display:inline-flex;align-items:center;gap:12px;margin-bottom:34px}
+        .profile-gate-logo{width:52px;height:52px;border-radius:17px;display:flex;align-items:center;justify-content:center;color:#020617;font-weight:1000;font-size:18px;background:linear-gradient(135deg,#f59e0b,#fbbf24);box-shadow:0 14px 35px rgba(245,158,11,.22)}
+        .profile-gate-title{font-size:clamp(26px,4vw,42px);font-weight:1000;letter-spacing:-.04em;color:#fff}
+        .profile-gate-subtitle{margin-top:8px;color:#94a3b8;font-size:14px}
+        .profile-gate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;max-width:900px;margin:0 auto}
+        .profile-gate-card-wrap{position:relative;min-width:0}.profile-gate-edit{position:absolute;top:6px;right:calc(50% - 90px);width:34px;height:34px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:rgba(15,23,42,.82);backdrop-filter:blur(10px);color:#cbd5e1;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;transition:.18s;box-shadow:0 6px 18px rgba(0,0,0,.22);-webkit-tap-highlight-color:transparent;touch-action:manipulation}.profile-gate-edit:hover{background:rgba(99,102,241,.85);color:#fff;border-color:rgba(129,140,248,.7);transform:translateY(-1px)}.profile-gate-edit:active{transform:scale(.94)}
+.profile-gate-card{border:0;background:transparent;color:#fff;cursor:pointer;padding:12px;border-radius:22px;transition:transform .2s ease,background .2s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .profile-gate-card:hover{transform:translateY(-5px);background:rgba(255,255,255,.045)}
+        .profile-gate-card:active{transform:scale(.97)}
+        .profile-gate-avatar{width:112px;height:112px;margin:0 auto 13px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 18px 45px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.12);transition:box-shadow .2s ease,transform .2s ease}
+        .profile-gate-card:hover .profile-gate-avatar{box-shadow:0 22px 55px rgba(0,0,0,.38),0 0 0 2px rgba(255,255,255,.12)}
+        .profile-gate-name{font-size:15px;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .profile-gate-count{margin-top:4px;font-size:10px;color:#64748b}
+        .profile-gate-add{border:1px dashed rgba(148,163,184,.35);background:rgba(255,255,255,.025)}
+        .profile-gate-add .profile-gate-avatar{background:rgba(148,163,184,.08);color:#94a3b8;border:1px dashed rgba(148,163,184,.35);box-shadow:none}
+        .profile-gate-footer{margin-top:34px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+        .profile-gate-manage{padding:11px 16px;border-radius:13px;border:1px solid rgba(148,163,184,.20);background:rgba(255,255,255,.05);color:#cbd5e1;font-size:12px;font-weight:800;cursor:pointer;transition:.18s}
+        .profile-gate-manage:hover{background:rgba(255,255,255,.09);border-color:rgba(148,163,184,.35)}
+        @media(max-width:520px){#profile-gate{padding:20px 14px}.profile-gate-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.profile-gate-avatar{width:92px;height:92px;font-size:34px;border-radius:24px}.profile-gate-card{padding:10px 6px}.profile-gate-edit{top:4px;right:calc(50% - 80px)}}
+
+        /* ===== PROFILY ===== */
+        .profile-trigger{position:relative;width:56px;height:56px;padding:5px;border-radius:999px;display:flex;align-items:center;justify-content:center;overflow:visible;border:1px solid rgba(148,163,184,.22);background:linear-gradient(145deg,rgba(15,23,42,.98),rgba(2,6,23,.94));color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
+        .profile-trigger:before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(99,102,241,.9),rgba(56,189,248,.35),rgba(148,163,184,.15));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.95}
+        .profile-trigger:hover{transform:translateY(-1px) scale(1.02);border-color:rgba(99,102,241,.55);box-shadow:0 12px 30px rgba(99,102,241,.18),inset 0 1px 0 rgba(255,255,255,.08)}
+        .profile-trigger:active{transform:scale(.96);box-shadow:0 5px 16px rgba(0,0,0,.24)}
+        .profile-trigger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(99,102,241,.22),0 10px 28px rgba(99,102,241,.16)}
+        .profile-avatar{width:44px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 2px 8px rgba(0,0,0,.18);pointer-events:none;user-select:none;-webkit-user-select:none}
+        .profile-trigger-chevron{position:absolute;right:0px;bottom:0px;width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#111827;color:#e2e8f0;border:2px solid #020617;font-size:7px;box-shadow:0 2px 7px rgba(0,0,0,.35);pointer-events:none;user-select:none}
+        .profile-menu{min-width:250px;max-width:calc(100vw - 24px)}
+        .profile-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:12px;text-align:left;transition:.18s}
+        .profile-menu-item:hover{background:rgba(148,163,184,.10)}
+        .profile-mini-avatar{width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+        .profile-selected{box-shadow:inset 0 0 0 1px rgba(99,102,241,.45);background:rgba(99,102,241,.10)}
+        .profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+        @media(min-width:640px){.profile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+        .profile-card{position:relative;padding:14px;border-radius:16px;border:1px solid rgba(148,163,184,.14);background:rgba(148,163,184,.05);transition:.2s}
+        .profile-card:hover{transform:translateY(-1px);border-color:rgba(99,102,241,.35)}
     </style>
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
+
+    <!-- ÚVODNÍ VÝBĚR PROFILU -->
+    <div id="profile-gate" aria-modal="true" role="dialog">
+        <div class="profile-gate-inner">
+            <div class="profile-gate-brand">
+                <div class="profile-gate-logo"><i class="fa-solid fa-clapperboard"></i></div>
+                <div class="text-left">
+                    <div class="profile-gate-title">MojeFilmy</div>
+                    <div class="profile-gate-subtitle">Kdo se dnes dívá?</div>
+                </div>
+            </div>
+            <div id="profile-gate-grid" class="profile-gate-grid"></div>
+            <div class="profile-gate-footer">
+                <button class="profile-gate-manage" onclick="openProfileGateManage()"><i class="fa-solid fa-users-gear mr-2"></i>Spravovat profily</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Navigační panel -->
     <nav class="bg-white/90 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 backdrop-blur-md">
@@ -431,6 +493,25 @@
                 <button onclick="openSettingsModal()" class="bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-amber-500 theme-hover-text border border-slate-200 dark:border-slate-800 w-10 h-10 rounded-xl flex items-center justify-center transition-all" title="Nastavení aplikace">
                     <i class="fa-solid fa-gear text-lg animate-hover-spin"></i>
                 </button>
+
+                <!-- Přepínač profilů -->
+                <div class="relative">
+                    <button onclick="toggleProfileMenu()" id="profile-trigger" class="profile-trigger" title="Přepnout profil" aria-label="Přepnout profil">
+                        <span id="profile-trigger-avatar" class="profile-avatar"><i class="fa-solid fa-user-astronaut"></i></span>
+                        <span class="profile-trigger-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+                    </button>
+                    <div id="profile-menu" class="profile-menu hidden absolute right-0 top-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 z-50">
+                        <div class="px-2.5 py-2 border-b border-slate-200 dark:border-slate-800 mb-1">
+                            <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Aktivní profil</div>
+                            <div id="profile-menu-current" class="text-sm font-black mt-0.5">—</div>
+                        </div>
+                        <div id="profile-menu-list" class="space-y-1"></div>
+                        <button onclick="openProfilesSettings(); toggleProfileMenu(false)" class="profile-menu-item mt-1 border-t border-slate-200 dark:border-slate-800 pt-3 rounded-none">
+                            <span class="profile-mini-avatar bg-slate-100 dark:bg-slate-950 text-slate-500"><i class="fa-solid fa-users-gear"></i></span>
+                            <span><b class="text-xs block">Spravovat profily</b><small class="text-[10px] text-slate-500">Přidat, upravit nebo odstranit</small></span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -855,6 +936,23 @@
         </div>
     </div>
 
+    <!-- PROFIL MODAL -->
+    <div id="profile-editor-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[10050] flex items-center justify-center p-3 sm:p-5">
+        <div class="glass-panel w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
+            <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+                <div><h2 id="profile-editor-title" class="text-xl font-black">Přidat profil</h2><p class="text-xs text-slate-500 mt-0.5">Nastav jméno a ikonu profilu.</p></div>
+                <button onclick="closeProfileEditor()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="profile-edit-id">
+                <div><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Název profilu</label><input id="profile-name-input" maxlength="30" placeholder="Např. Dominik" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-3 text-sm font-bold focus:outline-none focus:border-indigo-500"></div>
+                <div><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Ikona</label><div id="profile-icon-options" class="flex flex-wrap gap-2 mt-2"></div></div>
+                <div><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Barva</label><div id="profile-color-options" class="flex flex-wrap gap-2 mt-2"></div></div>
+                <div class="flex justify-between gap-2 pt-2"><button onclick="closeProfileEditor()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Zrušit</button><button onclick="saveProfileFromEditor()" class="px-5 py-2.5 rounded-xl bg-indigo-500 text-white text-xs font-black"><i class="fa-solid fa-check mr-1.5"></i>Uložit profil</button></div>
+            </div>
+        </div>
+    </div>
+
     <!-- NASTAVENÍ MODAL -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5">
         <div class="glass-panel w-full max-w-4xl max-h-[92vh] rounded-3xl overflow-hidden flex flex-col shadow-2xl">
@@ -920,32 +1018,137 @@
                     <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-key"></i></span><div><h3 class="text-sm font-black">TMDb API</h3><p class="text-[10px] text-slate-500">Klíč je uložen pouze v tomto prohlížeči.</p></div></div>
                     <div class="flex flex-col sm:flex-row gap-2 mt-3"><input type="password" id="api-key-input" placeholder="Vložte TMDb API klíč..." class="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-amber-500 theme-focus-border"><button onclick="saveApiKey()" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs theme-bg theme-text">Uložit klíč</button></div>
                 </div>
+                <div id="settings-profiles-card" class="settings-card">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="fa-solid fa-users"></i></span><div><h3 class="text-sm font-black">Profily</h3><p class="text-[10px] text-slate-500">Každý profil má vlastní knihovnu, rozkoukané tituly a hodnocení.</p></div></div>
+                        <button onclick="openProfileEditor()" class="px-3 py-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-black hover:bg-indigo-500/15"><i class="fa-solid fa-plus mr-1"></i>Přidat profil</button>
+                    </div>
+                    <div id="settings-profiles-list" class="profile-grid"></div>
+                    <div class="mt-4 p-3 rounded-xl bg-slate-100/70 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-[10px] text-slate-500">
+                        <i class="fa-solid fa-shield-halved mr-1 text-emerald-500"></i>Každý profil má vlastní data. Import i export pracuje pouze s právě vybraným profilem a nemění ostatní profily.
+                    </div>
+                </div>
+
                 <div class="settings-card">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-950 flex items-center justify-center"><i class="fa-solid fa-database"></i></span><div><h3 class="text-sm font-black">Data aplikace</h3><p class="text-[10px] text-slate-500">Záloha nebo úplné vymazání knihovny</p></div></div><div class="flex flex-wrap gap-2"><button onclick="exportDatabase()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold"><i class="fa-solid fa-download mr-1"></i>Export</button><label class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold cursor-pointer"><i class="fa-solid fa-upload mr-1"></i>Import<input type="file" id="import-file" class="hidden" onchange="importDatabase(event)"></label><button onclick="resetDatabase()" class="px-3 py-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Reset</button></div></div>
+                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud"></i></span><div><h3 class="text-sm font-black">Supabase</h3><p class="text-[10px] text-slate-500">Volitelné cloudové úložiště pro profily a knihovny.</p></div></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+                        <input id="supabase-url-input" type="url" placeholder="https://xxxxx.supabase.co" class="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-emerald-500">
+                        <input id="supabase-key-input" type="password" placeholder="Supabase anon key" class="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        <button onclick="saveSupabaseConfig()" class="px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-black"><i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Připojit Supabase</button>
+                        <button onclick="syncProfilesToSupabase(true)" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold"><i class="fa-solid fa-rotate mr-1.5"></i>Synchronizovat</button>
+                    </div>
+                    <p id="supabase-status" class="text-[10px] text-slate-500 mt-2">Supabase není připojené.</p>
+                </div>
+
+                <div class="settings-card">
+                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-950 flex items-center justify-center"><i class="fa-solid fa-database"></i></span><div><h3 class="text-sm font-black">Data aplikace</h3><p class="text-[10px] text-slate-500">Resetování dat aktuálního profilu</p></div></div>
+                    <div class="flex flex-wrap items-center gap-2 mt-3">
+                        <span class="text-[10px] text-slate-500 mr-1">Aktivní profil: <b id="settings-active-profile-name" class="text-slate-700 dark:text-slate-300">—</b></span>
+                        <button onclick="resetDatabase()" class="px-3 py-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 text-xs font-bold"><i class="fa-solid fa-trash-can mr-1"></i>Resetovat data profilu</button>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">Export a import najdeš přímo u každého profilu. Tím se zabrání nechtěnému přepsání dat jiného profilu.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ===== PROFILY =====
+        const PROFILE_ICONS = ['fa-user','fa-user-astronaut','fa-user-ninja','fa-ghost','fa-cat','fa-dog','fa-robot','fa-dragon','fa-star','fa-heart'];
+        const PROFILE_COLORS = ['indigo','blue','emerald','rose','amber','purple','cyan','pink','violet'];
+        let profiles = [];
+        let activeProfileId = localStorage.getItem('mfs_active_profile') || '';
+        let profileEditorIcon = 'fa-user';
+        let profileEditorColor = 'indigo';
+        let supabaseClient = null;
+
+        function defaultProfileSettings() {
+            return {
+                themeColor: localStorage.getItem('mfs_theme_color') || 'amber',
+                themeMode: localStorage.getItem('mfs_theme_mode') || 'dark',
+                cardSize: localStorage.getItem('mfs_card_size') || 'normal',
+                homeCardSize: localStorage.getItem('mfs_home_card_size') || 'normal',
+                homeContinueSize: localStorage.getItem('mfs_home_continue_size') || 'normal',
+                animations: localStorage.getItem('mfs_animations') !== 'false',
+                autoSync: localStorage.getItem('mfs_auto_sync') === 'true',
+                notifications: localStorage.getItem('mfs_notifications') !== 'false',
+                notificationDays: Number(localStorage.getItem('mfs_notification_days') || 3),
+                confirmDelete: localStorage.getItem('mfs_confirm_delete') !== 'false',
+                startTab: localStorage.getItem('mfs_start_tab') || 'home'
+            };
+        }
+        function ensureProfileSettings(profile) {
+            if (!profile) return defaultProfileSettings();
+            const defaults = defaultProfileSettings();
+            profile.settings = Object.assign({}, defaults, profile.settings || {});
+            return profile.settings;
+        }
+        function activeProfileSettings() { return ensureProfileSettings(activeProfile()); }
+        function saveActiveProfileSettings() {
+            const p = activeProfile();
+            if (!p) return;
+            p.settings = {
+                themeColor: state.themeColor, themeMode: state.themeMode, cardSize: state.cardSize,
+                homeCardSize: state.homeCardSize, homeContinueSize: state.homeContinueSize,
+                animations: state.animations, autoSync: state.autoSync, notifications: state.notifications,
+                notificationDays: state.notificationDays, confirmDelete: state.confirmDelete, startTab: state.startTab
+            };
+            persistProfiles();
+        }
+        function applyActiveProfileSettings() {
+            const ps = activeProfileSettings();
+            Object.assign(state, ps);
+            if (state.themeMode === 'dark') document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+            document.documentElement.classList.toggle('reduce-motion', !state.animations);
+            applyThemeColor(state.themeColor);
+            applyCardSize(state.cardSize);
+            applyHomeCardSize(state.homeCardSize);
+            applyHomeContinueSize(state.homeContinueSize);
+            setThemeMode(state.themeMode, true);
+            const a=document.getElementById('setting-animations'); if(a) a.checked=state.animations;
+            const au=document.getElementById('setting-auto-sync'); if(au) au.checked=state.autoSync;
+            const n=document.getElementById('setting-notifications'); if(n) n.checked=state.notifications;
+            const nd=document.getElementById('setting-notification-days'); if(nd) nd.value=String(state.notificationDays);
+            const cd=document.getElementById('setting-confirm-delete'); if(cd) cd.checked=state.confirmDelete;
+            const st=document.getElementById('setting-start-tab'); if(st) st.value=state.startTab;
+        }
+
+        function loadProfiles() {
+            try { profiles = JSON.parse(localStorage.getItem('mfs_profiles')) || []; } catch { profiles = []; }
+            const legacyWatchlist = (() => { try { return JSON.parse(localStorage.getItem('mfs_watchlist')) || []; } catch { return []; } })();
+            if (!profiles.length) {
+                profiles = [{ id:'profile_default', name:'Můj profil', icon:'fa-user', color:'indigo', watchlist: legacyWatchlist, settings: defaultProfileSettings(), createdAt: Date.now() }];
+                activeProfileId = profiles[0].id;
+                localStorage.setItem('mfs_profiles', JSON.stringify(profiles));
+                localStorage.setItem('mfs_active_profile', activeProfileId);
+            }
+            profiles.forEach(ensureProfileSettings);
+            persistProfiles();
+            let active = profiles.find(p => p.id === activeProfileId);
+            if (!active) { active = profiles[0]; activeProfileId = active.id; localStorage.setItem('mfs_active_profile', activeProfileId); }
+            ensureProfileSettings(active);
+            return active;
+        }
+        function activeProfile() { return profiles.find(p => p.id === activeProfileId) || profiles[0]; }
+        function profileColorClass(color) {
+            const map = {indigo:'bg-indigo-500/15 text-indigo-400',blue:'bg-blue-500/15 text-blue-400',emerald:'bg-emerald-500/15 text-emerald-400',rose:'bg-rose-500/15 text-rose-400',amber:'bg-amber-500/15 text-amber-400',purple:'bg-purple-500/15 text-purple-400',cyan:'bg-cyan-500/15 text-cyan-400',pink:'bg-pink-500/15 text-pink-400',violet:'bg-violet-500/15 text-violet-400'};
+            return map[color] || map.indigo;
+        }
+        function persistProfiles() { localStorage.setItem('mfs_profiles', JSON.stringify(profiles)); localStorage.setItem('mfs_active_profile', activeProfileId); }
+        function syncCurrentWatchlistToProfile() { const p=activeProfile(); if(p){p.watchlist=state.watchlist; persistProfiles();} }
+
         // Globální stav aplikace
+        loadProfiles();
         let state = {
-            watchlist: JSON.parse(localStorage.getItem('mfs_watchlist')) || [],
+            watchlist: activeProfile().watchlist || [],
             apiKey: localStorage.getItem('mfs_api_key') || '',
             activeTab: 'home',
             currentDetailId: null,
             homeRefresh: { shows: 0, movies: 0 },
-            themeColor: localStorage.getItem('mfs_theme_color') || 'amber',
-            themeMode: localStorage.getItem('mfs_theme_mode') || 'dark',
-            cardSize: localStorage.getItem('mfs_card_size') || 'normal',
-            homeCardSize: localStorage.getItem('mfs_home_card_size') || 'normal',
-            homeContinueSize: localStorage.getItem('mfs_home_continue_size') || 'normal',
-            animations: localStorage.getItem('mfs_animations') !== 'false',
-            autoSync: localStorage.getItem('mfs_auto_sync') === 'true',
-            notifications: localStorage.getItem('mfs_notifications') !== 'false',
-            notificationDays: Number(localStorage.getItem('mfs_notification_days') || 3),
-            confirmDelete: localStorage.getItem('mfs_confirm_delete') !== 'false',
-            startTab: localStorage.getItem('mfs_start_tab') || 'home',
+            ...activeProfileSettings(),
         };
 
         // Migrace starého hodnocení 0–5 na nový rozsah 0–10.
@@ -954,6 +1157,7 @@
                 item.rating = Number(item.rating) * 2;
             }
         });
+        syncCurrentWatchlistToProfile();
         localStorage.setItem('mfs_watchlist', JSON.stringify(state.watchlist));
 
         // Globální stav vyhledávání
@@ -966,29 +1170,22 @@
 
         // Inicializace při načtení
         window.onload = function() {
-            // Aplikace světlého/tmavého režimu jako první
-            if (state.themeMode === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+            renderProfileSwitcher();
+            renderProfilesSettings();
+            showProfileGate();
+            // Nastavení se načítají z právě zvoleného profilu.
+            applyActiveProfileSettings();
             
             checkDemoBanner();
             renderWatchlist();
             renderHome();
-            applyThemeColor(state.themeColor);
-            setThemeMode(state.themeMode, true); // Inicializace tlačítek režimu
+            applyActiveProfileSettings();
             document.getElementById('api-key-input').value = state.apiKey;
-            applyCardSize(state.cardSize);
-            applyHomeCardSize(state.homeCardSize);
-            applyHomeContinueSize(state.homeContinueSize);
+            document.getElementById('supabase-url-input').value = localStorage.getItem('mfs_supabase_url') || '';
+            document.getElementById('supabase-key-input').value = localStorage.getItem('mfs_supabase_key') || '';
+            initSupabaseClient();
+            if (supabaseClient) setTimeout(() => loadProfilesFromSupabase(), 300);
             setCreatorSearchType(creatorSearchType, true);
-            document.getElementById('setting-animations').checked = state.animations;
-            document.getElementById('setting-auto-sync').checked = state.autoSync;
-            document.getElementById('setting-notifications').checked = state.notifications;
-            document.getElementById('setting-notification-days').value = String(state.notificationDays);
-            document.getElementById('setting-confirm-delete').checked = state.confirmDelete;
-            document.getElementById('setting-start-tab').value = state.startTab;
             if (['home','watchlist','upcoming','creator','stats'].includes(state.startTab)) switchTab(state.startTab);
             updateNotificationBell();
             if (state.autoSync && state.apiKey) setTimeout(() => syncAllShowsSilently(), 500);
@@ -1002,6 +1199,98 @@
                 banner.classList.add('hidden');
             }
         }
+
+        // ===== SPRÁVA PROFILŮ =====
+        function renderProfileGate(){
+            const gate=document.getElementById('profile-gate'); const grid=document.getElementById('profile-gate-grid');
+            if(!gate||!grid) return;
+            grid.innerHTML=profiles.map(p=>`<div class="profile-gate-card-wrap" data-profile-id="${p.id}">
+                <button type="button" class="profile-gate-card" onclick="enterProfile('${p.id}');return false;" aria-label="Otevřít profil ${escapeHtml(p.name)}">
+                    <span class="profile-gate-avatar ${profileColorClass(p.color)}"><i class="fa-solid ${p.icon}"></i></span>
+                    <span class="profile-gate-name">${escapeHtml(p.name)}</span>
+                </button>
+                <button type="button" class="profile-gate-edit" onclick="event.preventDefault();event.stopPropagation();openProfileGateEdit('${p.id}');return false;" title="Upravit profil" aria-label="Upravit profil">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+            </div>`).join('') + `<div class="profile-gate-card-wrap profile-gate-add-wrap" onclick="openProfileGateAdd();return false;" role="button" tabindex="0" aria-label="Přidat nový profil">
+                <button type="button" class="profile-gate-card profile-gate-add" onclick="event.stopPropagation();openProfileGateAdd();return false;" aria-label="Přidat nový profil">
+                    <span class="profile-gate-avatar"><i class="fa-solid fa-plus"></i></span>
+                    <span class="profile-gate-name">Přidat profil</span>
+                </button>
+            </div>`;
+        }
+        document.addEventListener('keydown',e=>{
+            if((e.key==='Enter'||e.key===' ') && e.target.classList?.contains('profile-gate-add-wrap')){
+                e.preventDefault(); openProfileGateAdd();
+            }
+        });
+        function enterProfile(id){
+            const p=profiles.find(x=>x.id===id); if(!p) return;
+            syncCurrentWatchlistToProfile(); activeProfileId=id; state.watchlist=Array.isArray(p.watchlist)?p.watchlist:[];
+            localStorage.setItem('mfs_active_profile',id); localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist));
+            const gate=document.getElementById('profile-gate'); if(gate) gate.classList.add('hidden'); document.body.style.overflow='';
+            applyActiveProfileSettings();
+            renderProfileSwitcher(); renderProfilesSettings(); checkDemoBanner(); renderWatchlist(); renderHome(); updateNotificationBell();
+            if(state.activeTab==='upcoming') renderUpcomingEpisodes();
+        }
+        function openProfileGateAdd(){ openProfileEditor(''); }
+        function openProfileGateEdit(id){ openProfileEditor(id); }
+        function openProfileGateManage(){ const gate=document.getElementById('profile-gate'); if(gate) gate.classList.add('hidden'); document.body.style.overflow=''; openProfilesSettings(); }
+        function showProfileGate(){ renderProfileGate(); const gate=document.getElementById('profile-gate'); if(gate){gate.classList.remove('hidden'); document.body.style.overflow='hidden';} }
+
+        function renderProfileSwitcher() {
+            const p=activeProfile(); if(!p) return;
+            const av=document.getElementById('profile-trigger-avatar'); if(av){ av.className=`profile-avatar ${profileColorClass(p.color)}`; av.innerHTML=`<i class="fa-solid ${p.icon}"></i>`; }
+            const cur=document.getElementById('profile-menu-current'); if(cur) cur.textContent=p.name;
+            const list=document.getElementById('profile-menu-list'); if(list){ list.innerHTML=profiles.map(x=>`<button class="profile-menu-item ${x.id===activeProfileId?'profile-selected':''}" onclick="switchProfile('${x.id}')"><span class="profile-mini-avatar ${profileColorClass(x.color)}"><i class="fa-solid ${x.icon}"></i></span><span class="min-w-0"><b class="text-xs block truncate">${escapeHtml(x.name)}</b><small class="text-[10px] text-slate-500">${(x.watchlist||[]).length} titulů</small></span>${x.id===activeProfileId?'<i class="fa-solid fa-check text-emerald-500 ml-auto"></i>':''}</button>`).join(''); }
+        }
+        function renderProfilesSettings() {
+            const box=document.getElementById('settings-profiles-list'); if(!box) return;
+            const current=activeProfile();
+            const activeName=document.getElementById('settings-active-profile-name'); if(activeName) activeName.textContent=current?.name||'—';
+            box.innerHTML=profiles.map(p=>`<div class="profile-card">
+                <div class="flex items-center gap-3">
+                    <span class="profile-mini-avatar ${profileColorClass(p.color)} w-11 h-11"><i class="fa-solid ${p.icon}"></i></span>
+                    <div class="min-w-0"><b class="text-sm block truncate">${escapeHtml(p.name)}</b><span class="text-[10px] text-slate-500">${(p.watchlist||[]).length} titulů ${p.id===activeProfileId?'· aktivní':''}</span></div>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button onclick="openProfileEditor('${p.id}')" class="flex-1 py-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-bold"><i class="fa-solid fa-pen mr-1"></i>Upravit</button>
+                    <button onclick="exportProfileData('${p.id}')" class="py-2 px-3 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/15 text-[10px] font-bold" title="Exportovat data tohoto profilu"><i class="fa-solid fa-download"></i></button>
+                    <button onclick="importProfileData('${p.id}')" class="py-2 px-3 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 text-[10px] font-bold" title="Importovat data do tohoto profilu"><i class="fa-solid fa-upload"></i></button>
+                    <button onclick="deleteProfile('${p.id}')" class="py-2 px-3 rounded-lg bg-red-500/10 text-red-400 border border-red-500/15 text-[10px] font-bold" ${profiles.length<=1?'disabled':''} title="Odstranit profil"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>`).join('');
+        }
+
+        function toggleProfileMenu(force){ const m=document.getElementById('profile-menu'); if(!m)return; const open=typeof force==='boolean'?force:m.classList.contains('hidden'); m.classList.toggle('hidden',!open); if(open) renderProfileSwitcher(); }
+        function switchProfile(id){
+            if(id===activeProfileId){ toggleProfileMenu(false); return; }
+            syncCurrentWatchlistToProfile();
+            const p=profiles.find(x=>x.id===id); if(!p)return;
+            activeProfileId=id; state.watchlist=Array.isArray(p.watchlist)?p.watchlist:[]; localStorage.setItem('mfs_active_profile',id); localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist));
+            applyActiveProfileSettings();
+            toggleProfileMenu(false); renderProfileSwitcher(); renderProfilesSettings(); checkDemoBanner(); renderWatchlist(); renderHome(); updateNotificationBell();
+            if(state.activeTab==='upcoming') renderUpcomingEpisodes();
+        }
+        function openProfilesSettings(){ openSettingsModal(); setTimeout(()=>document.getElementById('settings-profiles-card')?.scrollIntoView({behavior:'smooth',block:'start'}),80); }
+        function openProfileEditor(id=''){
+            const p=id?profiles.find(x=>x.id===id):null; document.getElementById('profile-edit-id').value=p?.id||''; document.getElementById('profile-name-input').value=p?.name||''; profileEditorIcon=p?.icon||'fa-user'; profileEditorColor=p?.color||'indigo';
+            document.getElementById('profile-editor-title').textContent=p?'Upravit profil':'Přidat profil'; renderProfileEditorOptions(); document.getElementById('profile-editor-modal').classList.remove('hidden'); document.body.style.overflow='hidden';
+        }
+        function renderProfileEditorOptions(){
+            const io=document.getElementById('profile-icon-options'), co=document.getElementById('profile-color-options'); if(io) io.innerHTML=PROFILE_ICONS.map(i=>`<button type="button" onclick="profileEditorIcon='${i}';renderProfileEditorOptions()" class="w-10 h-10 rounded-xl border ${profileEditorIcon===i?'border-indigo-500 ring-2 ring-indigo-500/30':'border-slate-200 dark:border-slate-800'} bg-slate-100 dark:bg-slate-950"><i class="fa-solid ${i}"></i></button>`).join(''); if(co) co.innerHTML=PROFILE_COLORS.map(c=>`<button type="button" onclick="profileEditorColor='${c}';renderProfileEditorOptions()" class="w-9 h-9 rounded-full ${'bg-'+c+'-500'} ${profileEditorColor===c?'ring-2 ring-white ring-offset-2 ring-offset-slate-900':''}" title="${c}"></button>`).join('');
+        }
+        function closeProfileEditor(){document.getElementById('profile-editor-modal').classList.add('hidden'); document.body.style.overflow='auto';}
+        function saveProfileFromEditor(){
+            const name=document.getElementById('profile-name-input').value.trim()||'Nový profil'; const id=document.getElementById('profile-edit-id').value;
+            if(id){ const p=profiles.find(x=>x.id===id); if(p){p.name=name;p.icon=profileEditorIcon;p.color=profileEditorColor;ensureProfileSettings(p);} } else { profiles.push({id:'profile_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,icon:profileEditorIcon,color:profileEditorColor,watchlist:[],settings:defaultProfileSettings(),createdAt:Date.now()}); }
+            persistProfiles(); renderProfileSwitcher(); renderProfilesSettings(); renderProfileGate(); closeProfileEditor();
+        }
+        function deleteProfile(id){
+            if(profiles.length<=1){alert('Musí zůstat alespoň jeden profil.');return;} const p=profiles.find(x=>x.id===id); if(!p)return; if(!confirm(`Opravdu odstranit profil „${p.name}“ včetně jeho knihovny?`))return;
+            profiles=profiles.filter(x=>x.id!==id); if(activeProfileId===id){activeProfileId=profiles[0].id;state.watchlist=profiles[0].watchlist||[];localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist));} persistProfiles(); if(supabaseClient){ supabaseClient.from('mfs_profiles').delete().eq('id',id).then(({error})=>{if(error)console.warn('Supabase mazání profilu:',error);}); } renderProfileSwitcher(); renderProfilesSettings(); checkDemoBanner(); renderWatchlist(); renderHome();
+        }
+        document.addEventListener('click',e=>{ const menu=document.getElementById('profile-menu'),btn=document.getElementById('profile-trigger'); if(menu&&btn&&!menu.contains(e.target)&&!btn.contains(e.target)) menu.classList.add('hidden'); });
 
         // Přepínání záložek
         function switchTab(tabId) {
@@ -1034,6 +1323,7 @@
 
         // Otevření a zavření Nastavení
         function openSettingsModal() {
+            renderProfilesSettings();
             document.getElementById('settings-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -1062,7 +1352,7 @@
 
             if (!isInit) {
                 state.themeMode = mode;
-                localStorage.setItem('mfs_theme_mode', mode);
+                saveActiveProfileSettings();
             }
             
             applyThemeColor(state.themeColor); // Znovu aplikuje barvy, aby se správně nastavil text na aktivním tlačítku
@@ -1071,7 +1361,7 @@
 
         function changeThemeColor(color) {
             state.themeColor = color;
-            localStorage.setItem('mfs_theme_color', color);
+            saveActiveProfileSettings();
             applyThemeColor(color);
             switchTab(state.activeTab); // Znovu aplikuje barvu na aktivní záložku
             renderWatchlist(); // Překreslí knihovnu s novými barvami pokroku
@@ -2439,7 +2729,7 @@
         // --- NASTAVENÍ ROZHRANÍ A UPOZORNĚNÍ ---
         function setCardSize(size) {
             state.cardSize = size;
-            localStorage.setItem('mfs_card_size', size);
+            saveActiveProfileSettings();
             applyCardSize(size);
         }
         function applyCardSize(size) {
@@ -2454,7 +2744,7 @@
         }
         function setHomeCardSize(size) {
             state.homeCardSize = ['small','normal','large'].includes(size) ? size : 'normal';
-            localStorage.setItem('mfs_home_card_size', state.homeCardSize);
+            saveActiveProfileSettings();
             applyHomeCardSize(state.homeCardSize);
         }
         function applyHomeCardSize(size) {
@@ -2471,7 +2761,7 @@
         }
         function setHomeContinueSize(size) {
             state.homeContinueSize = ['small','normal','large'].includes(size) ? size : 'normal';
-            localStorage.setItem('mfs_home_continue_size', state.homeContinueSize);
+            saveActiveProfileSettings();
             applyHomeContinueSize(state.homeContinueSize);
         }
         function applyHomeContinueSize(size) {
@@ -2496,14 +2786,14 @@
             });
         }
         function setAnimations(enabled) {
-            state.animations = enabled; localStorage.setItem('mfs_animations', enabled);
+            state.animations = enabled; saveActiveProfileSettings();
             document.documentElement.classList.toggle('reduce-motion', !enabled);
         }
-        function setAutoSync(enabled) { state.autoSync = enabled; localStorage.setItem('mfs_auto_sync', enabled); }
-        function setNotifications(enabled) { state.notifications = enabled; localStorage.setItem('mfs_notifications', enabled); updateNotificationBell(); }
-        function setNotificationDays(days) { state.notificationDays = Number(days); localStorage.setItem('mfs_notification_days', days); updateNotificationBell(); }
-        function setConfirmDelete(enabled) { state.confirmDelete = !!enabled; localStorage.setItem('mfs_confirm_delete', state.confirmDelete); }
-        function setStartTab(tab) { state.startTab = tab; localStorage.setItem('mfs_start_tab', tab); }
+        function setAutoSync(enabled) { state.autoSync = enabled; saveActiveProfileSettings(); }
+        function setNotifications(enabled) { state.notifications = enabled; saveActiveProfileSettings(); updateNotificationBell(); }
+        function setNotificationDays(days) { state.notificationDays = Number(days); saveActiveProfileSettings(); updateNotificationBell(); }
+        function setConfirmDelete(enabled) { state.confirmDelete = !!enabled; saveActiveProfileSettings(); }
+        function setStartTab(tab) { state.startTab = tab; saveActiveProfileSettings(); }
 
         function getUpcomingNotificationItems() {
             if (!state.notifications) return [];
@@ -2542,9 +2832,25 @@
             try { for (const show of state.watchlist.filter(i => i.type === 'show' && i.tmdbId)) await syncShowData(show); saveToLocalStorage(); renderWatchlist(); updateNotificationBell(); } catch(e) { console.warn('Automatická synchronizace:', e); }
         }
 
+        // ===== SUPABASE =====
+        function getSupabaseConfig(){ return { url:localStorage.getItem('mfs_supabase_url')||'', key:localStorage.getItem('mfs_supabase_key')||'' }; }
+        function initSupabaseClient(){ const cfg=getSupabaseConfig(); if(!cfg.url||!cfg.key||!window.supabase) { supabaseClient=null; return false; } try { supabaseClient=window.supabase.createClient(cfg.url,cfg.key); return true; } catch(e){ console.warn(e); supabaseClient=null; return false; } }
+        async function saveProfileToSupabase(profile){ if(!supabaseClient) return; try { await supabaseClient.from('mfs_profiles').upsert({id:profile.id,name:profile.name,icon:profile.icon,color:profile.color,settings:ensureProfileSettings(profile),watchlist:profile.watchlist||[],updated_at:new Date().toISOString()},{onConflict:'id'}); } catch(e){ console.warn('Supabase profil:',e); } }
+        async function syncProfilesToSupabase(showAlert=false){
+            if(!initSupabaseClient()){ const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase není připojené.'; if(showAlert)alert('Nejdřív vyplň Supabase URL a anon key.'); return; }
+            syncCurrentWatchlistToProfile(); let ok=true; for(const p of profiles){ try { const {error}=await supabaseClient.from('mfs_profiles').upsert({id:p.id,name:p.name,icon:p.icon,color:p.color,settings:ensureProfileSettings(p),watchlist:p.watchlist||[],updated_at:new Date().toISOString()},{onConflict:'id'}); if(error) throw error; } catch(e){ok=false;console.warn(e);break;} }
+            const el=document.getElementById('supabase-status'); if(el)el.textContent=ok?'Supabase připojeno · profily synchronizované.':'Supabase připojeno, ale synchronizace se nepodařila.'; if(showAlert)alert(ok?'Profily a knihovny byly synchronizovány.':'Synchronizace se nepodařila. Zkontroluj tabulku mfs_profiles a RLS.');
+        }
+        async function loadProfilesFromSupabase(){
+            if(!initSupabaseClient()) return; try { const {data,error}=await supabaseClient.from('mfs_profiles').select('*').order('created_at',{ascending:true}); if(error) throw error; if(Array.isArray(data)&&data.length){ profiles=data.map(p=>({id:p.id,name:p.name,icon:p.icon||'fa-user',color:p.color||'indigo',settings:Object.assign({},defaultProfileSettings(),p.settings||{}),watchlist:Array.isArray(p.watchlist)?p.watchlist:[],createdAt:p.created_at})); const ap=activeProfile()||profiles[0]; activeProfileId=ap.id; state.watchlist=ap.watchlist||[]; applyActiveProfileSettings(); persistProfiles(); localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist)); renderProfileSwitcher(); renderProfilesSettings(); renderWatchlist(); renderHome(); renderProfileGate(); } const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase připojeno · data načtena.'; } catch(e){console.warn('Supabase načtení:',e); const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase je připojené, ale data nelze načíst.';}
+        }
+        function saveSupabaseConfig(){ const url=document.getElementById('supabase-url-input')?.value.trim().replace(/\/$/,''); const key=document.getElementById('supabase-key-input')?.value.trim(); localStorage.setItem('mfs_supabase_url',url||'');localStorage.setItem('mfs_supabase_key',key||''); if(initSupabaseClient()){document.getElementById('supabase-status').textContent='Supabase připojeno. Synchronizuji…';syncProfilesToSupabase(true);}else{document.getElementById('supabase-status').textContent='Zkontroluj URL, anon key a připojení.';} }
+
         // --- POMOCNÉ FUNKCE ---
         function saveToLocalStorage() {
             localStorage.setItem('mfs_watchlist', JSON.stringify(state.watchlist));
+            const p = activeProfile(); if (p) { p.watchlist = state.watchlist; persistProfiles(); }
+            if (supabaseClient) syncProfilesToSupabase(false);
         }
 
         function saveApiKey() {
@@ -2554,46 +2860,103 @@
             alert('API klíč uložen.');
         }
 
-        function exportDatabase() {
-            const backup = { version: 4, watchlist: state.watchlist };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `mfs_backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importDatabase(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    const importedWatchlist = Array.isArray(importedData) ? importedData : importedData?.watchlist;
-                    if (Array.isArray(importedWatchlist)) {
-                        if (confirm('Import nahradí všechna vaše stávající data. Chcete pokračovat?')) {
-                            state.watchlist = importedWatchlist;
-                            if (importedData?.language) {
-                                
-                                                }
-                            saveToLocalStorage();
-                            checkDemoBanner();
-                            switchTab('watchlist');
-                            alert('Záloha byla úspěšně nahrána!');
-                        }
-                    } else {
-                        alert('Neplatný formát souboru.');
-                    }
-                } catch {
-                    alert('Chyba při čtení souboru.');
-                }
+        function exportProfileData(profileId=activeProfileId) {
+            const profile=profiles.find(p=>p.id===profileId);
+            if(!profile) return alert('Profil nebyl nalezen.');
+            const backup={
+                format:'mfs-profile',
+                version:1,
+                exportedAt:new Date().toISOString(),
+                profile:{
+                    name:profile.name,
+                    icon:profile.icon,
+                    color:profile.color,
+                    settings:ensureProfileSettings(profile)
+                },
+                settings:ensureProfileSettings(profile),
+                watchlist:Array.isArray(profile.watchlist)?profile.watchlist:[]
             };
-            reader.readAsText(file);
+            const dataStr='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(backup,null,2));
+            const a=document.createElement('a');
+            a.href=dataStr;
+            a.download=`mfs_${(profile.name||'profil').replace(/[^a-z0-9áčďéěíňóřšťúůýž _-]/gi,'').trim().replace(/\s+/g,'_')||'profil'}_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
         }
+
+        function importProfileData(profileId=activeProfileId) {
+            const profile=profiles.find(p=>p.id===profileId);
+            if(!profile) return alert('Profil nebyl nalezen.');
+            const input=document.createElement('input');
+            input.type='file'; input.accept='.json,application/json';
+            input.onchange=event=>{
+                const file=event.target.files?.[0]; if(!file) return;
+                const reader=new FileReader();
+                reader.onload=e=>{
+                    try {
+                        const data=JSON.parse(e.target.result);
+                        const imported=Array.isArray(data?.watchlist)?data.watchlist:(Array.isArray(data)?data:null);
+                        if(!imported) return alert('Neplatný profilový export.');
+                        const sourceName=data?.profile?.name||'jiného profilu';
+                        if(!confirm(`Importovat ${imported.length} titulů z profilu „${sourceName}“ do profilu „${profile.name}“?\n\nImport nahradí pouze data tohoto profilu. Ostatní profily zůstanou beze změny.`)) return;
+                        profile.watchlist=imported;
+                        const importedSettings=data?.settings || data?.profile?.settings;
+                        if(importedSettings && typeof importedSettings==='object') profile.settings=Object.assign({},defaultProfileSettings(),importedSettings);
+                        if(profile.id===activeProfileId){
+                            applyActiveProfileSettings();
+                            state.watchlist=profile.watchlist;
+                            localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist));
+                        }
+                        persistProfiles();
+                        if(supabaseClient) saveProfileToSupabase(profile);
+                        renderProfileSwitcher(); renderProfilesSettings(); checkDemoBanner(); renderWatchlist(); renderHome();
+                        alert(`Import dokončen. Profil „${profile.name}“ nyní obsahuje ${imported.length} titulů.`);
+                    } catch(err){ console.warn(err); alert('Chyba při čtení profilového exportu.'); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Starší globální názvy ponechány kvůli kompatibilitě se staršími zálohami; nové rozhraní používá výhradně export/import aktuálního profilu.
+        function exportDatabase(){ exportProfileData(activeProfileId); }
+        function importDatabase(event){
+            const file=event?.target?.files?.[0];
+            if(file){
+                const fakeInput=document.createElement('input'); fakeInput.type='file';
+                // Bezpečnostní ochrana: globální import už nepřepisuje všechny profily. Importuje se pouze do aktivního profilu.
+                const reader=new FileReader(); reader.onload=e=>{
+                    try{
+                        const data=JSON.parse(e.target.result);
+                        const imported=Array.isArray(data?.watchlist)?data.watchlist:(Array.isArray(data)?data:null);
+                        if(!imported) return alert('Neplatný formát souboru.');
+                        const p=activeProfile();
+                        if(!p) return;
+                        if(!confirm(`Importovat ${imported.length} titulů do profilu „${p.name}“?\n\nOstatní profily zůstanou beze změny.`)) return;
+                        p.watchlist=imported; state.watchlist=imported; persistProfiles(); localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist));
+                        if(supabaseClient) saveProfileToSupabase(p);
+                        renderProfileSwitcher(); renderProfilesSettings(); checkDemoBanner(); renderWatchlist(); renderHome(); alert('Data byla importována pouze do aktivního profilu.');
+                    }catch{alert('Chyba při čtení souboru.');}
+                }; reader.readAsText(file);
+            }
+            if(event?.target) event.target.value='';
+        }
+
+        /*
+        SUPABASE TABULKA (spusť v Supabase SQL Editoru):
+        create table if not exists public.mfs_profiles (
+          id text primary key,
+          name text not null,
+          icon text not null default 'fa-user',
+          color text not null default 'indigo',
+          settings jsonb not null default '{}'::jsonb,
+          watchlist jsonb not null default '[]'::jsonb,
+          created_at timestamptz not null default now(),
+          updated_at timestamptz not null default now()
+        );
+        -- Pokud tabulka mfs_profiles už existuje ze starší verze, spusť také:
+        -- alter table public.mfs_profiles add column if not exists settings jsonb not null default '{}'::jsonb;
+        -- Pro skutečné víceuživatelské nasazení doporučuji přidat owner_id uuid references auth.users(id) a RLS.
+        */
 
         // ===== PWA / OFFLINE PODPORA =====
         if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
