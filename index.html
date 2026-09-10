@@ -253,10 +253,19 @@
         .setting-row+.setting-row{border-top:1px solid rgba(148,163,184,.12)}
         .switch{position:relative;width:44px;height:24px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;border-radius:999px;background:#cbd5e1;transition:.2s}.dark .switch span{background:#334155}.switch span:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s;box-shadow:0 2px 5px rgba(0,0,0,.25)}.switch input:checked+span{background:#f59e0b}.switch input:checked+span:before{transform:translateX(20px)}
         .creator-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 85% 20%,rgba(245,158,11,.25),transparent 28%),linear-gradient(135deg,#111827,#020617 72%);color:white}
+        .creator-type-switch{display:flex;gap:4px;padding:4px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.16);border-radius:14px}
+        .creator-type-btn{flex:1;padding:9px 14px;border-radius:10px;font-size:11px;font-weight:900;color:#94a3b8;transition:.2s}
+        .creator-type-btn.active{background:#f59e0b;color:#0f172a;box-shadow:0 6px 18px rgba(245,158,11,.15)}
+        .dark .creator-type-btn.active{color:#020617}
         .creator-hero:after{content:'';position:absolute;width:280px;height:280px;border-radius:50%;border:1px solid rgba(245,158,11,.15);right:-100px;top:-120px;box-shadow:0 0 0 35px rgba(245,158,11,.03),0 0 0 70px rgba(245,158,11,.02)}
         .search-shell{box-shadow:0 18px 50px rgba(15,23,42,.10)}
         .dark .search-shell{box-shadow:0 22px 60px rgba(0,0,0,.30)}
-        .creator-mode{transition:.2s}.creator-mode.active{background:#f59e0b;color:#0f172a;box-shadow:0 8px 20px rgba(245,158,11,.18)}
+        .creator-search-mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;min-width:210px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.16);border-radius:14px;box-sizing:border-box}
+        .creator-mode{width:100%;min-width:0;height:38px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border:0;border-radius:10px;background:transparent;color:#94a3b8;font-size:11px;font-weight:900;white-space:nowrap;cursor:pointer;transition:background .18s,color .18s,box-shadow .18s,transform .18s;box-sizing:border-box}
+        .creator-mode i{width:15px;text-align:center;flex:0 0 15px}.creator-mode:hover:not(.active){color:#0f172a;background:rgba(148,163,184,.10)}.dark .creator-mode:hover:not(.active){color:#f8fafc;background:rgba(148,163,184,.08)}
+        .creator-mode.active{background:#f59e0b;color:#0f172a;box-shadow:0 6px 18px rgba(245,158,11,.18)}
+        .dark .creator-mode.active{color:#020617}
+        @media (max-width:640px){.creator-search-mode-switch{min-width:0;width:100%}}
         .quick-chip{border:1px solid rgba(148,163,184,.16);background:rgba(148,163,184,.06)}
         .result-card{transition:.2s;border:1px solid rgba(148,163,184,.14)}.result-card:hover{transform:translateY(-1px);border-color:rgba(245,158,11,.38);box-shadow:0 12px 30px rgba(15,23,42,.10)}
         .manual-input{display:block;width:100%;background:rgba(248,250,252,.9);color:#0f172a;border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:.8rem .9rem;font-size:.85rem;outline:none;transition:.2s}.dark .manual-input{background:rgba(2,6,23,.65);color:#fff;border-color:rgba(148,163,184,.16)}.manual-input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.10)}
@@ -630,15 +639,15 @@
                 <div class="glass-panel search-shell rounded-3xl p-4 sm:p-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div><h3 class="font-black text-lg">Vyhledávání</h3><p class="text-xs text-slate-500 mt-0.5">Hledej podle názvu nebo herce.</p></div>
-                        <div class="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-                            <button type="button" id="search-mode-title" onclick="setSearchMode('title')" class="creator-mode active px-3.5 py-2 rounded-lg text-xs font-bold"><i class="fa-solid fa-film mr-1.5"></i>Název</button>
-                            <button type="button" id="search-mode-actor" onclick="setSearchMode('actor')" class="creator-mode px-3.5 py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-user mr-1.5"></i>Herec</button>
+                        <div class="creator-search-mode-switch" role="group" aria-label="Způsob vyhledávání">
+                            <button type="button" id="search-mode-title" onclick="setSearchMode('title')" class="creator-mode active"><i class="fa-solid fa-film"></i><span>Název</span></button>
+                            <button type="button" id="search-mode-actor" onclick="setSearchMode('actor')" class="creator-mode"><i class="fa-solid fa-user"></i><span>Herec</span></button>
                         </div>
                     </div>
                     <form onsubmit="searchTMDb(event)" class="relative">
                         <div class="flex flex-col sm:flex-row gap-2">
                             <div class="relative flex-1"><i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="search-input" placeholder="Např. Interstellar, Wednesday..." class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 theme-focus-border"></div>
-                            <select id="search-type-select" class="sm:w-32 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-3 py-3 text-xs font-semibold focus:outline-none focus:border-amber-500 theme-focus-border"><option value="multi">Vše</option><option value="movie">Filmy</option><option value="tv">Seriály</option></select>
+                            <div class="creator-type-switch sm:w-48" aria-label="Typ titulu"><button type="button" id="creator-type-movie" onclick="setCreatorSearchType('movie')" class="creator-type-btn active"><i class="fa-solid fa-film mr-1.5"></i>Film</button><button type="button" id="creator-type-tv" onclick="setCreatorSearchType('tv')" class="creator-type-btn"><i class="fa-solid fa-tv mr-1.5"></i>Seriál</button></div>
                             <button type="submit" class="sm:w-28 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/15 theme-bg theme-text"><i class="fa-solid fa-arrow-right mr-1.5"></i>Hledat</button>
                         </div>
                     </form>
@@ -949,6 +958,7 @@
 
         // Globální stav vyhledávání
         let currentSearchMode = 'title'; // 'title' nebo 'actor'
+        let creatorSearchType = localStorage.getItem('mfs_creator_search_type') || 'movie';
 
         // Grafy
         let ratioChart = null;
@@ -972,6 +982,7 @@
             applyCardSize(state.cardSize);
             applyHomeCardSize(state.homeCardSize);
             applyHomeContinueSize(state.homeContinueSize);
+            setCreatorSearchType(creatorSearchType, true);
             document.getElementById('setting-animations').checked = state.animations;
             document.getElementById('setting-auto-sync').checked = state.autoSync;
             document.getElementById('setting-notifications').checked = state.notifications;
@@ -1196,30 +1207,34 @@
             if (!title) { alert('Zadej název seriálu.'); return; }
             const seasons = [...document.querySelectorAll('#manual-seasons-builder .manual-season')].map((season,idx)=>({ season_number: idx+1, name: season.querySelector('.manual-season-name').value.trim() || `Série ${idx+1}`, episodes: [...season.querySelectorAll('.manual-episodes > div')].map((row,i)=>({ episode_number:i+1, name:row.querySelector('.manual-ep-name').value.trim() || `Epizoda ${i+1}`, runtime:parseInt(row.querySelector('.manual-ep-runtime').value)||45, air_date:row.querySelector('.manual-ep-date').value||null, overview:'', watched:false })) }));
             const item = { id:`manual_${Date.now()}`, tmdbId:null, type:'show', originalTitle:document.getElementById('manual-show-original').value.trim() || title, title, overview:document.getElementById('manual-show-overview').value.trim() || 'Vlastní seriál bez popisu.', genres:document.getElementById('manual-show-genres').value.split(',').map(x=>x.trim()).filter(Boolean), poster_path:null, poster_url:document.getElementById('manual-show-poster').value.trim() || null, backdrop_path:null, rating:0, notes:'', addedAt:Date.now(), seasons, cast:[] };
-            state.watchlist.push(item); saveToLocalStorage(); checkDemoBanner(); renderWatchlist(); renderHome(); resetManualBuilder(); switchTab('watchlist'); alert('Vlastní seriál byl přidán do knihovny.');
+            state.watchlist.push(item); saveToLocalStorage(); checkDemoBanner(); renderWatchlist(); renderHome(); resetManualBuilder(); alert('Vlastní seriál byl přidán do knihovny.');
+        }
+
+        function setCreatorSearchType(type, silent = false) {
+            creatorSearchType = type === 'tv' ? 'tv' : 'movie';
+            localStorage.setItem('mfs_creator_search_type', creatorSearchType);
+            document.querySelectorAll('.creator-type-btn').forEach(btn => btn.classList.toggle('active', btn.id === `creator-type-${creatorSearchType === 'tv' ? 'tv' : 'movie'}`));
+            const input = document.getElementById('search-input');
+            if (input && currentSearchMode === 'title') input.placeholder = creatorSearchType === 'tv' ? 'Např. Wednesday, The Last of Us...' : 'Např. Interstellar, Duna...';
+            if (!silent) document.getElementById('search-results').innerHTML = '';
         }
 
         // Přepínání režimu vyhledávání (Podle názvu / Podle herce)
         function setSearchMode(mode) {
-            currentSearchMode = mode;
+            currentSearchMode = mode === 'actor' ? 'actor' : 'title';
             const btnTitle = document.getElementById('search-mode-title');
             const btnActor = document.getElementById('search-mode-actor');
-            const typeSelect = document.getElementById('search-type-select');
             const searchInput = document.getElementById('search-input');
 
-            const activeBg = ['indigo','rose','blue','purple','pink','violet'].includes(state.themeColor) ? `bg-${state.themeColor}-500 text-white` : `bg-${state.themeColor}-500 text-slate-950`;
-            const inactiveClasses = "flex-1 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+            // Tlačítka mají pevnou, stejnou šířku. Při přepnutí se mění pouze aktivní stav,
+            // takže se přepínač ani jeho obsah nikdy nezmenší/nerozhodí.
+            btnTitle?.classList.toggle('active', currentSearchMode === 'title');
+            btnActor?.classList.toggle('active', currentSearchMode === 'actor');
 
-            if (mode === 'title') {
-                btnTitle.className = `flex-1 py-2 rounded-lg text-xs font-bold transition-all ${activeBg}`;
-                btnActor.className = inactiveClasses;
-                typeSelect.classList.remove('hidden');
-                searchInput.placeholder = "Zadej název filmu nebo seriálu...";
-            } else {
-                btnTitle.className = inactiveClasses;
-                btnActor.className = `flex-1 py-2 rounded-lg text-xs font-bold transition-all ${activeBg}`;
-                typeSelect.classList.add('hidden');
-                searchInput.placeholder = "Zadej jméno herce...";
+            if (searchInput) {
+                searchInput.placeholder = currentSearchMode === 'actor'
+                    ? 'Zadej jméno herce...'
+                    : (creatorSearchType === 'tv' ? 'Např. Wednesday, The Last of Us...' : 'Např. Interstellar, Duna...');
             }
         }
 
@@ -1745,7 +1760,7 @@
                 
                 const tempItem = {
                     tmdbId,
-                    type,
+                    type: type === 'tv' ? 'show' : 'movie',
                     originalTitle: data.original_title || data.original_name,
                     title: data.title || data.name,
                     overview: data.overview || 'Popis děje není k dispozici.',
@@ -1803,7 +1818,10 @@
             overview.innerText = item.overview;
             renderCast(item.cast || []);
 
-            const existingItem = state.watchlist.find(w => w.tmdbId === item.tmdbId && w.type === item.type);
+            const existingItem = state.watchlist.find(w => {
+                if (w.tmdbId !== item.tmdbId) return false;
+                return item.type === 'movie' ? w.type === 'movie' : w.type === 'show' || w.type === 'tv';
+            });
 
             previewInfo.innerHTML = item.type === 'movie'
                 ? `<i class="fa-solid fa-clock text-amber-500 theme-text mr-1"></i> Délka filmu: <strong>${item.runtime} minut</strong>`
@@ -1840,6 +1858,22 @@
             if (previewContainer) previewContainer.classList.add('hidden');
             state.currentDetailId = id;
             openDetail(id);
+
+            // U rozkoukaného / nezačatého seriálu po otevření rovnou ukaž
+            // sérii, ve které je další nezhlédnutá epizoda.
+            if (existing.type === 'show') {
+                const next = getNextEpisode(existing);
+                if (next) {
+                    setTimeout(() => {
+                        const seasonBlocks = document.querySelectorAll('#modal-seasons-container > div');
+                        const target = Array.from(seasonBlocks).find(block => {
+                            const heading = block.querySelector('h4');
+                            return heading && heading.textContent.includes(`Série ${next.season}`);
+                        });
+                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
+            }
         }
 
         // Vykreslení hodnocení 0–10
@@ -2117,7 +2151,7 @@
             const container = document.getElementById('search-results');
             container.innerHTML = `<div class="text-xs text-slate-500">Vyhledávám...</div>`;
 
-            const searchType = currentSearchMode === 'actor' ? 'person' : document.getElementById('search-type-select').value;
+            const searchType = currentSearchMode === 'actor' ? 'person' : creatorSearchType;
             const url = `https://api.themoviedb.org/3/search/${searchType}?api_key=${state.apiKey}&query=${encodeURIComponent(query)}&language=${encodeURIComponent(apiLanguage())}`;
 
             try {
@@ -2160,28 +2194,52 @@
             applyThemeColor(state.themeColor);
         }
 
+        function findLibraryItemForSearch(tmdbId, mediaType) {
+            return state.watchlist.find(w => {
+                if (w.tmdbId !== tmdbId) return false;
+                if (mediaType === 'movie') return w.type === 'movie';
+                return w.type === 'show' || w.type === 'tv';
+            }) || null;
+        }
+
         function renderMediaResults(results) {
             const container = document.getElementById('search-results');
             if (results.length === 0) {
                 container.innerHTML = '<div class="text-xs text-slate-500">Žádné výsledky.</div>';
                 return;
             }
+
+            // Ulož poslední výsledky, aby se po přidání titul okamžitě překreslil
+            // na stav „V knihovně“ bez nutnosti nového vyhledávání.
+            window.mfsLastMediaResults = results;
+
             container.innerHTML = results.map(item => {
                 const isMovie = item.media_type === 'movie';
                 const originalTitle = isMovie ? item.original_title : item.original_name;
                 const czechTitle = isMovie ? item.title : item.name;
-                const inWatchlist = state.watchlist.some(w => w.tmdbId === item.id && w.type === item.media_type);
+                const existing = findLibraryItemForSearch(item.id, item.media_type);
+                const inWatchlist = !!existing;
+                const completed = existing && !isMovie && getProgressPercent(existing) >= 100;
                 const posterUrl = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : 'https://via.placeholder.com/92x138?text=N/A';
+
+                let actionButton;
+                if (!inWatchlist) {
+                    actionButton = `<button type="button" onclick="event.stopPropagation(); addTMDbItem(${item.id}, '${item.media_type}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-1.5 rounded font-bold transition-all flex-shrink-0 theme-bg theme-text"><i class="fa-solid fa-plus mr-1"></i>Přidat</button>`;
+                } else if (completed) {
+                    actionButton = `<button type="button" disabled title="Tento seriál je již celý zhlédnutý" class="bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1.5 rounded font-bold flex-shrink-0 cursor-default"><i class="fa-solid fa-check mr-1"></i>V knihovně</button>`;
+                } else {
+                    actionButton = `<button type="button" onclick="event.stopPropagation(); openExistingTitleFromSearch('${existing.id}')" class="bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950 dark:hover:bg-emerald-900 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1.5 rounded font-bold transition-all flex-shrink-0"><i class="fa-solid fa-folder-open mr-1"></i>V knihovně</button>`;
+                }
 
                 return `
                     <div onclick="openTMDbPreview(${item.id}, '${item.media_type}')" class="flex items-center gap-3 p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group">
-                        <img src="${posterUrl}" alt="${originalTitle}" class="w-10 h-14 object-cover rounded border border-slate-200 dark:border-slate-800 flex-shrink-0 block">
+                        <img src="${posterUrl}" alt="${escapeHtml(originalTitle || '')}" class="w-10 h-14 object-cover rounded border border-slate-200 dark:border-slate-800 flex-shrink-0 block">
                         <div class="flex-1 min-w-0">
-                            <span class="font-bold text-slate-800 dark:text-white text-sm block truncate group-hover:text-amber-500 theme-group-hover-text transition-colors" title="${originalTitle}">${originalTitle}</span>
-                            <span class="text-xs text-slate-500 dark:text-slate-400 block truncate mt-0.5" title="${czechTitle}">${czechTitle !== originalTitle ? czechTitle : ''}</span>
+                            <span class="font-bold text-slate-800 dark:text-white text-sm block truncate group-hover:text-amber-500 theme-group-hover-text transition-colors" title="${escapeHtml(originalTitle || '')}">${escapeHtml(originalTitle || '')}</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 block truncate mt-0.5" title="${escapeHtml(czechTitle || '')}">${czechTitle && czechTitle !== originalTitle ? escapeHtml(czechTitle) : ''}</span>
                             <span class="block text-[9px] uppercase tracking-wider text-slate-500 mt-1 font-semibold">${isMovie ? 'Film' : 'Seriál'} • <span class="text-amber-500/80 theme-text">Klikni pro detail</span></span>
                         </div>
-                        <button type="button" onclick="event.stopPropagation(); addTMDbItem(${item.id}, '${item.media_type}')" ${inWatchlist ? 'disabled' : ''} class="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 px-3 py-1.5 rounded font-bold transition-all flex-shrink-0 theme-bg theme-text">${inWatchlist ? 'V knihovně' : '+ Přidat'}</button>
+                        ${actionButton}
                     </div>
                 `;
             }).join('');
@@ -2204,7 +2262,7 @@
                 `;
 
                 const credits = (data.cast || [])
-                    .filter(item => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path)
+                    .filter(item => item.media_type === creatorSearchType && item.poster_path)
                     .sort((a, b) => b.popularity - a.popularity)
                     .slice(0, 40);
 
@@ -2303,7 +2361,7 @@
                 saveToLocalStorage();
                 checkDemoBanner();
                 renderHome();
-                switchTab('watchlist');
+                if (Array.isArray(window.mfsLastMediaResults)) renderMediaResults(window.mfsLastMediaResults);
                 alert('Titul byl úspěšně importován z TMDb!');
             } catch (error) {
                 console.error(error);
@@ -2429,6 +2487,14 @@
             });
         }
 
+        function applySettingButtonState(selector, dataAttr, value) {
+            document.querySelectorAll(selector).forEach(btn => {
+                const active = btn.dataset[dataAttr] === value;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-amber-500', active);
+                btn.classList.toggle('theme-ring', active);
+            });
+        }
         function setAnimations(enabled) {
             state.animations = enabled; localStorage.setItem('mfs_animations', enabled);
             document.documentElement.classList.toggle('reduce-motion', !enabled);
