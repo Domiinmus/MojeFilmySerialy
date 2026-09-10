@@ -1393,6 +1393,30 @@
             updateNotificationBell();
         }
 
+        function normalizeWatchlistTypes() {
+            let changed = false;
+            state.watchlist.forEach(item => {
+                if (!item) return;
+
+                // Starší / různé zdroje mohou mít seriál uložený jako tv, series nebo serial.
+                // Interně aplikace používá pouze "show". Díky tomu se do Domů automaticky
+                // dostanou i seriály, které už byly v knihovně před touto úpravou.
+                const rawType = String(item.type || item.media_type || '').toLowerCase();
+                if (['tv', 'series', 'serial', 'seriál', 'seríál', 'show'].includes(rawType)) {
+                    if (item.type !== 'show') {
+                        item.type = 'show';
+                        changed = true;
+                    }
+                } else if (['movie', 'film', 'filmy'].includes(rawType)) {
+                    if (item.type !== 'movie') {
+                        item.type = 'movie';
+                        changed = true;
+                    }
+                }
+            });
+            if (changed) saveToLocalStorage();
+        }
+
         function getProgressPercent(item) {
             if (item.type === 'movie') {
                 return item.watched ? 100 : 0;
@@ -1420,7 +1444,25 @@
             renderHome();
         }
 
+        // Vrátí první nezhlédnutou epizodu, kterou má uživatel sledovat dál.
+        function getNextEpisode(item) {
+            if (!item || item.type !== 'show' || !Array.isArray(item.seasons)) return null;
+            const seasons = [...item.seasons].sort((a,b) => (Number(a.season_number)||0) - (Number(b.season_number)||0));
+            for (const season of seasons) {
+                const episodes = Array.isArray(season.episodes)
+                    ? [...season.episodes].sort((a,b) => (Number(a.episode_number)||0) - (Number(b.episode_number)||0))
+                    : [];
+                const ep = episodes.find(e => !e.watched);
+                if (ep) return { season: Number(season.season_number)||0, episode: Number(ep.episode_number)||0, name: ep.name||'' };
+            }
+            return null;
+        }
+
         function renderHome() {
+            // Vždy nejdřív sjednoť typy titulů. Tím se do "Co si pustit"
+            // zahrnou i starší seriály z knihovny, nejen nově přidané.
+            normalizeWatchlistTypes();
+
             const continueGrid = document.getElementById('home-continue-grid');
             const showsGrid = document.getElementById('home-shows-grid');
             const moviesGrid = document.getElementById('home-movies-grid');
@@ -1449,6 +1491,15 @@
                         <img src="${getItemPoster(item, 'w342')}" alt="${escapeHtml(item.title || item.originalTitle)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <div class="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent pt-10">
                             <div class="text-xs font-bold text-white truncate">${escapeHtml(item.title || item.originalTitle)}</div>
+                            ${item.type === 'show' && getNextEpisode(item) ? `
+                                <div class="mt-1.5 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-black/45 border border-white/10 text-[9px] font-extrabold text-white">
+                                    <i class="fa-solid fa-forward text-amber-400"></i>
+                                    <span>S${String(getNextEpisode(item).season).padStart(2,'0')} · E${String(getNextEpisode(item).episode).padStart(2,'0')}</span>
+                                    <span class="text-slate-300 font-semibold truncate max-w-[120px]">${escapeHtml(getNextEpisode(item).name || 'Další epizoda')}</span>
+                                </div>
+                            ` : item.type === 'movie' ? `
+                                <div class="mt-1.5 text-[9px] font-bold text-slate-300"><i class="fa-solid fa-film mr-1 text-amber-400"></i>Pokračovat ve sledování</div>
+                            ` : ''}
                             <div class="mt-1.5 h-1.5 bg-white/20 rounded-full overflow-hidden"><div class="h-full bg-amber-500 theme-bg rounded-full" style="width:${p}%"></div></div>
                             <div class="text-[9px] text-slate-300 mt-1">${p}% dokončeno</div>
                         </div>
@@ -1457,16 +1508,19 @@
             }).join('') : `<div class="col-span-full rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 py-10 text-center text-xs text-slate-500"><i class="fa-solid fa-play-circle text-3xl mb-2 block"></i>Nemáš žádný rozkoukaný titul.</div>`;
 
             // Doporučení na Domů jsou vždy pouze zhlédnuté = 0 % a první dvě sekce jsou řazené čistě podle novosti.
-            const unseen = state.watchlist.filter(item => homeItemProgress(item) === 0);
+            // "Co si pustit" = všechny nezhlédnuté tituly z celé knihovny.
+            // Nezáleží na tom, kdy byly přidány; nové i starší položky se automaticky
+            // objeví podle data přidání, dokud mají 0 % zhlédnuto.
+            const unseen = state.watchlist.filter(item => item && homeItemProgress(item) === 0);
             const newest = (a,b) => (Number(b.addedAt)||0) - (Number(a.addedAt)||0);
             const bestRated = (a,b) => (Number(b.rating)||0) - (Number(a.rating)||0) || (Number(b.addedAt)||0) - (Number(a.addedAt)||0);
 
             const pickNewest = (type, key) => {
                 const candidates = unseen.filter(i => i.type === type).sort(newest);
-                if (candidates.length <= 5) return candidates;
-                const offset = (state.homeRefresh?.[key] || 0) * 5;
+                if (candidates.length <= 6) return candidates;
+                const offset = (state.homeRefresh?.[key] || 0) * 6;
                 const start = offset % candidates.length;
-                return candidates.slice(start).concat(candidates.slice(0, start)).slice(0, 5);
+                return candidates.slice(start).concat(candidates.slice(0, start)).slice(0, 6);
             };
 
             const shows = pickNewest('show', 'shows');
@@ -1475,7 +1529,7 @@
             // Nejlépe hodnocené = pouze tituly, které už byly zhlédnuté a mají hodnocení.
             // Filmy a seriály jsou záměrně oddělené.
             const watchedRated = state.watchlist
-                .filter(item => homeItemProgress(item) >= 100 && Number(item.rating) > 0)
+                .filter(item => homeItemProgress(item) >= 100 && Number(item.rating) >= 8)
                 .sort(bestRated);
             const topRatedOffset = (state.homeRefresh?.topRated || 0) * 6;
 
@@ -1868,6 +1922,7 @@
                 saveToLocalStorage();
                 updateMovieButton(item);
                 updateModalProgress(item);
+                renderHome();
             };
         }
 
@@ -1954,6 +2009,7 @@
                 saveToLocalStorage();
                 renderSeasons(item);
                 updateModalProgress(item);
+                renderHome();
             }
         }
 
@@ -1965,6 +2021,7 @@
                 saveToLocalStorage();
                 renderSeasons(item);
                 updateModalProgress(item);
+                renderHome();
             }
         }
 
@@ -1975,6 +2032,7 @@
                 saveToLocalStorage();
                 renderSeasons(item);
                 updateModalProgress(item);
+                renderHome();
             }
         }
 
