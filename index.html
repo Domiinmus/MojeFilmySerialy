@@ -251,49 +251,73 @@
             .profile-gate-manage { min-height: 40px; padding: 9px 13px; font-size: 11px; }
         }
 
-        /* ===== PROFILY V NASTAVENÍ: responzivní akční ikony ===== */
+        /* ===== PROFILY V NASTAVENÍ: opravdu responzivní akce ===== */
         .profile-settings-actions {
-            display: flex;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) repeat(3, 44px);
             align-items: center;
             gap: .5rem;
             width: 100%;
-        }
-        .profile-settings-actions .profile-action-edit {
-            flex: 1 1 auto;
             min-width: 0;
         }
-        .profile-settings-actions .profile-action-icon {
-            flex: 0 0 clamp(38px, 3vw, 46px);
-            width: clamp(38px, 3vw, 46px);
-            height: clamp(38px, 3vw, 46px);
-            min-height: 0;
-            padding: 0 !important;
-            display: inline-flex;
+        .profile-settings-actions > button {
+            box-sizing: border-box !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            min-height: 44px !important;
+            height: 44px !important;
+            margin: 0 !important;
+            padding: 0 .55rem !important;
+            display: inline-flex !important;
             align-items: center;
             justify-content: center;
-            font-size: clamp(.72rem, 2vw, .9rem) !important;
+            overflow: hidden;
+            white-space: nowrap;
             line-height: 1;
         }
         .profile-settings-actions .profile-action-edit {
-            min-height: clamp(38px, 3vw, 46px);
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-            font-size: clamp(.68rem, 2vw, .78rem) !important;
+            font-size: .76rem !important;
+        }
+        .profile-settings-actions .profile-action-icon {
+            padding: 0 !important;
+            font-size: .86rem !important;
         }
         @media (max-width: 639px) {
             .profile-settings-actions {
-                gap: clamp(.3rem, 2vw, .5rem);
+                grid-template-columns: minmax(0, 1fr) repeat(3, clamp(34px, 10vw, 40px));
+                gap: clamp(4px, 1.8vw, 7px);
             }
-            .profile-settings-actions .profile-action-icon {
-                flex-basis: clamp(34px, 10vw, 42px);
-                width: clamp(34px, 10vw, 42px);
-                height: clamp(34px, 10vw, 42px);
-                border-radius: clamp(8px, 2.5vw, 11px);
-                font-size: clamp(.68rem, 4vw, .82rem) !important;
+            .profile-settings-actions > button {
+                min-height: clamp(34px, 10vw, 40px) !important;
+                height: clamp(34px, 10vw, 40px) !important;
+                padding: 0 !important;
+                border-radius: clamp(8px, 2.5vw, 10px) !important;
             }
             .profile-settings-actions .profile-action-edit {
-                min-height: clamp(34px, 10vw, 42px);
-                font-size: clamp(.62rem, 3vw, .72rem) !important;
+                padding: 0 5px !important;
+                font-size: clamp(.58rem, 2.9vw, .7rem) !important;
+            }
+            .profile-settings-actions .profile-action-edit i {
+                margin-right: 3px !important;
+                font-size: .72rem;
+            }
+            .profile-settings-actions .profile-action-icon {
+                font-size: clamp(.68rem, 3.6vw, .78rem) !important;
+            }
+        }
+        @media (max-width: 360px) {
+            .profile-settings-actions {
+                grid-template-columns: minmax(0, 1fr) repeat(3, 32px);
+                gap: 4px;
+            }
+            .profile-settings-actions > button {
+                height: 32px !important;
+                min-height: 32px !important;
+                border-radius: 7px !important;
+            }
+            .profile-settings-actions .profile-action-edit {
+                font-size: .56rem !important;
             }
         }
 
@@ -1145,7 +1169,7 @@
                 </div>
 
                 <div class="settings-card">
-                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud"></i></span><div><h3 class="text-sm font-black">Supabase</h3><p class="text-[10px] text-slate-500">Volitelné cloudové úložiště pro profily a knihovny.</p></div></div>
+                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud"></i></span><div><h3 class="text-sm font-black">Supabase</h3><p class="text-[10px] text-slate-500">Volitelné cloudové úložiště pouze pro profily.</p></div></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
                         <input id="supabase-url-input" type="url" placeholder="https://xxxxx.supabase.co" class="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-emerald-500">
                         <input id="supabase-key-input" type="password" placeholder="Supabase anon key" class="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-emerald-500">
@@ -1211,6 +1235,7 @@
                 notificationDays: state.notificationDays, confirmDelete: state.confirmDelete, startTab: state.startTab
             };
             persistProfiles();
+            if (supabaseClient) syncProfilesToSupabase(false);
         }
         function applyActiveProfileSettings() {
             const ps = activeProfileSettings();
@@ -1296,8 +1321,8 @@
             renderHome();
             applyActiveProfileSettings();
             document.getElementById('api-key-input').value = state.apiKey;
-            document.getElementById('supabase-url-input').value = localStorage.getItem('mfs_supabase_url') || '';
-            document.getElementById('supabase-key-input').value = localStorage.getItem('mfs_supabase_key') || '';
+            document.getElementById('supabase-url-input').value = MFS_SUPABASE_URL;
+            document.getElementById('supabase-key-input').value = MFS_SUPABASE_PUBLISHABLE_KEY;
             initSupabaseClient();
             if (supabaseClient) setTimeout(() => loadProfilesFromSupabase(), 300);
             setCreatorSearchType(creatorSearchType, true);
@@ -1398,8 +1423,12 @@
         function closeProfileEditor(){document.getElementById('profile-editor-modal').classList.add('hidden'); document.body.style.overflow='auto';}
         function saveProfileFromEditor(){
             const name=document.getElementById('profile-name-input').value.trim()||'Nový profil'; const id=document.getElementById('profile-edit-id').value;
-            if(id){ const p=profiles.find(x=>x.id===id); if(p){p.name=name;p.icon=profileEditorIcon;p.color=profileEditorColor;ensureProfileSettings(p);} } else { profiles.push({id:'profile_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,icon:profileEditorIcon,color:profileEditorColor,watchlist:[],settings:defaultProfileSettings(),createdAt:Date.now()}); }
+            let savedProfile=null;
+            if(id){ const p=profiles.find(x=>x.id===id); if(p){p.name=name;p.icon=profileEditorIcon;p.color=profileEditorColor;ensureProfileSettings(p);savedProfile=p;} }
+            else { savedProfile={id:'profile_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,icon:profileEditorIcon,color:profileEditorColor,watchlist:[],settings:defaultProfileSettings(),createdAt:Date.now()}; profiles.push(savedProfile); }
             persistProfiles(); renderProfileSwitcher(); renderProfilesSettings(); renderProfileGate(); closeProfileEditor();
+            // Nový/upravený profil se uloží do Supabase okamžitě, bez reloadu.
+            if(savedProfile && supabaseClient) saveProfileToSupabase(savedProfile);
         }
         function deleteProfile(id){
             if(profiles.length<=1){alert('Musí zůstat alespoň jeden profil.');return;} const p=profiles.find(x=>x.id===id); if(!p)return; if(!confirm(`Opravdu odstranit profil „${p.name}“ včetně jeho knihovny?`))return;
@@ -2948,18 +2977,65 @@
         }
 
         // ===== SUPABASE =====
-        function getSupabaseConfig(){ return { url:localStorage.getItem('mfs_supabase_url')||'', key:localStorage.getItem('mfs_supabase_key')||'' }; }
-        function initSupabaseClient(){ const cfg=getSupabaseConfig(); if(!cfg.url||!cfg.key||!window.supabase) { supabaseClient=null; return false; } try { supabaseClient=window.supabase.createClient(cfg.url,cfg.key); return true; } catch(e){ console.warn(e); supabaseClient=null; return false; } }
-        async function saveProfileToSupabase(profile){ if(!supabaseClient) return; try { await supabaseClient.from('mfs_profiles').upsert({id:profile.id,name:profile.name,icon:profile.icon,color:profile.color,settings:ensureProfileSettings(profile),watchlist:profile.watchlist||[],updated_at:new Date().toISOString()},{onConflict:'id'}); } catch(e){ console.warn('Supabase profil:',e); } }
+        // Supabase je pro tuto PWA nastaveno přímo v aplikaci. Nepoužíváme heslo databáze ani secret key.
+        const MFS_SUPABASE_URL = 'https://nrmyuhymgtdnfacdwweq.supabase.co';
+        const MFS_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_2tmDf4nJ7MhbNEcLZKw6QQ_TGZwL7wl';
+        let supabaseAuthReady = false;
+        function getSupabaseConfig(){ return { url:MFS_SUPABASE_URL, key:MFS_SUPABASE_PUBLISHABLE_KEY }; }
+        function initSupabaseClient(){ const cfg=getSupabaseConfig(); if(!cfg.url||!cfg.key||!window.supabase) { supabaseClient=null; return false; } try { if(!supabaseClient) supabaseClient=window.supabase.createClient(cfg.url,cfg.key); return true; } catch(e){ console.warn(e); supabaseClient=null; return false; } }
+        async function ensureSupabaseAuth(){
+            // Cloud synchronizace profilů už nevyžaduje vytvoření účtu ani přihlášení.
+            return !!initSupabaseClient();
+        }
+        async function saveProfileToSupabase(profile){
+            if(!initSupabaseClient() || !profile) return;
+            try {
+                const {error}=await supabaseClient.from('mfs_profiles').upsert({
+                    id:profile.id, name:profile.name, icon:profile.icon, color:profile.color
+                },{onConflict:'id'});
+                if(error) throw error;
+            } catch(e){ console.warn('Supabase profil:',e); }
+        }
         async function syncProfilesToSupabase(showAlert=false){
-            if(!initSupabaseClient()){ const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase není připojené.'; if(showAlert)alert('Nejdřív vyplň Supabase URL a anon key.'); return; }
-            syncCurrentWatchlistToProfile(); let ok=true; for(const p of profiles){ try { const {error}=await supabaseClient.from('mfs_profiles').upsert({id:p.id,name:p.name,icon:p.icon,color:p.color,settings:ensureProfileSettings(p),watchlist:p.watchlist||[],updated_at:new Date().toISOString()},{onConflict:'id'}); if(error) throw error; } catch(e){ok=false;console.warn(e);break;} }
-            const el=document.getElementById('supabase-status'); if(el)el.textContent=ok?'Supabase připojeno · profily synchronizované.':'Supabase připojeno, ale synchronizace se nepodařila.'; if(showAlert)alert(ok?'Profily a knihovny byly synchronizovány.':'Synchronizace se nepodařila. Zkontroluj tabulku mfs_profiles a RLS.');
+            if(!initSupabaseClient()) return;
+            syncCurrentWatchlistToProfile();
+            let ok=true;
+            try {
+                for(const p of profiles){
+                    const {error}=await supabaseClient.from('mfs_profiles').upsert({
+                        id:p.id, name:p.name, icon:p.icon, color:p.color
+                    },{onConflict:'id'});
+                    if(error) throw error;
+                }
+            } catch(e){ ok=false; console.warn('Supabase synchronizace profilů:',e); }
+            const el=document.getElementById('supabase-status'); if(el)el.textContent=ok?'Supabase připojeno · profily synchronizované.':'Supabase připojeno, ale profily se nepodařilo synchronizovat.';
+            if(showAlert) alert(ok?'Profily byly synchronizovány.':'Synchronizace profilů se nepodařila. Zkontroluj tabulku mfs_profiles a její RLS.');
         }
         async function loadProfilesFromSupabase(){
-            if(!initSupabaseClient()) return; try { const {data,error}=await supabaseClient.from('mfs_profiles').select('*').order('created_at',{ascending:true}); if(error) throw error; if(Array.isArray(data)&&data.length){ profiles=data.map(p=>({id:p.id,name:p.name,icon:p.icon||'fa-user',color:p.color||'indigo',settings:Object.assign({},defaultProfileSettings(),p.settings||{}),watchlist:Array.isArray(p.watchlist)?p.watchlist:[],createdAt:p.created_at})); const ap=activeProfile()||profiles[0]; activeProfileId=ap.id; state.watchlist=ap.watchlist||[]; applyActiveProfileSettings(); persistProfiles(); localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist)); renderProfileSwitcher(); renderProfilesSettings(); renderWatchlist(); renderHome(); renderProfileGate(); } const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase připojeno · data načtena.'; } catch(e){console.warn('Supabase načtení:',e); const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase je připojené, ale data nelze načíst.';}
+            if(!initSupabaseClient()) return;
+            try {
+                const {data,error}=await supabaseClient.from('mfs_profiles').select('*').order('created_at',{ascending:true});
+                if(error) throw error;
+                if(Array.isArray(data)&&data.length){
+                    // Cloud obsahuje pouze profily. Lokální knihovny a nastavení se podle ID zachovají.
+                    const localById=new Map(profiles.map(p=>[p.id,p]));
+                    profiles=data.map(p=>{
+                        const local=localById.get(p.id);
+                        return {
+                            id:p.id, name:p.name, icon:p.icon||'fa-user', color:p.color||'indigo',
+                            settings:local?.settings||defaultProfileSettings(),
+                            watchlist:Array.isArray(local?.watchlist)?local.watchlist:[],
+                            createdAt:p.created_at
+                        };
+                    });
+                    const ap=activeProfile()||profiles[0]; activeProfileId=ap.id; state.watchlist=ap.watchlist||[]; applyActiveProfileSettings(); persistProfiles(); localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist)); renderProfileSwitcher(); renderProfilesSettings(); renderWatchlist(); renderHome(); renderProfileGate();
+                } else if(profiles.length){
+                    await syncProfilesToSupabase(false);
+                }
+                const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase připojeno · profily načteny.';
+            } catch(e){console.warn('Supabase načtení profilů:',e); const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase je připojené, ale profily nelze načíst.';}
         }
-        function saveSupabaseConfig(){ const url=document.getElementById('supabase-url-input')?.value.trim().replace(/\/$/,''); const key=document.getElementById('supabase-key-input')?.value.trim(); localStorage.setItem('mfs_supabase_url',url||'');localStorage.setItem('mfs_supabase_key',key||''); if(initSupabaseClient()){document.getElementById('supabase-status').textContent='Supabase připojeno. Synchronizuji…';syncProfilesToSupabase(true);}else{document.getElementById('supabase-status').textContent='Zkontroluj URL, anon key a připojení.';} }
+        function saveSupabaseConfig(){ const el=document.getElementById('supabase-status'); if(el)el.textContent='Supabase je nastavené · ukládají se pouze profily.'; syncProfilesToSupabase(true); }
 
         // --- POMOCNÉ FUNKCE ---
         function saveToLocalStorage() {
@@ -3057,20 +3133,16 @@
         }
 
         /*
-        SUPABASE TABULKA (spusť v Supabase SQL Editoru):
+        SUPABASE TABULKA – pouze profily, bez vytváření účtu:
         create table if not exists public.mfs_profiles (
           id text primary key,
           name text not null,
           icon text not null default 'fa-user',
           color text not null default 'indigo',
-          settings jsonb not null default '{}'::jsonb,
-          watchlist jsonb not null default '[]'::jsonb,
-          created_at timestamptz not null default now(),
-          updated_at timestamptz not null default now()
+          created_at timestamptz not null default now()
         );
-        -- Pokud tabulka mfs_profiles už existuje ze starší verze, spusť také:
-        -- alter table public.mfs_profiles add column if not exists settings jsonb not null default '{}'::jsonb;
-        -- Pro skutečné víceuživatelské nasazení doporučuji přidat owner_id uuid references auth.users(id) a RLS.
+        -- U této verze se do Supabase NEUKLÁDÁ knihovna ani nastavení profilu.
+        -- Pokud používáš starší tabulku s owner_id, settings nebo watchlist, uprav ji podle pokynů v chatu.
         */
 
         // ===== PWA / OFFLINE PODPORA =====
