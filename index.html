@@ -205,6 +205,52 @@
             }
         }
 
+        /* ===== MOBIL: tlačítka a ovládání se přizpůsobí šířce telefonu ===== */
+        @media (max-width: 639px) {
+            button, .btn, [role="button"] {
+                min-height: 42px;
+                max-width: 100%;
+                touch-action: manipulation;
+            }
+            nav button {
+                min-height: 42px;
+                padding-left: .7rem !important;
+                padding-right: .7rem !important;
+                font-size: .78rem !important;
+            }
+            .profile-trigger {
+                width: 48px !important;
+                height: 48px !important;
+                flex: 0 0 48px;
+            }
+            .profile-avatar { width: 38px !important; height: 38px !important; font-size: 14px !important; }
+            .profile-trigger-chevron { width: 16px; height: 16px; font-size: 6px; }
+            .home-refresh-btn { width: 42px !important; height: 42px !important; min-height: 42px; }
+            .home-link-btn { min-height: 38px; padding: .35rem .5rem; }
+            .profile-gate-inner {
+                max-height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            #profile-gate {
+                overflow: hidden !important;
+                overscroll-behavior: none;
+                touch-action: none;
+                padding: max(12px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom));
+            }
+            .profile-gate-brand { margin-bottom: 18px; }
+            .profile-gate-logo { width: 42px; height: 42px; font-size: 15px; border-radius: 14px; }
+            .profile-gate-title { font-size: clamp(24px, 8vw, 34px); }
+            .profile-gate-subtitle { font-size: 12px; margin-top: 4px; }
+            .profile-gate-grid { gap: 4px; max-height: 58vh; overflow: hidden; }
+            .profile-gate-card { padding: 6px 4px; }
+            .profile-gate-avatar { width: clamp(70px, 22vw, 92px); height: clamp(70px, 22vw, 92px); font-size: clamp(27px, 8vw, 34px); margin-bottom: 7px; border-radius: 20px; }
+            .profile-gate-name { font-size: 13px; }
+            .profile-gate-footer { margin-top: 16px; }
+            .profile-gate-manage { min-height: 40px; padding: 9px 13px; font-size: 11px; }
+        }
+
         /* Extra úzké iPhony */
         @media (max-width: 380px) {
             #watchlist-grid.grid-card-small,
@@ -382,7 +428,7 @@
 
 
         /* ===== ÚVODNÍ VÝBĚR PROFILU ===== */
-        #profile-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 20%,rgba(99,102,241,.18),transparent 36%),radial-gradient(circle at 20% 80%,rgba(56,189,248,.10),transparent 32%),linear-gradient(135deg,#020617 0%,#0b1120 52%,#111827 100%);overflow:auto}
+        #profile-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 20%,rgba(99,102,241,.18),transparent 36%),radial-gradient(circle at 20% 80%,rgba(56,189,248,.10),transparent 32%),linear-gradient(135deg,#020617 0%,#0b1120 52%,#111827 100%);overflow:hidden}
         #profile-gate.hidden{display:none}
         .profile-gate-inner{width:min(100%,980px);text-align:center}
         .profile-gate-brand{display:inline-flex;align-items:center;gap:12px;margin-bottom:34px}
@@ -390,7 +436,7 @@
         .profile-gate-title{font-size:clamp(26px,4vw,42px);font-weight:1000;letter-spacing:-.04em;color:#fff}
         .profile-gate-subtitle{margin-top:8px;color:#94a3b8;font-size:14px}
         .profile-gate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;max-width:900px;margin:0 auto}
-        .profile-gate-card-wrap{position:relative;min-width:0}.profile-gate-edit{position:absolute;top:6px;right:calc(50% - 90px);width:34px;height:34px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:rgba(15,23,42,.82);backdrop-filter:blur(10px);color:#cbd5e1;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;transition:.18s;box-shadow:0 6px 18px rgba(0,0,0,.22);-webkit-tap-highlight-color:transparent;touch-action:manipulation}.profile-gate-edit:hover{background:rgba(99,102,241,.85);color:#fff;border-color:rgba(129,140,248,.7);transform:translateY(-1px)}.profile-gate-edit:active{transform:scale(.94)}
+        .profile-gate-card-wrap{position:relative;min-width:0}.profile-gate-edit{position:absolute;top:4px;right:calc(50% - 64px);width:34px;height:34px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:rgba(15,23,42,.82);backdrop-filter:blur(10px);color:#cbd5e1;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;transition:.18s;box-shadow:0 6px 18px rgba(0,0,0,.22);-webkit-tap-highlight-color:transparent;touch-action:manipulation}.profile-gate-edit:hover{background:rgba(99,102,241,.85);color:#fff;border-color:rgba(129,140,248,.7);transform:translateY(-1px)}.profile-gate-edit:active{transform:scale(.94)}
 .profile-gate-card{border:0;background:transparent;color:#fff;cursor:pointer;padding:12px;border-radius:22px;transition:transform .2s ease,background .2s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
         .profile-gate-card:hover{transform:translateY(-5px);background:rgba(255,255,255,.045)}
         .profile-gate-card:active{transform:scale(.97)}
@@ -403,7 +449,7 @@
         .profile-gate-footer{margin-top:34px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
         .profile-gate-manage{padding:11px 16px;border-radius:13px;border:1px solid rgba(148,163,184,.20);background:rgba(255,255,255,.05);color:#cbd5e1;font-size:12px;font-weight:800;cursor:pointer;transition:.18s}
         .profile-gate-manage:hover{background:rgba(255,255,255,.09);border-color:rgba(148,163,184,.35)}
-        @media(max-width:520px){#profile-gate{padding:20px 14px}.profile-gate-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.profile-gate-avatar{width:92px;height:92px;font-size:34px;border-radius:24px}.profile-gate-card{padding:10px 6px}.profile-gate-edit{top:4px;right:calc(50% - 80px)}}
+        @media(max-width:520px){#profile-gate{padding:20px 14px}.profile-gate-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.profile-gate-avatar{width:92px;height:92px;font-size:34px;border-radius:24px}.profile-gate-card{padding:10px 6px}.profile-gate-edit{top:2px;right:calc(50% - 55px)}}
 
         /* ===== PROFILY ===== */
         .profile-trigger{position:relative;width:56px;height:56px;padding:5px;border-radius:999px;display:flex;align-items:center;justify-content:center;overflow:visible;border:1px solid rgba(148,163,184,.22);background:linear-gradient(145deg,rgba(15,23,42,.98),rgba(2,6,23,.94));color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
@@ -1228,15 +1274,15 @@
             const p=profiles.find(x=>x.id===id); if(!p) return;
             syncCurrentWatchlistToProfile(); activeProfileId=id; state.watchlist=Array.isArray(p.watchlist)?p.watchlist:[];
             localStorage.setItem('mfs_active_profile',id); localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist));
-            const gate=document.getElementById('profile-gate'); if(gate) gate.classList.add('hidden'); document.body.style.overflow='';
+            const gate=document.getElementById('profile-gate'); if(gate) gate.classList.add('hidden'); document.documentElement.style.overflow=''; document.body.style.overflow=''; document.body.style.position=''; document.body.style.width='';
             applyActiveProfileSettings();
             renderProfileSwitcher(); renderProfilesSettings(); checkDemoBanner(); renderWatchlist(); renderHome(); updateNotificationBell();
             if(state.activeTab==='upcoming') renderUpcomingEpisodes();
         }
         function openProfileGateAdd(){ openProfileEditor(''); }
         function openProfileGateEdit(id){ openProfileEditor(id); }
-        function openProfileGateManage(){ const gate=document.getElementById('profile-gate'); if(gate) gate.classList.add('hidden'); document.body.style.overflow=''; openProfilesSettings(); }
-        function showProfileGate(){ renderProfileGate(); const gate=document.getElementById('profile-gate'); if(gate){gate.classList.remove('hidden'); document.body.style.overflow='hidden';} }
+        function openProfileGateManage(){ const gate=document.getElementById('profile-gate'); if(gate) gate.classList.add('hidden'); document.documentElement.style.overflow=''; document.body.style.overflow=''; document.body.style.position=''; document.body.style.width=''; openProfilesSettings(); }
+        function showProfileGate(){ renderProfileGate(); const gate=document.getElementById('profile-gate'); if(gate){gate.classList.remove('hidden'); document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden'; document.body.style.position='fixed'; document.body.style.width='100%';} }
 
         function renderProfileSwitcher() {
             const p=activeProfile(); if(!p) return;
