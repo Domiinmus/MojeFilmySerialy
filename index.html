@@ -685,66 +685,6 @@
   }
 }
 </style>
-<style id="mfs-profile-actions-v2">
-/* Profily – akční tlačítka: skutečně responzivní velikost */
-#settings-modal #settings-profiles-list .profile-settings-actions{
-  display:flex !important;
-  align-items:stretch !important;
-  gap:clamp(4px,1.5vw,8px) !important;
-  width:100% !important;
-  min-width:0 !important;
-  box-sizing:border-box !important;
-}
-#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
-  flex:1 1 0 !important;
-  width:auto !important;
-  min-width:0 !important;
-  max-width:none !important;
-  height:clamp(34px,4vw,44px) !important;
-  min-height:0 !important;
-  padding:0 clamp(9px,2vw,16px) !important;
-  font-size:clamp(11px,1.4vw,13px) !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-  box-sizing:border-box !important;
-}
-#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
-  flex:0 1 clamp(30px,3.2vw,42px) !important;
-  width:clamp(30px,3.2vw,42px) !important;
-  min-width:0 !important;
-  max-width:42px !important;
-  height:clamp(34px,4vw,44px) !important;
-  min-height:0 !important;
-  padding:0 !important;
-  font-size:clamp(10px,1.5vw,14px) !important;
-  box-sizing:border-box !important;
-}
-#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon i{margin:0 !important;}
-@media(max-width:639px){
-  #settings-modal #settings-profiles-list .profile-settings-actions{gap:5px !important;}
-  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
-    flex:1 1 auto !important;
-    min-width:76px !important;
-    height:36px !important;
-    font-size:12px !important;
-    padding:0 11px !important;
-  }
-  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
-    flex:0 0 clamp(30px,8vw,38px) !important;
-    width:clamp(30px,8vw,38px) !important;
-    height:36px !important;
-    font-size:11px !important;
-  }
-}
-@media(max-width:380px){
-  #settings-modal #settings-profiles-list .profile-settings-actions{gap:4px !important;}
-  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{min-width:72px !important;font-size:11px !important;padding:0 8px !important;}
-  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{flex-basis:29px !important;width:29px !important;height:32px !important;font-size:10px !important;}
-}
-/* API klíč je pevně v HTML, uživatel ho nemusí vyplňovat */
-#api-key-input{opacity:.7;cursor:default;}
-</style>
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
 
@@ -1337,8 +1277,8 @@
                     <div class="mt-3"><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Po spuštění otevřít</label><select id="setting-start-tab" onchange="setStartTab(this.value)" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs"><option value="home">Domů</option><option value="watchlist">Knihovnu</option><option value="upcoming">Nadcházející</option><option value="creator">Přidat / Vytvořit</option><option value="stats">Statistiky</option></select></div>
                 </div>
                 <div class="settings-card">
-                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-key"></i></span><div><h3 class="text-sm font-black">TMDb API</h3><p class="text-[10px] text-slate-500">TMDb API klíč je nastaven přímo v aplikaci.</p></div></div>
-                    <div class="flex flex-col sm:flex-row gap-2 mt-3"><input type="password" id="api-key-input" placeholder="TMDb API klíč je nastaven automaticky" readonly class="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-amber-500 theme-focus-border"><button onclick="saveApiKey()" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs theme-bg theme-text">Uložit klíč</button></div>
+                    <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-key"></i></span><div><h3 class="text-sm font-black">TMDb API</h3><p class="text-[10px] text-slate-500">Klíč je uložen pouze v tomto prohlížeči.</p></div></div>
+                    <div class="flex flex-col sm:flex-row gap-2 mt-3"><input type="password" id="api-key-input" placeholder="Vložte TMDb API klíč..." class="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-amber-500 theme-focus-border"><button onclick="saveApiKey()" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs theme-bg theme-text">Uložit klíč</button></div>
                 </div>
                 <div id="settings-profiles-card" class="settings-card">
                     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
@@ -1422,7 +1362,7 @@
             };
             persistProfiles();
             const p2=activeProfile();
-            if(p2 && supabaseClient){ p2.apiKey=MFS_TMDB_API_KEY; p2.searchType=creatorSearchType||p2.searchType||'movie'; saveProfileToSupabase(p2); }
+            if(p2 && supabaseClient){ p2.apiKey=state.apiKey||p2.apiKey||''; p2.searchType=creatorSearchType||p2.searchType||'movie'; saveProfileToSupabase(p2); }
         }
         function applyActiveProfileSettings() {
             const ps = activeProfileSettings();
@@ -1471,7 +1411,7 @@
         loadProfiles();
         let state = {
             watchlist: activeProfile().watchlist || [],
-            apiKey: MFS_TMDB_API_KEY,
+            apiKey: localStorage.getItem('mfs_api_key') || '',
             activeTab: 'home',
             currentDetailId: null,
             homeRefresh: { shows: 0, movies: 0 },
@@ -1507,7 +1447,7 @@
             renderWatchlist();
             renderHome();
             applyActiveProfileSettings();
-            const apiInput = document.getElementById('api-key-input'); if (apiInput) apiInput.value = MFS_TMDB_API_KEY;
+            document.getElementById('api-key-input').value = state.apiKey;
             initSupabaseClient();
             if (supabaseClient) setTimeout(() => loadProfilesFromSupabase(), 300);
             setCreatorSearchType(creatorSearchType, true);
@@ -1611,10 +1551,10 @@
         function closeProfileEditor(){document.getElementById('profile-editor-modal').classList.add('hidden'); document.body.style.overflow='auto';}
         async function saveProfileFromEditor(){
             const name=document.getElementById('profile-name-input').value.trim()||'Nový profil'; const id=document.getElementById('profile-edit-id').value;
-            if(id){ const p=profiles.find(x=>x.id===id); if(p){p.name=name;p.icon=profileEditorIcon;p.color=profileEditorColor;ensureProfileSettings(p);} } else { profiles.push({id:'profile_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,icon:profileEditorIcon,color:profileEditorColor,watchlist:[],settings:defaultProfileSettings(),apiKey:MFS_TMDB_API_KEY,searchType:creatorSearchType||'movie',createdAt:Date.now()}); }
+            if(id){ const p=profiles.find(x=>x.id===id); if(p){p.name=name;p.icon=profileEditorIcon;p.color=profileEditorColor;ensureProfileSettings(p);} } else { profiles.push({id:'profile_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,icon:profileEditorIcon,color:profileEditorColor,watchlist:[],settings:defaultProfileSettings(),apiKey:state.apiKey||'',searchType:creatorSearchType||'movie',createdAt:Date.now()}); }
             persistProfiles();
             const savedProfile=id ? profiles.find(x=>x.id===id) : profiles[profiles.length-1];
-            if(savedProfile){ savedProfile.apiKey=MFS_TMDB_API_KEY; savedProfile.searchType=creatorSearchType||savedProfile.searchType||'movie'; persistProfiles(); if(!supabaseClient) initSupabaseClient(); if(supabaseClient){ const cloudOk=await saveProfileToSupabase(savedProfile); if(!cloudOk) console.warn('Nový profil se nepodařilo uložit do Supabase. Zkontroluj SQL/RLS tabulky mfs_profiles.'); } }
+            if(savedProfile){ savedProfile.apiKey=state.apiKey||savedProfile.apiKey||''; savedProfile.searchType=creatorSearchType||savedProfile.searchType||'movie'; persistProfiles(); if(!supabaseClient) initSupabaseClient(); if(supabaseClient){ const cloudOk=await saveProfileToSupabase(savedProfile); if(!cloudOk) console.warn('Nový profil se nepodařilo uložit do Supabase. Zkontroluj SQL/RLS tabulky mfs_profiles.'); } }
             renderProfileSwitcher(); renderProfilesSettings(); renderProfileGate(); closeProfileEditor();
         }
         function deleteProfile(id){
@@ -3179,8 +3119,6 @@
         // Používá se pouze publishable key. Secret/service_role key sem nikdy nedávej.
         const MFS_SUPABASE_URL = 'https://nrmyuhymgtdnfacdwweq.supabase.co';
         const MFS_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_2tmDf4nJ7MhbNEcLZKw6QQ_TGZwL7wl';
-        // TMDb klíč je pevně nastavený v aplikaci – profily ho nemusí zadávat.
-        const MFS_TMDB_API_KEY = 'f38cd66467f5737752cd8ccd7de73447';
         let supabaseClient = null;
 
         // Bez účtu oddělujeme profily podle instalace prohlížeče.
@@ -3224,7 +3162,7 @@
                     color: profile.color || 'indigo',
                     watchlist: Array.isArray(profile.watchlist) ? profile.watchlist : [],
                     settings: Object.assign({}, defaultProfileSettings(), profile.settings || {}),
-                    api_key: MFS_TMDB_API_KEY,
+                    api_key: String(profile.apiKey || ''),
                     search_type: profile.searchType || 'movie'
                 };
                 const {error} = await supabaseClient.from('mfs_profiles').upsert(payload, {onConflict:'id'});
@@ -3273,7 +3211,7 @@
                             color:p.color||'indigo',
                             watchlist:Array.isArray(p.watchlist)?p.watchlist:(Array.isArray(local?.watchlist)?local.watchlist:[]),
                             settings:Object.assign({},defaultProfileSettings(),local?.settings||{},p.settings||{}),
-                            apiKey: MFS_TMDB_API_KEY,
+                            apiKey: typeof p.api_key === 'string' ? p.api_key : (local?.apiKey || ''),
                             searchType:p.search_type || local?.searchType || 'movie',
                             createdAt:p.created_at?new Date(p.created_at).getTime():(local?.createdAt||Date.now())
                         };
@@ -3284,7 +3222,7 @@
                     if(!profiles.some(p=>p.id===activeProfileId)) activeProfileId=profiles[0].id;
                     const ap=activeProfile();
                     state.watchlist=Array.isArray(ap?.watchlist)?ap.watchlist:[];
-                    state.apiKey=MFS_TMDB_API_KEY;
+                    state.apiKey=ap?.apiKey||'';
                     creatorSearchType=ap?.searchType||creatorSearchType;
                     applyActiveProfileSettings();
                     persistProfiles();
@@ -3315,7 +3253,7 @@
                     animations: state.animations, autoSync: state.autoSync, notifications: state.notifications,
                     notificationDays: state.notificationDays, confirmDelete: state.confirmDelete, startTab: state.startTab
                 });
-                p.apiKey = MFS_TMDB_API_KEY;
+                p.apiKey = state.apiKey || '';
                 p.searchType = creatorSearchType || 'movie';
                 persistProfiles();
                 if (supabaseClient) {
