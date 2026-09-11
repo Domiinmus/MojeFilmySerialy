@@ -707,6 +707,111 @@
 }
 </style>
 
+<style id="mfs-mobile-profile-hard-fix">
+/* HARD FIX: profile action buttons must never overlap on narrow phones */
+@media (max-width:639px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    display:grid !important;
+    grid-template-columns:minmax(78px,1fr) repeat(3,minmax(28px,1fr)) !important;
+    gap:5px !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions > button{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    margin:0 !important;
+    padding:0 !important;
+    box-sizing:border-box !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    min-width:0 !important;
+    width:100% !important;
+    padding:0 6px !important;
+    font-size:12px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:clip !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit i{
+    margin-right:3px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+    min-width:0 !important;
+    width:100% !important;
+    padding:0 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+}
+@media (max-width:360px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    grid-template-columns:minmax(74px,1fr) repeat(3,minmax(27px,1fr)) !important;
+    gap:4px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions > button{
+    height:32px !important;
+    min-height:32px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    font-size:11px !important;
+    padding:0 4px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit i{
+    margin-right:2px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+    font-size:10px !important;
+  }
+}
+@media (max-width:320px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    grid-template-columns:minmax(70px,1fr) repeat(3,minmax(25px,1fr)) !important;
+    gap:3px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    font-size:10px !important;
+    padding:0 3px !important;
+  }
+}
+</style>
+
+<style id="mfs-mobile-profile-hard-fix">
+/* HARD FIX: profile action buttons must never overlap on narrow phones */
+@media (max-width:639px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    display:grid !important;
+    grid-template-columns:minmax(78px,1fr) repeat(3,minmax(28px,1fr)) !important;
+    gap:5px !important; width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions > button{
+    width:100% !important; min-width:0 !important; max-width:100% !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    min-width:0 !important; width:100% !important; padding:0 6px !important; font-size:12px !important; white-space:nowrap !important; overflow:hidden !important; text-overflow:clip !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit i{margin-right:3px !important;}
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+    min-width:0 !important; width:100% !important; padding:0 !important; display:flex !important; align-items:center !important; justify-content:center !important;
+  }
+}
+@media (max-width:360px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{grid-template-columns:minmax(74px,1fr) repeat(3,minmax(27px,1fr)) !important;gap:4px !important;}
+  #settings-modal #settings-profiles-list .profile-settings-actions > button{height:32px !important;min-height:32px !important;}
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{font-size:11px !important;padding:0 4px !important;}
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit i{margin-right:2px !important;}
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{font-size:10px !important;}
+}
+@media (max-width:320px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{grid-template-columns:minmax(70px,1fr) repeat(3,minmax(25px,1fr)) !important;gap:3px !important;}
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{font-size:10px !important;padding:0 3px !important;}
+}
+</style>
+
 <style id="mfs-mobile-profile-final">
 /* ===== FINÁLNÍ PROFILY – TELEFON + PC ===== */
 #settings-modal #settings-profiles-list .profile-settings-actions{
