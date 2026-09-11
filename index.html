@@ -251,6 +251,52 @@
             .profile-gate-manage { min-height: 40px; padding: 9px 13px; font-size: 11px; }
         }
 
+        /* ===== PROFILY V NASTAVENÍ: responzivní akční ikony ===== */
+        .profile-settings-actions {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            width: 100%;
+        }
+        .profile-settings-actions .profile-action-edit {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .profile-settings-actions .profile-action-icon {
+            flex: 0 0 clamp(38px, 3vw, 46px);
+            width: clamp(38px, 3vw, 46px);
+            height: clamp(38px, 3vw, 46px);
+            min-height: 0;
+            padding: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(.72rem, 2vw, .9rem) !important;
+            line-height: 1;
+        }
+        .profile-settings-actions .profile-action-edit {
+            min-height: clamp(38px, 3vw, 46px);
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            font-size: clamp(.68rem, 2vw, .78rem) !important;
+        }
+        @media (max-width: 639px) {
+            .profile-settings-actions {
+                gap: clamp(.3rem, 2vw, .5rem);
+            }
+            .profile-settings-actions .profile-action-icon {
+                flex-basis: clamp(34px, 10vw, 42px);
+                width: clamp(34px, 10vw, 42px);
+                height: clamp(34px, 10vw, 42px);
+                border-radius: clamp(8px, 2.5vw, 11px);
+                font-size: clamp(.68rem, 4vw, .82rem) !important;
+            }
+            .profile-settings-actions .profile-action-edit {
+                min-height: clamp(34px, 10vw, 42px);
+                font-size: clamp(.62rem, 3vw, .72rem) !important;
+            }
+        }
+
         /* Extra úzké iPhony */
         @media (max-width: 380px) {
             #watchlist-grid.grid-card-small,
@@ -1322,11 +1368,11 @@
                     <span class="profile-mini-avatar ${profileColorClass(p.color)} w-11 h-11"><i class="fa-solid ${p.icon}"></i></span>
                     <div class="min-w-0"><b class="text-sm block truncate">${escapeHtml(p.name)}</b><span class="text-[10px] text-slate-500">${(p.watchlist||[]).length} titulů ${p.id===activeProfileId?'· aktivní':''}</span></div>
                 </div>
-                <div class="flex gap-2 mt-3">
-                    <button onclick="openProfileEditor('${p.id}')" class="flex-1 py-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-bold"><i class="fa-solid fa-pen mr-1"></i>Upravit</button>
-                    <button onclick="exportProfileData('${p.id}')" class="py-2 px-3 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/15 text-[10px] font-bold" title="Exportovat data tohoto profilu"><i class="fa-solid fa-download"></i></button>
-                    <button onclick="importProfileData('${p.id}')" class="py-2 px-3 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 text-[10px] font-bold" title="Importovat data do tohoto profilu"><i class="fa-solid fa-upload"></i></button>
-                    <button onclick="deleteProfile('${p.id}')" class="py-2 px-3 rounded-lg bg-red-500/10 text-red-400 border border-red-500/15 text-[10px] font-bold" ${profiles.length<=1?'disabled':''} title="Odstranit profil"><i class="fa-solid fa-trash"></i></button>
+                <div class="profile-settings-actions mt-3">
+                    <button onclick="openProfileEditor('${p.id}')" class="profile-action-edit rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-bold"><i class="fa-solid fa-pen mr-1"></i>Upravit</button>
+                    <button onclick="exportProfileData('${p.id}')" class="profile-action-icon rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/15 font-bold" title="Exportovat data tohoto profilu" aria-label="Exportovat data tohoto profilu"><i class="fa-solid fa-download"></i></button>
+                    <button onclick="importProfileData('${p.id}')" class="profile-action-icon rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 font-bold" title="Importovat data do tohoto profilu" aria-label="Importovat data do tohoto profilu"><i class="fa-solid fa-upload"></i></button>
+                    <button onclick="deleteProfile('${p.id}')" class="profile-action-icon rounded-lg bg-red-500/10 text-red-400 border border-red-500/15 font-bold" ${profiles.length<=1?'disabled':''} title="Odstranit profil" aria-label="Odstranit profil"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>`).join('');
         }
