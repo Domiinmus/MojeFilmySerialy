@@ -612,7 +612,7 @@
 /* PROFILE ACTION BUTTONS – mobile: force the buttons to fit the available width */
 #settings-modal #settings-profiles-list .profile-settings-actions{
   display:grid !important;
-  grid-template-columns:minmax(0,1fr) 32px 32px 32px !important;
+  grid-template-columns:minmax(92px,1fr) 32px 32px 32px !important;
   gap:6px !important;
   width:100% !important;
   max-width:100% !important;
@@ -653,35 +653,35 @@
 }
 @media (max-width:639px){
   #settings-modal #settings-profiles-list .profile-settings-actions{
-    grid-template-columns:minmax(0,1fr) clamp(28px,7.5vw,34px) clamp(28px,7.5vw,34px) clamp(28px,7.5vw,34px) !important;
+    grid-template-columns:minmax(88px,1fr) clamp(28px,7.5vw,34px) clamp(28px,7.5vw,34px) clamp(28px,7.5vw,34px) !important;
     gap:clamp(4px,1.5vw,6px) !important;
   }
   #settings-modal #settings-profiles-list .profile-settings-actions > button{
-    height:clamp(28px,8vw,34px) !important;
+    height:clamp(30px,8vw,36px) !important;
   }
   #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
     font-size:clamp(10px,2.8vw,12px) !important;
     border-radius:clamp(6px,2vw,8px) !important;
   }
   #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
-    font-size:clamp(10px,2.7vw,12px) !important;
-    padding:0 clamp(5px,2vw,8px) !important;
+    font-size:clamp(11px,2.9vw,13px) !important;
+    padding:0 10px !important;
   }
 }
 @media (max-width:380px){
   #settings-modal #settings-profiles-list .profile-settings-actions{
-    grid-template-columns:minmax(0,1fr) 28px 28px 28px !important;
+    grid-template-columns:minmax(84px,1fr) 28px 28px 28px !important;
     gap:4px !important;
   }
   #settings-modal #settings-profiles-list .profile-settings-actions > button{
-    height:28px !important;
+    height:30px !important;
   }
   #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
     font-size:10px !important;
   }
   #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
-    font-size:10px !important;
-    padding:0 5px !important;
+    font-size:11px !important;
+    padding:0 8px !important;
   }
 }
 </style>
@@ -1549,12 +1549,12 @@
             const io=document.getElementById('profile-icon-options'), co=document.getElementById('profile-color-options'); if(io) io.innerHTML=PROFILE_ICONS.map(i=>`<button type="button" onclick="profileEditorIcon='${i}';renderProfileEditorOptions()" class="w-10 h-10 rounded-xl border ${profileEditorIcon===i?'border-indigo-500 ring-2 ring-indigo-500/30':'border-slate-200 dark:border-slate-800'} bg-slate-100 dark:bg-slate-950"><i class="fa-solid ${i}"></i></button>`).join(''); if(co) co.innerHTML=PROFILE_COLORS.map(c=>`<button type="button" onclick="profileEditorColor='${c}';renderProfileEditorOptions()" class="w-9 h-9 rounded-full ${'bg-'+c+'-500'} ${profileEditorColor===c?'ring-2 ring-white ring-offset-2 ring-offset-slate-900':''}" title="${c}"></button>`).join('');
         }
         function closeProfileEditor(){document.getElementById('profile-editor-modal').classList.add('hidden'); document.body.style.overflow='auto';}
-        function saveProfileFromEditor(){
+        async function saveProfileFromEditor(){
             const name=document.getElementById('profile-name-input').value.trim()||'Nový profil'; const id=document.getElementById('profile-edit-id').value;
             if(id){ const p=profiles.find(x=>x.id===id); if(p){p.name=name;p.icon=profileEditorIcon;p.color=profileEditorColor;ensureProfileSettings(p);} } else { profiles.push({id:'profile_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,icon:profileEditorIcon,color:profileEditorColor,watchlist:[],settings:defaultProfileSettings(),apiKey:state.apiKey||'',searchType:creatorSearchType||'movie',createdAt:Date.now()}); }
             persistProfiles();
             const savedProfile=id ? profiles.find(x=>x.id===id) : profiles[profiles.length-1];
-            if(savedProfile){ savedProfile.apiKey=state.apiKey||savedProfile.apiKey||''; savedProfile.searchType=creatorSearchType||savedProfile.searchType||'movie'; persistProfiles(); if(supabaseClient) saveProfileToSupabase(savedProfile); }
+            if(savedProfile){ savedProfile.apiKey=state.apiKey||savedProfile.apiKey||''; savedProfile.searchType=creatorSearchType||savedProfile.searchType||'movie'; persistProfiles(); if(!supabaseClient) initSupabaseClient(); if(supabaseClient){ const cloudOk=await saveProfileToSupabase(savedProfile); if(!cloudOk) console.warn('Nový profil se nepodařilo uložit do Supabase. Zkontroluj SQL/RLS tabulky mfs_profiles.'); } }
             renderProfileSwitcher(); renderProfilesSettings(); renderProfileGate(); closeProfileEditor();
         }
         function deleteProfile(id){
@@ -3359,34 +3359,41 @@
         Poznámka: při anonymním přístupu není databáze zabezpečená proti cizímu čtení/zápisu; do této tabulky proto ukládej jen data určená pro tuto aplikaci.
 
         create table if not exists public.mfs_profiles (
-  id text primary key,
-  name text not null,
-  icon text not null default 'fa-user',
-  color text not null default 'indigo',
-  watchlist jsonb not null default '[]'::jsonb,
-  settings jsonb not null default '{}'::jsonb,
-  api_key text not null default '',
-  search_type text not null default 'movie',
-  created_at timestamptz not null default now()
-);
+          id text primary key,
+          name text not null,
+          icon text not null default 'fa-user',
+          color text not null default 'indigo',
+          watchlist jsonb not null default '[]'::jsonb,
+          settings jsonb not null default '{}'::jsonb,
+          api_key text not null default '',
+          search_type text not null default 'movie',
+          created_at timestamptz not null default now()
+        );
 
-alter table public.mfs_profiles add column if not exists watchlist jsonb not null default '[]'::jsonb;
-alter table public.mfs_profiles add column if not exists settings jsonb not null default '{}'::jsonb;
-alter table public.mfs_profiles add column if not exists api_key text not null default '';
-alter table public.mfs_profiles add column if not exists search_type text not null default 'movie';
+        -- Migrace staré verze tabulky, pokud už mfs_profiles existuje.
+        alter table public.mfs_profiles add column if not exists watchlist jsonb not null default '[]'::jsonb;
+        alter table public.mfs_profiles add column if not exists settings jsonb not null default '{}'::jsonb;
+        alter table public.mfs_profiles add column if not exists api_key text not null default '';
+        alter table public.mfs_profiles add column if not exists search_type text not null default 'movie';
+        alter table public.mfs_profiles drop column if exists owner_id;
+        alter table public.mfs_profiles alter column id type text;
 
-alter table public.mfs_profiles enable row level security;
-grant select, insert, update, delete on public.mfs_profiles to anon;
+        alter table public.mfs_profiles enable row level security;
+        grant select, insert, update, delete on public.mfs_profiles to anon;
 
-drop policy if exists "MFS anon read profiles" on public.mfs_profiles;
-drop policy if exists "MFS anon create profiles" on public.mfs_profiles;
-drop policy if exists "MFS anon update profiles" on public.mfs_profiles;
-drop policy if exists "MFS anon delete profiles" on public.mfs_profiles;
+        drop policy if exists "Users can see their own profiles" on public.mfs_profiles;
+        drop policy if exists "Users can create their own profiles" on public.mfs_profiles;
+        drop policy if exists "Users can update their own profiles" on public.mfs_profiles;
+        drop policy if exists "Users can delete their own profiles" on public.mfs_profiles;
+        drop policy if exists "MFS anon read profiles" on public.mfs_profiles;
+        drop policy if exists "MFS anon create profiles" on public.mfs_profiles;
+        drop policy if exists "MFS anon update profiles" on public.mfs_profiles;
+        drop policy if exists "MFS anon delete profiles" on public.mfs_profiles;
 
-create policy "MFS anon read profiles" on public.mfs_profiles for select to anon using (true);
-create policy "MFS anon create profiles" on public.mfs_profiles for insert to anon with check (true);
-create policy "MFS anon update profiles" on public.mfs_profiles for update to anon using (true) with check (true);
-create policy "MFS anon delete profiles" on public.mfs_profiles for delete to anon using (true);
+        create policy "MFS anon read profiles" on public.mfs_profiles for select to anon using (true);
+        create policy "MFS anon create profiles" on public.mfs_profiles for insert to anon with check (true);
+        create policy "MFS anon update profiles" on public.mfs_profiles for update to anon using (true) with check (true);
+        create policy "MFS anon delete profiles" on public.mfs_profiles for delete to anon using (true);
 */
 
         // ===== PWA / OFFLINE PODPORA =====
