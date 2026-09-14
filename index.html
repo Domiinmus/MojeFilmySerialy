@@ -926,6 +926,117 @@
   .profile-gate-footer{margin-top:20px !important; padding-bottom:8px !important}
 }
 </style>
+
+<style id="mfs-profile-actions-clean-final">
+/* Clean final layout for profile action buttons */
+#settings-modal #settings-profiles-list .profile-settings-actions{
+  display:grid !important;
+  grid-template-columns:minmax(110px,1fr) 36px 36px 36px !important;
+  gap:6px !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  overflow:visible !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions > button{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  height:38px !important;
+  min-height:38px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+  min-width:0 !important;
+  padding:0 10px !important;
+  font-size:11px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:clip !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit i{
+  margin-right:4px !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+  width:100% !important;
+  min-width:0 !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:12px !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon i{margin:0 !important}
+
+/* Phones: fit the complete row into the actual card width */
+@media (max-width:639px){
+  #settings-modal #settings-profiles-list .profile-card{
+    min-width:0 !important;
+    width:100% !important;
+    overflow:hidden !important;
+    box-sizing:border-box !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    grid-template-columns:minmax(0,1fr) repeat(3,32px) !important;
+    gap:5px !important;
+    width:100% !important;
+    max-width:100% !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions > button{
+    height:34px !important;
+    min-height:34px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    min-width:0 !important;
+    padding:0 8px !important;
+    font-size:11px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+    width:32px !important;
+    min-width:32px !important;
+    max-width:32px !important;
+    font-size:11px !important;
+  }
+}
+@media (max-width:360px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    grid-template-columns:minmax(0,1fr) repeat(3,29px) !important;
+    gap:4px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions > button{
+    height:32px !important;
+    min-height:32px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+    width:29px !important;
+    min-width:29px !important;
+    max-width:29px !important;
+    font-size:10px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    font-size:10px !important;
+    padding:0 6px !important;
+  }
+}
+@media (max-width:320px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    grid-template-columns:minmax(0,1fr) repeat(3,27px) !important;
+    gap:3px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+    width:27px !important;
+    min-width:27px !important;
+    max-width:27px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    font-size:10px !important;
+    padding:0 5px !important;
+  }
+}
+</style>
+
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
 
@@ -1063,7 +1174,7 @@
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tam, kde jsi skončil.</p>
                         </div>
                     </div>
-                    <button onclick="switchTab('watchlist')" class="home-link-btn shrink-0">Zobrazit vše <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                    <button onclick="openHomeLibraryView('continueShows')" class="home-link-btn shrink-0">Zobrazit vše <i class="fa-solid fa-arrow-right ml-1"></i></button>
                 </div>
                 <div id="home-continue-grid" class="home-continue-grid grid gap-3"></div>
             </div>
@@ -1087,9 +1198,10 @@
                                     <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nově přidané seriály, které jsi ještě neviděl.</p>
                                 </div>
                             </div>
-                            <button onclick="refreshHomeRecommendations('shows')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
-                                <i class="fa-solid fa-rotate"></i>
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="refreshHomeRecommendations('shows')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy"><i class="fa-solid fa-rotate"></i></button>
+                                <button onclick="openHomeLibraryView('unseenShows')" class="home-link-btn">Zobrazit vše <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                            </div>
                         </div>
                         <div id="home-shows-grid" class="home-recommend-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
                     </div>
@@ -1103,9 +1215,10 @@
                                     <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Nově přidané filmy, které jsi ještě neviděl.</p>
                                 </div>
                             </div>
-                            <button onclick="refreshHomeRecommendations('movies')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
-                                <i class="fa-solid fa-rotate"></i>
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="refreshHomeRecommendations('movies')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy"><i class="fa-solid fa-rotate"></i></button>
+                                <button onclick="openHomeLibraryView('unseenMovies')" class="home-link-btn">Zobrazit vše <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                            </div>
                         </div>
                         <div id="home-movies-grid" class="home-recommend-grid grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
                     </div>
@@ -1119,9 +1232,10 @@
                                     <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Tvoje nejlépe hodnocené filmy a seriály, které jsi už viděl.</p>
                                 </div>
                             </div>
-                            <button onclick="refreshHomeRecommendations('topRated')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy">
-                                <i class="fa-solid fa-rotate"></i>
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="refreshHomeRecommendations('topRated')" class="home-refresh-btn" title="Obnovit tipy" aria-label="Obnovit tipy"><i class="fa-solid fa-rotate"></i></button>
+                                <button onclick="openHomeLibraryView('topRated')" class="home-link-btn">Zobrazit vše <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                            </div>
                         </div>
 
                         <div class="space-y-5">
@@ -1156,23 +1270,23 @@
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <div class="relative flex-1 sm:flex-none">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                        <input type="text" id="search-library" oninput="renderWatchlist()" placeholder="Hledat v knihovně..." class="w-full sm:w-48 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                        <input type="text" id="search-library" oninput="state.homeLibraryFilter='';renderWatchlist()" placeholder="Hledat v knihovně..." class="w-full sm:w-48 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
                     </div>
-                    <select id="filter-type" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                    <select id="filter-type" onchange="state.homeLibraryFilter='';renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
                         <option value="all">Všechny typy</option>
                         <option value="show">Seriály</option>
                         <option value="movie">Filmy</option>
                     </select>
-                    <select id="filter-status" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                    <select id="filter-status" onchange="state.homeLibraryFilter='';renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
                         <option value="all">Všechny stavy</option>
                         <option value="watching">Rozkoukané</option>
                         <option value="completed">Dokončené</option>
                         <option value="not_started">Nezačaté</option>
                     </select>
-                    <select id="filter-genre" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                    <select id="filter-genre" onchange="state.homeLibraryFilter='';renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
                         <option value="all">Všechny žánry</option>
                     </select>
-                    <select id="sort-library" onchange="renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
+                    <select id="sort-library" onchange="state.homeLibraryFilter='';renderWatchlist()" class="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 focus:outline-none focus:border-amber-500 theme-focus-border">
                         <option value="newest">Nejnovější</option>
                         <option value="oldest">Nejstarší</option>
                         <option value="title">Podle názvu (A-Z)</option>
@@ -1828,6 +1942,9 @@
 
         // Přepínání záložek
         function switchTab(tabId) {
+            // Běžné otevření Knihovny vždy začíná bez speciálního filtru z Domů.
+            // openHomeLibraryView() ho nastaví znovu hned po přepnutí.
+            if (tabId === 'watchlist') state.homeLibraryFilter = '';
             state.activeTab = tabId;
             const tabs = ['home', 'watchlist', 'upcoming', 'creator', 'stats'];
             
@@ -1845,7 +1962,13 @@
             activeTabBtn.className = `px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${activeClasses}`;
 
             if (tabId === 'home') {
+                state.homeLibraryFilter = '';
                 renderHome();
+            }
+            if (tabId === 'watchlist') {
+                // openHomeLibraryView() nastaví filtr znovu až po přepnutí záložky.
+                // Běžné otevření Knihovny proto vždy ukáže celou knihovnu.
+                if (!state.homeLibraryFilter) renderWatchlist();
             }
             if (tabId === 'stats') {
                 calculateStats();
@@ -2150,6 +2273,43 @@
             genreSelect.value = genres.includes(oldGenre) ? oldGenre : 'all';
         }
 
+        // Otevře Knihovnu přesně s obsahem, který odpovídá konkrétní sekci na Domů.
+        function openHomeLibraryView(mode) {
+            state.homeLibraryFilter = mode || '';
+            const type = document.getElementById('filter-type');
+            const status = document.getElementById('filter-status');
+            const genre = document.getElementById('filter-genre');
+            const search = document.getElementById('search-library');
+            const sort = document.getElementById('sort-library');
+            if (search) search.value = '';
+            if (genre) genre.value = 'all';
+            if (type) type.value = 'all';
+            if (status) status.value = 'all';
+            if (sort) sort.value = mode === 'topRated' ? 'rating' : 'newest';
+            if (mode === 'continueShows' || mode === 'unseenShows') {
+                if (type) type.value = 'show';
+                if (status) status.value = mode === 'continueShows' ? 'watching' : 'not_started';
+            } else if (mode === 'unseenMovies') {
+                if (type) type.value = 'movie';
+                if (status) status.value = 'not_started';
+            }
+            switchTab('watchlist');
+            renderWatchlist();
+            const labels = {
+                continueShows: 'Rozkoukané seriály',
+                unseenShows: 'Nezhlédnuté seriály',
+                unseenMovies: 'Nezhlédnuté filmy',
+                topRated: 'Nejlépe hodnocené (8–10)'
+            };
+            const title = document.querySelector('#section-watchlist h2');
+            if (title) {
+                const icon = title.querySelector('i');
+                title.innerHTML = '';
+                if (icon) title.appendChild(icon);
+                title.appendChild(document.createTextNode(' ' + (labels[mode] || 'Moje Sledování')));
+            }
+        }
+
         function renderWatchlist() {
             const grid = document.getElementById('watchlist-grid');
             const creatorCount = document.getElementById('creator-library-count');
@@ -2164,6 +2324,18 @@
             grid.innerHTML = '';
 
             let filteredList = [...state.watchlist];
+
+            // Speciální filtr z tlačítka „Zobrazit vše“ na Domů.
+            // Ten je záměrně přesný, aby se nikdy nezobrazily jiné typy titulů.
+            if (state.homeLibraryFilter === 'continueShows') {
+                filteredList = filteredList.filter(item => item.type === 'show' && getProgressPercent(item) > 0 && getProgressPercent(item) < 100);
+            } else if (state.homeLibraryFilter === 'unseenShows') {
+                filteredList = filteredList.filter(item => item.type === 'show' && getProgressPercent(item) === 0);
+            } else if (state.homeLibraryFilter === 'unseenMovies') {
+                filteredList = filteredList.filter(item => item.type === 'movie' && getProgressPercent(item) === 0);
+            } else if (state.homeLibraryFilter === 'topRated') {
+                filteredList = filteredList.filter(item => getProgressPercent(item) >= 100 && Number(item.rating) >= 8);
+            }
 
             // Filtrování
             if (filterType !== 'all') filteredList = filteredList.filter(item => item.type === filterType);
