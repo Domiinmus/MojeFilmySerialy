@@ -1036,6 +1036,55 @@
   }
 }
 </style>
+<style id="profile-actions-final-layout">
+/* Profilová tlačítka: Upravit vždy pod ikonovými akcemi. */
+#settings-modal #settings-profiles-list .profile-settings-actions{
+  display:grid !important;
+  grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+  gap:8px !important;
+  width:100% !important;
+  align-items:stretch !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions > button{
+  min-width:0 !important;
+  width:100% !important;
+  height:38px !important;
+  min-height:38px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+  grid-column:1 / -1 !important;
+  grid-row:2 !important;
+  padding:0 12px !important;
+  font-size:12px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+#settings-modal #settings-profiles-list .profile-settings-actions .profile-action-icon{
+  grid-row:1 !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+@media (max-width:639px){
+  #settings-modal #settings-profiles-list .profile-settings-actions{
+    grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+    gap:6px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions > button{
+    height:36px !important;
+    min-height:36px !important;
+  }
+  #settings-modal #settings-profiles-list .profile-settings-actions .profile-action-edit{
+    font-size:12px !important;
+    padding:0 10px !important;
+  }
+}
+</style>
+
 
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
