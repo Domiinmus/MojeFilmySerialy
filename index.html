@@ -1972,9 +1972,64 @@
             if(savedProfile){ savedProfile.apiKey=state.apiKey||savedProfile.apiKey||''; savedProfile.searchType=creatorSearchType||savedProfile.searchType||'movie'; persistProfiles(); if(!supabaseClient) initSupabaseClient(); if(supabaseClient){ const cloudOk=await saveProfileToSupabase(savedProfile); if(!cloudOk) console.warn('Nový profil se nepodařilo uložit do Supabase. Zkontroluj SQL/RLS tabulky mfs_profiles.'); } }
             renderProfileSwitcher(); renderProfilesSettings(); renderProfileGate(); closeProfileEditor();
         }
-        function deleteProfile(id){
-            if(profiles.length<=1){alert('Musí zůstat alespoň jeden profil.');return;} const p=profiles.find(x=>x.id===id); if(!p)return; if(!confirm(`Opravdu odstranit profil „${p.name}“ včetně jeho knihovny?`))return;
-            profiles=profiles.filter(x=>x.id!==id);
+        // Trvalé označení smazaných profilů (tombstones), aby je synchronizace
+        // z jiného zařízení už nikdy znovu nevytvořila.
+        const MFS_DELETED_PROFILE_PREFIX='__mfs_deleted__';
+        let deletedProfileIds=new Set();
+        try {
+            const raw=JSON.parse(localStorage.getItem('mfs_deleted_profile_ids')||'[]');
+            if(Array.isArray(raw)) deletedProfileIds=new Set(raw.map(String));
+        } catch(_) {}
+        function deletedProfileMarker(id){ return MFS_DELETED_PROFILE_PREFIX + encodeURIComponent(String(id)); }
+        function isDeletedProfileMarker(id){ return String(id||'').startsWith(MFS_DELETED_PROFILE_PREFIX); }
+        function deletedIdFromMarker(id){
+            if(!isDeletedProfileMarker(id)) return '';
+            try { return decodeURIComponent(String(id).slice(MFS_DELETED_PROFILE_PREFIX.length)); } catch(_) { return String(id).slice(MFS_DELETED_PROFILE_PREFIX.length); }
+        }
+        function rememberDeletedProfile(id){
+            id=String(id||''); if(!id) return;
+            deletedProfileIds.add(id);
+            localStorage.setItem('mfs_deleted_profile_ids',JSON.stringify([...deletedProfileIds]));
+        }
+        function forgetDeletedProfile(id){
+            id=String(id||'');
+            if(deletedProfileIds.delete(id)) localStorage.setItem('mfs_deleted_profile_ids',JSON.stringify([...deletedProfileIds]));
+        }
+        async function writeDeletedProfileTombstone(id){
+            if(!supabaseClient || !id) return false;
+            try {
+                const tombstone={
+                    id:deletedProfileMarker(id),
+                    name:'__MFS_DELETED_PROFILE__', icon:'fa-trash', color:'slate',
+                    watchlist:[], settings:{}, api_key:'', search_type:'movie'
+                };
+                const {error}=await supabaseClient.from('mfs_profiles').upsert(tombstone,{onConflict:'id'});
+                if(error) throw error;
+                return true;
+            } catch(e){ console.warn('Supabase záznam smazaného profilu:',e); return false; }
+        }
+        function collectDeletedIdsFromCloud(data){
+            const cloudDeleted=new Set();
+            for(const row of (Array.isArray(data)?data:[])) {
+                const rid=String(row?.id||'');
+                if(isDeletedProfileMarker(rid)) cloudDeleted.add(deletedIdFromMarker(rid));
+            }
+            if(cloudDeleted.size){
+                for(const id of cloudDeleted) deletedProfileIds.add(id);
+                localStorage.setItem('mfs_deleted_profile_ids',JSON.stringify([...deletedProfileIds]));
+            }
+            return cloudDeleted;
+        }
+        async function deleteProfile(id){
+            id=String(id||'');
+            if(profiles.length<=1){alert('Musí zůstat alespoň jeden profil.');return;}
+            const p=profiles.find(x=>String(x.id)===id); if(!p)return;
+            if(!confirm(`Opravdu odstranit profil „${p.name}“ včetně jeho knihovny?`))return;
+
+            // Nejdřív lokálně zapiš tombstone. Tím zabráníme tomu, aby ho mezitím
+            // jiná synchronizace z cloudu znovu přidala.
+            rememberDeletedProfile(id);
+            profiles=profiles.filter(x=>String(x.id)!==id);
             if(activeProfileId===id){
                 activeProfileId=profiles[0].id;
                 state.watchlist=profiles[0].watchlist||[];
@@ -1982,9 +2037,17 @@
                 applyActiveProfileSettings();
             }
             persistProfiles();
-            if(supabaseClient) supabaseClient.from('mfs_profiles').delete().eq('id',cloudProfileId(id)).then(({error})=>{
-                if(error) console.warn('Supabase mazání profilu:',error);
-            });
+
+            if(supabaseClient){
+                try {
+                    // Odstraň skutečný profil a současně ulož trvalou značku smazání.
+                    const del=await supabaseClient.from('mfs_profiles').delete().eq('id',cloudProfileId(id));
+                    if(del.error) throw del.error;
+                    await writeDeletedProfileTombstone(id);
+                } catch(e){
+                    console.warn('Supabase mazání profilu:',e);
+                }
+            }
             renderProfileSwitcher(); renderProfilesSettings(); checkDemoBanner(); renderWatchlist(); renderHome(); renderProfileGate();
         }
         document.addEventListener('click',e=>{ const menu=document.getElementById('profile-menu'),btn=document.getElementById('profile-trigger'); if(menu&&btn&&!menu.contains(e.target)&&!btn.contains(e.target)) menu.classList.add('hidden'); });
@@ -3674,9 +3737,13 @@
                 const localActiveId=activeProfileId;
                 const localMap=new Map(profiles.map(p=>[String(p.id),p]));
                 if(Array.isArray(data)) {
+                    const cloudDeleted=collectDeletedIdsFromCloud(data);
                     const merged=[]; const used=new Set();
                     for(const row of data) {
-                        const id=String(row.id); const local=localMap.get(id);
+                        const id=String(row.id||'');
+                        if(isDeletedProfileMarker(id)) continue;
+                        if(deletedProfileIds.has(id) || cloudDeleted.has(id)) continue;
+                        const local=localMap.get(id);
                         const watchlist=Array.isArray(row.watchlist)?row.watchlist:(local?.watchlist||[]);
                         const settings=Object.assign({}, defaultProfileSettings(), local?.settings||{}, row.settings||{});
                         merged.push({
@@ -3688,7 +3755,7 @@
                         used.add(id);
                     }
                     // Lokální profil, který ještě nebyl do cloudu dopsán, zachovej.
-                    for(const local of localMap.values()) if(!used.has(String(local.id))) merged.push(local);
+                    for(const local of localMap.values()) if(!used.has(String(local.id)) && !deletedProfileIds.has(String(local.id))) merged.push(local);
                     profiles=merged;
                     if(!profiles.some(p=>String(p.id)===String(localActiveId))) activeProfileId=profiles[0]?.id||activeProfileId;
                     profiles.forEach(ensureProfileSettings);
@@ -3725,6 +3792,7 @@
 
         async function saveProfileToSupabase(profile) {
             if (!supabaseClient || !profile) return false;
+            if (deletedProfileIds.has(String(profile.id))) return false;
             try {
                 const payload = {
                     id: cloudProfileId(profile.id),
@@ -3754,6 +3822,7 @@
             let ok=true;
             // Nejprve uložíme lokální profily.
             for(const p of profiles) {
+                if(deletedProfileIds.has(String(p.id))) continue;
                 if(!(await saveProfileToSupabase(p))) {ok=false;break;}
             }
             const el=document.getElementById('supabase-status');
@@ -3772,10 +3841,14 @@
 
                 const localMap=new Map(profiles.map(p=>[p.id,p]));
                 if(Array.isArray(data) && data.length) {
+                    const cloudDeleted=collectDeletedIdsFromCloud(data);
                     const merged=[];
                     const used=new Set();
                     for(const row of data) {
+                        const rawId=String(row?.id||'');
+                        if(isDeletedProfileMarker(rawId)) continue;
                         const id=localProfileIdFromCloud(row.id);
+                        if(deletedProfileIds.has(String(id)) || cloudDeleted.has(String(id))) continue;
                         const local=localMap.get(id);
                         // Nikdy nesmaž lokální profil jen proto, že cloud vrátí neúplná data.
                         // Cloud je zdroj synchronizace, ale lokální knihovna/profil se při prázdném cloudu zachová.
@@ -3798,7 +3871,7 @@
                         used.add(id);
                     }
                     // Lokální profily, které cloud nevrátil, vždy zachovej.
-                    for(const local of localMap.values()) if(!used.has(local.id)) merged.push(local);
+                    for(const local of localMap.values()) if(!used.has(local.id) && !deletedProfileIds.has(String(local.id))) merged.push(local);
                     profiles=merged;
                     if(!profiles.length) {
                         profiles=[{id:'profile_default',name:'Můj profil',icon:'fa-user',color:'indigo',watchlist:[],settings:defaultProfileSettings(),apiKey:MFS_TMDB_API_KEY,searchType:'movie',createdAt:Date.now()}];
