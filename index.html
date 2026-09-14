@@ -1084,6 +1084,16 @@
   }
 }
 </style>
+<style id="profile-deleted-gap-fix">
+/* Deleted/empty profile entries must not leave visual gaps. */
+#profile-gate .profile-card:empty,
+#profile-gate .profile-grid > :empty,
+#settings-profiles-list > :empty,
+#settings-profiles-list .profile-card[data-deleted="true"]{
+  display:none !important;
+}
+</style>
+
 
 
 </head>
@@ -1729,7 +1739,20 @@
         const MFS_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_2tmDf4nJ7MhbNEcLZKw6QQ_TGZwL7wl';
         const MFS_TMDB_API_KEY = 'f38cd66467f5737752cd8ccd7de73447';
 
-        // ===== PROFILY =====
+        
+// Odstranění prázdných/označených profilů z UI.
+// Tombstone ID zůstává pouze pro synchronizaci, nikdy se ale nesmí
+// vykreslit jako prázdná karta nebo zabírat místo v gridu.
+function getVisibleProfiles(){
+    const deleted = (typeof deletedProfileIds !== 'undefined' && deletedProfileIds instanceof Set)
+        ? deletedProfileIds : new Set();
+    return profiles.filter(p => p && p.id && !deleted.has(String(p.id)) && p.__deleted !== true);
+}
+function cleanupDeletedProfileUI(){
+    document.querySelectorAll('[data-deleted="true"], .profile-deleted-placeholder').forEach(el => el.remove());
+}
+
+// ===== PROFILY =====
         const PROFILE_ICONS = ['fa-user','fa-user-astronaut','fa-user-ninja','fa-ghost','fa-cat','fa-dog','fa-robot','fa-dragon','fa-star','fa-heart'];
         const PROFILE_COLORS = ['indigo','blue','emerald','rose','amber','purple','cyan','pink','violet'];
         let profiles = [];
@@ -1884,7 +1907,7 @@
         function renderProfileGate(){
             const gate=document.getElementById('profile-gate'); const grid=document.getElementById('profile-gate-grid');
             if(!gate||!grid) return;
-            grid.innerHTML=profiles.map(p=>`<div class="profile-gate-card-wrap" data-profile-id="${p.id}">
+            grid.innerHTML=getVisibleProfiles().map(p=>`<div class="profile-gate-card-wrap" data-profile-id="${p.id}">
                 <button type="button" class="profile-gate-card" onclick="enterProfile('${p.id}');return false;" aria-label="Otevřít profil ${escapeHtml(p.name)}">
                     <span class="profile-gate-avatar ${profileColorClass(p.color)}"><i class="fa-solid ${p.icon}"></i></span>
                     <span class="profile-gate-name">${escapeHtml(p.name)}</span>
@@ -1898,6 +1921,7 @@
                     <span class="profile-gate-name">Přidat profil</span>
                 </button>
             </div>`;
+    cleanupDeletedProfileUI();
         }
         document.addEventListener('keydown',e=>{
             if((e.key==='Enter'||e.key===' ') && e.target.classList?.contains('profile-gate-add-wrap')){
@@ -1925,13 +1949,14 @@
             const p=activeProfile(); if(!p) return;
             const av=document.getElementById('profile-trigger-avatar'); if(av){ av.className=`profile-avatar ${profileColorClass(p.color)}`; av.innerHTML=`<i class="fa-solid ${p.icon}"></i>`; }
             const cur=document.getElementById('profile-menu-current'); if(cur) cur.textContent=p.name;
-            const list=document.getElementById('profile-menu-list'); if(list){ list.innerHTML=profiles.map(x=>`<button class="profile-menu-item ${x.id===activeProfileId?'profile-selected':''}" onclick="switchProfile('${x.id}')"><span class="profile-mini-avatar ${profileColorClass(x.color)}"><i class="fa-solid ${x.icon}"></i></span><span class="min-w-0"><b class="text-xs block truncate">${escapeHtml(x.name)}</b><small class="text-[10px] text-slate-500">${(x.watchlist||[]).length} titulů</small></span>${x.id===activeProfileId?'<i class="fa-solid fa-check text-emerald-500 ml-auto"></i>':''}</button>`).join(''); }
+            const list=document.getElementById('profile-menu-list'); if(list){ list.innerHTML=getVisibleProfiles().map(x=>`<button class="profile-menu-item ${x.id===activeProfileId?'profile-selected':''}" onclick="switchProfile('${x.id}')"><span class="profile-mini-avatar ${profileColorClass(x.color)}"><i class="fa-solid ${x.icon}"></i></span><span class="min-w-0"><b class="text-xs block truncate">${escapeHtml(x.name)}</b><small class="text-[10px] text-slate-500">${(x.watchlist||[]).length} titulů</small></span>${x.id===activeProfileId?'<i class="fa-solid fa-check text-emerald-500 ml-auto"></i>':''}</button>`).join(''); }
+    cleanupDeletedProfileUI();
         }
         function renderProfilesSettings() {
             const box=document.getElementById('settings-profiles-list'); if(!box) return;
             const current=activeProfile();
             const activeName=document.getElementById('settings-active-profile-name'); if(activeName) activeName.textContent=current?.name||'—';
-            box.innerHTML=profiles.map(p=>`<div class="profile-card">
+            box.innerHTML=getVisibleProfiles().map(p=>`<div class="profile-card">
                 <div class="flex items-center gap-3">
                     <span class="profile-mini-avatar ${profileColorClass(p.color)} w-11 h-11"><i class="fa-solid ${p.icon}"></i></span>
                     <div class="min-w-0"><b class="text-sm block truncate">${escapeHtml(p.name)}</b><span class="text-[10px] text-slate-500">${(p.watchlist||[]).length} titulů ${p.id===activeProfileId?'· aktivní':''}</span></div>
@@ -1943,6 +1968,7 @@
                     <button onclick="deleteProfile('${p.id}')" class="profile-action-icon rounded-lg bg-red-500/10 text-red-400 border border-red-500/15 font-bold" ${profiles.length<=1?'disabled':''} title="Odstranit profil" aria-label="Odstranit profil"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>`).join('');
+    cleanupDeletedProfileUI();
         }
 
         function toggleProfileMenu(force){ const m=document.getElementById('profile-menu'); if(!m)return; const open=typeof force==='boolean'?force:m.classList.contains('hidden'); m.classList.toggle('hidden',!open); if(open) renderProfileSwitcher(); }
