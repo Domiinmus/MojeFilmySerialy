@@ -1096,6 +1096,31 @@
 
 
 
+
+<style id="profile-desktop-reflow-fix">
+/* Desktop: profile cards stay centered and reflow immediately after deletion. */
+@media (min-width: 521px){
+  #profile-gate-grid.profile-gate-grid{
+    display:grid !important;
+    grid-template-columns:repeat(auto-fit,minmax(150px,180px)) !important;
+    justify-content:center !important;
+    align-items:start !important;
+    gap:18px !important;
+    width:100% !important;
+    max-width:900px !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+  #profile-gate-grid .profile-gate-card-wrap{
+    width:180px !important;
+    min-width:0 !important;
+    justify-self:center !important;
+  }
+}
+@media (max-width:520px){
+  #profile-gate-grid .profile-gate-card-wrap{width:auto !important;}
+}
+</style>
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
 
@@ -1907,7 +1932,9 @@ function cleanupDeletedProfileUI(){
         function renderProfileGate(){
             const gate=document.getElementById('profile-gate'); const grid=document.getElementById('profile-gate-grid');
             if(!gate||!grid) return;
-            grid.innerHTML=getVisibleProfiles().map(p=>`<div class="profile-gate-card-wrap" data-profile-id="${p.id}">
+            const visibleProfiles = getVisibleProfiles();
+            grid.replaceChildren();
+            grid.innerHTML=visibleProfiles.map(p=>`<div class="profile-gate-card-wrap" data-profile-id="${p.id}">
                 <button type="button" class="profile-gate-card" onclick="enterProfile('${p.id}');return false;" aria-label="Otevřít profil ${escapeHtml(p.name)}">
                     <span class="profile-gate-avatar ${profileColorClass(p.color)}"><i class="fa-solid ${p.icon}"></i></span>
                     <span class="profile-gate-name">${escapeHtml(p.name)}</span>
