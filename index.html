@@ -1694,7 +1694,7 @@
             applyActiveProfileSettings();
             document.getElementById('api-key-input').value = state.apiKey;
             initSupabaseClient();
-            if (supabaseClient) setTimeout(() => loadProfilesFromSupabase(), 300);
+            if (supabaseClient) setTimeout(async () => { await loadProfilesFromSupabase(); startRemoteSync(); }, 300);
             setCreatorSearchType(creatorSearchType, true);
             if (['home','watchlist','upcoming','creator','stats'].includes(state.startTab)) switchTab(state.startTab);
             updateNotificationBell();
@@ -3370,6 +3370,10 @@
         // Konfigurace je přímo v aplikaci – index.html je připravený pro GitHub.
         // Používá se pouze publishable key. Secret/service_role key sem nikdy nedávej.
         let supabaseClient = null;
+        let mfsRealtimeChannel = null;
+        let mfsRemoteSyncTimer = null;
+        let mfsRemoteSyncBusy = false;
+        let mfsRemoteSyncQueued = false;
 
         // Bez účtu oddělujeme profily podle instalace prohlížeče.
         // Knihovna ani nastavení se do cloudu neposílají.
@@ -3402,6 +3406,102 @@
                 return false;
             }
         }
+        function setupSupabaseRealtime() {
+            if (!supabaseClient) return false;
+            try {
+                if (mfsRealtimeChannel) {
+                    try { supabaseClient.removeChannel(mfsRealtimeChannel); } catch(_) {}
+                }
+                mfsRealtimeChannel = supabaseClient.channel('mfs_profiles_realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'mfs_profiles' }, payload => {
+                        // Změna z jiného zařízení se načte okamžitě.
+                        // Vlastní změnu pouze ignorujeme, aby se UI zbytečně nepřekreslovalo.
+                        const changedId = String(payload?.new?.id || payload?.old?.id || '');
+                        const currentId = String(activeProfileId || '');
+                        if (payload?.eventType === 'DELETE') {
+                            if (changedId === currentId) {
+                                syncProfilesFromCloudNow();
+                            } else {
+                                syncProfilesFromCloudNow();
+                            }
+                            return;
+                        }
+                        if (changedId) syncProfilesFromCloudNow();
+                    })
+                    .subscribe(status => {
+                        const el=document.getElementById('supabase-status');
+                        if(status === 'SUBSCRIBED' && el) el.textContent='Supabase připojeno · živá synchronizace zapnutá.';
+                    });
+                return true;
+            } catch(e) {
+                console.warn('Supabase Realtime:', e);
+                return false;
+            }
+        }
+
+        async function syncProfilesFromCloudNow() {
+            if (!supabaseClient || mfsRemoteSyncBusy) {
+                if (supabaseClient) mfsRemoteSyncQueued = true;
+                return;
+            }
+            mfsRemoteSyncBusy = true;
+            try {
+                const {data,error}=await supabaseClient.from('mfs_profiles')
+                    .select('id,name,icon,color,watchlist,settings,api_key,search_type,created_at')
+                    .order('created_at',{ascending:true});
+                if(error) throw error;
+                const localActiveId=activeProfileId;
+                const localMap=new Map(profiles.map(p=>[String(p.id),p]));
+                if(Array.isArray(data)) {
+                    const merged=[]; const used=new Set();
+                    for(const row of data) {
+                        const id=String(row.id); const local=localMap.get(id);
+                        const watchlist=Array.isArray(row.watchlist)?row.watchlist:(local?.watchlist||[]);
+                        const settings=Object.assign({}, defaultProfileSettings(), local?.settings||{}, row.settings||{});
+                        merged.push({
+                            id, name:row.name||local?.name||'Profil', icon:row.icon||local?.icon||'fa-user',
+                            color:row.color||local?.color||'indigo', watchlist, settings,
+                            apiKey:MFS_TMDB_API_KEY, searchType:row.search_type||local?.searchType||'movie',
+                            createdAt:row.created_at?new Date(row.created_at).getTime():(local?.createdAt||Date.now())
+                        });
+                        used.add(id);
+                    }
+                    // Lokální profil, který ještě nebyl do cloudu dopsán, zachovej.
+                    for(const local of localMap.values()) if(!used.has(String(local.id))) merged.push(local);
+                    profiles=merged;
+                    if(!profiles.some(p=>String(p.id)===String(localActiveId))) activeProfileId=profiles[0]?.id||activeProfileId;
+                    profiles.forEach(ensureProfileSettings);
+                    const ap=activeProfile();
+                    if(ap) {
+                        state.watchlist=Array.isArray(ap.watchlist)?ap.watchlist:[];
+                        state.apiKey=MFS_TMDB_API_KEY;
+                        creatorSearchType=ap.searchType||creatorSearchType;
+                        applyActiveProfileSettings();
+                        persistProfiles();
+                        localStorage.setItem('mfs_watchlist',JSON.stringify(state.watchlist));
+                        setCreatorSearchType(creatorSearchType,true);
+                    }
+                    renderProfileSwitcher(); renderProfilesSettings(); renderWatchlist(); renderHome(); renderProfileGate(); updateNotificationBell();
+                }
+            } catch(e) { console.warn('Živá synchronizace profilů:',e); }
+            finally {
+                mfsRemoteSyncBusy=false;
+                if(mfsRemoteSyncQueued) { mfsRemoteSyncQueued=false; setTimeout(syncProfilesFromCloudNow,50); }
+            }
+        }
+
+        function startRemoteSync() {
+            if(!supabaseClient) return;
+            setupSupabaseRealtime();
+            clearInterval(mfsRemoteSyncTimer);
+            // Realtime je hlavní cesta; tento krátký fallback zachytí i výpadek Realtime.
+            mfsRemoteSyncTimer=setInterval(() => syncProfilesFromCloudNow(), 10000);
+            document.addEventListener('visibilitychange', () => {
+                if(document.visibilityState === 'visible') syncProfilesFromCloudNow();
+            });
+            window.addEventListener('focus', () => syncProfilesFromCloudNow());
+        }
+
         async function saveProfileToSupabase(profile) {
             if (!supabaseClient || !profile) return false;
             try {
@@ -3522,7 +3622,7 @@
                 persistProfiles();
                 if (supabaseClient) {
                     clearTimeout(window.mfsCloudSaveTimer);
-                    window.mfsCloudSaveTimer = setTimeout(() => saveProfileToSupabase(p), 350);
+                    window.mfsCloudSaveTimer = setTimeout(() => saveProfileToSupabase(p), 150);
                 }
             }
         }
