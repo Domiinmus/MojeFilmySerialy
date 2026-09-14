@@ -2064,6 +2064,19 @@ function cleanupDeletedProfileUI(){
             }
             persistProfiles();
 
+            // Okamžitě překresli všechny profilové seznamy. Cloudové mazání je
+            // asynchronní a nesmí blokovat vizuální odstranění karty/ikony.
+            renderProfileSwitcher();
+            renderProfilesSettings();
+            renderProfileGate();
+            cleanupDeletedProfileUI();
+            requestAnimationFrame(() => {
+                renderProfileSwitcher();
+                renderProfilesSettings();
+                renderProfileGate();
+                cleanupDeletedProfileUI();
+            });
+
             if(supabaseClient){
                 try {
                     // Odstraň skutečný profil a současně ulož trvalou značku smazání.
