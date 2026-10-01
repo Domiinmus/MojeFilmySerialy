@@ -565,6 +565,70 @@
 
 
 
+        /* ===== UPOZORNĚNÍ – RESPONSIVNÍ MOBILNÍ PANEL ===== */
+        #notification-trigger-wrap {
+            position: relative;
+            flex: 0 0 auto;
+            min-width: 40px;
+        }
+        #notification-btn {
+            flex: 0 0 40px;
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px;
+            min-height: 40px;
+        }
+        #notification-panel {
+            width: min(360px, calc(100vw - 20px)) !important;
+            max-width: calc(100vw - 20px) !important;
+            max-height: min(70dvh, 420px);
+        }
+        @media (max-width: 639px) {
+            #notification-trigger-wrap {
+                position: static !important;
+                flex: 0 0 40px !important;
+                width: 40px !important;
+                min-width: 40px !important;
+            }
+            #notification-btn {
+                width: 40px !important;
+                height: 40px !important;
+                min-width: 40px !important;
+                min-height: 40px !important;
+                padding: 0 !important;
+            }
+            #notification-panel {
+                position: fixed !important;
+                left: 10px !important;
+                right: 10px !important;
+                top: calc(env(safe-area-inset-top) + 116px) !important;
+                width: auto !important;
+                max-width: none !important;
+                max-height: calc(100dvh - env(safe-area-inset-top) - 136px) !important;
+                z-index: 9998 !important;
+                border-radius: 18px !important;
+            }
+            #notification-panel > div:first-child {
+                padding: 12px !important;
+            }
+            #notification-list {
+                max-height: calc(100dvh - env(safe-area-inset-top) - 230px) !important;
+            }
+        }
+        @media (max-width: 380px) {
+            #notification-panel {
+                left: 8px !important;
+                right: 8px !important;
+                top: calc(env(safe-area-inset-top) + 112px) !important;
+            }
+            #notification-panel > div:first-child h3 {
+                font-size: 12px !important;
+            }
+            #notification-panel > div:first-child button {
+                font-size: 9px !important;
+            }
+        }
+
         /* ===== ÚVODNÍ VÝBĚR PROFILU ===== */
         #profile-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 20%,rgba(99,102,241,.18),transparent 36%),radial-gradient(circle at 20% 80%,rgba(56,189,248,.10),transparent 32%),linear-gradient(135deg,#020617 0%,#0b1120 52%,#111827 100%);overflow:hidden}
         #profile-gate.hidden{display:none}
@@ -1173,7 +1237,7 @@
                 </div>
 
                 <!-- Upozornění na nadcházející epizody -->
-                <div class="relative">
+                <div id="notification-trigger-wrap" class="relative">
                     <button onclick="toggleNotifications()" id="notification-btn" class="relative bg-slate-200 dark:bg-slate-900 hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-amber-500 theme-hover-text border border-slate-200 dark:border-slate-800 w-10 h-10 rounded-xl flex items-center justify-center transition-all" title="Nadcházející epizody">
                         <i class="fa-regular fa-bell text-lg"></i>
                         <span id="notification-count" class="hidden absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center border-2 border-white dark:border-slate-950">0</span>
@@ -1891,6 +1955,34 @@ function cleanupDeletedProfileUI(){
         let ratioChart = null;
         let genreChart = null;
 
+        // --- OPRAVA STRANGER THINGS: vždy načti všechny dostupné série ---
+        // ČSFD aktuálně uvádí 5 sérií / 42 epizod. Pokud je v knihovně starší
+        // záznam s neúplnými sériemi, při dostupném TMDb klíči jej automaticky dosynchronizujeme.
+        async function ensureStrangerThingsComplete() {
+            const show = state.watchlist.find(item =>
+                item.type === 'show' &&
+                String(item.title || item.originalTitle || '').trim().toLowerCase() === 'stranger things'
+            );
+            if (!show || !state.apiKey) return;
+
+            // Oficiální TMDb ID seriálu Stranger Things.
+            if (!show.tmdbId) show.tmdbId = 66732;
+
+            const seasonCount = (show.seasons || []).filter(s => Number(s.season_number) > 0).length;
+            if (seasonCount >= 5 && (show.seasons || []).reduce((n, s) => n + (s.episodes || []).length, 0) >= 42) return;
+
+            try {
+                if (await syncShowData(show)) {
+                    saveToLocalStorage();
+                    renderWatchlist();
+                    renderHome();
+                    updateNotificationBell();
+                }
+            } catch (e) {
+                console.warn('Stranger Things – automatické doplnění sérií:', e);
+            }
+        }
+
         // Inicializace při načtení
         window.onload = function() {
             renderProfileSwitcher();
@@ -1909,7 +2001,8 @@ function cleanupDeletedProfileUI(){
             setCreatorSearchType(creatorSearchType, true);
             if (['home','watchlist','upcoming','creator','stats'].includes(state.startTab)) switchTab(state.startTab);
             updateNotificationBell();
-            if (state.autoSync && state.apiKey) setTimeout(() => syncAllShowsSilently(), 500);
+            if (state.apiKey) setTimeout(() => { ensureStrangerThingsComplete(); }, 450);
+            if (state.autoSync && state.apiKey) setTimeout(() => syncAllShowsSilently(), 900);
         };
 
         // Bezpečnostní pojistka pro mobil/PWA: pokud některá volitelná inicializace selže,
