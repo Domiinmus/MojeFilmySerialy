@@ -1185,6 +1185,80 @@
   #profile-gate-grid .profile-gate-card-wrap{width:auto !important;}
 }
 </style>
+
+<style id="mfs-modern-logo-and-developer">
+        /* ===== MODERNÍ HLAVNÍ LOGO ===== */
+        .mfs-main-logo{
+            position:relative;
+            width:48px;height:48px;flex:0 0 48px;
+            display:flex;align-items:center;justify-content:center;
+            border-radius:15px;
+            background:linear-gradient(145deg,#111827 0%,#1e293b 58%,#0f172a 100%);
+            color:#fbbf24;
+            border:1px solid rgba(251,191,36,.35);
+            box-shadow:0 10px 28px rgba(15,23,42,.22),inset 0 1px 0 rgba(255,255,255,.10);
+            overflow:hidden;
+        }
+        .mfs-main-logo:before{
+            content:'';position:absolute;width:30px;height:30px;border-radius:9px;
+            border:1px solid rgba(251,191,36,.30);
+            transform:rotate(45deg);
+        }
+        .mfs-main-logo:after{
+            content:'';position:absolute;inset:1px;border-radius:14px;
+            background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 45%,rgba(251,191,36,.06));
+            pointer-events:none;
+        }
+        .mfs-main-logo-icon{
+            position:relative;z-index:2;font-size:17px;line-height:1;
+            filter:drop-shadow(0 2px 5px rgba(251,191,36,.25));
+        }
+        .mfs-main-logo-mark{
+            position:absolute;z-index:3;right:5px;bottom:4px;
+            font-size:7px;font-weight:1000;letter-spacing:.04em;
+            color:#fff;opacity:.95;
+        }
+        .dark .mfs-main-logo{
+            box-shadow:0 12px 32px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.10);
+        }
+        .mfs-brand-name{font-size:1.05rem;line-height:1;letter-spacing:.025em}
+        @media(max-width:639px){
+            .mfs-main-logo{width:42px;height:42px;flex-basis:42px;border-radius:13px}
+            .mfs-main-logo:before{width:26px;height:26px}
+            .mfs-main-logo-icon{font-size:15px}
+            .mfs-main-logo-mark{right:4px;bottom:3px;font-size:6px}
+            .mfs-brand-name{font-size:.96rem}
+        }
+
+        /* ===== REŽIM VÝVOJÁŘE – nastavení ===== */
+        .developer-card{border-color:rgba(139,92,246,.22)!important;background:linear-gradient(145deg,rgba(139,92,246,.06),rgba(15,23,42,.03))!important}
+        .developer-card:before{background:linear-gradient(180deg,#8b5cf6,transparent)!important}
+        .developer-status{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:9px;font-weight:900}
+        .developer-status.locked{background:rgba(148,163,184,.10);color:#94a3b8}
+        .developer-status.unlocked{background:rgba(16,185,129,.10);color:#34d399}
+        .developer-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(148,163,184,.10)}
+        .developer-setting-row:first-child{border-top:0}
+        .developer-setting-name{font-size:11px;font-weight:800;min-width:0}
+        .developer-setting-key{font-size:9px;color:#64748b;margin-top:2px}
+        .developer-login{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        .developer-login input{min-width:0;flex:1 1 180px}
+        .developer-hidden-badge{font-size:8px;font-weight:900;padding:3px 6px;border-radius:999px;background:rgba(239,68,68,.10);color:#f87171}
+        @media(max-width:639px){
+            .mfs-main-logo{width:46px;height:46px;flex-basis:46px;border-radius:14px}
+            .mfs-main-logo-icon{top:7px;left:8px;font-size:13px}
+            .mfs-main-logo-mark{right:6px;bottom:5px;font-size:9px}
+            .developer-setting-row{align-items:flex-start}
+            .developer-login{align-items:stretch}
+            .developer-login input,.developer-login button{width:100%;flex-basis:100%}
+        }
+
+
+<style id="mfs-developer-mode-fix">
+#developer-mode-card{display:block!important;position:relative;z-index:2}
+#developer-mode-card .developer-login button{min-height:42px}
+#developer-mode-card .developer-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+@media(max-width:639px){#developer-mode-card .developer-login{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}#developer-mode-card .developer-login input,#developer-mode-card .developer-login button{width:100%;min-width:0}}
+</style>
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
 
@@ -1209,10 +1283,12 @@
     <nav class="bg-white/90 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
-                <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-black text-xl tracking-tighter theme-bg theme-text">MFS</div>
+                <div class="mfs-main-logo" aria-label="My Films & Serials">
+                    <span class="mfs-main-logo-icon"><i class="fa-solid fa-film"></i></span>
+                    <span class="mfs-main-logo-mark">MFS</span>
+                </div>
                 <div>
-                    <span class="text-xl font-bold tracking-wider text-slate-900 dark:text-white">My Films <span class="text-amber-500 theme-text">& Serials</span></span>
-                    <span class="block text-[10px] text-amber-500 theme-text font-mono uppercase tracking-widest">TVŮJ OSOBNÍ KATALOG v4.2</span>
+                    <span class="mfs-brand-name font-bold text-slate-900 dark:text-white">My Films <span class="text-amber-500 theme-text">& Serials</span></span>
                 </div>
             </div>
             
@@ -1298,9 +1374,7 @@
                 <div class="home-hero-glow"></div>
                 <div class="relative z-10 p-6 sm:p-8 lg:p-9 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                     <div>
-                        <div class="text-[10px] font-black uppercase tracking-[.22em] text-slate-300/80 mb-2"><i class="fa-solid fa-clapperboard mr-1.5"></i> Tvůj osobní katalog</div>
                         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight">Vítej zpět! <span aria-hidden="true">👋</span></h2>
-                        <p class="text-sm sm:text-base text-slate-300 mt-2">Tvoje filmy a seriály, vše na jednom místě.</p>
                     </div>
                     <div class="home-date-card shrink-0">
                         <div class="w-11 h-11 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-xl"><i class="fa-regular fa-calendar"></i></div>
@@ -1726,8 +1800,47 @@
                 <button onclick="closeSettingsModal()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar space-y-4">
+                <!-- REŽIM VÝVOJÁŘE -->
+                <div id="developer-mode-card" class="settings-card developer-card">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center"><i class="fa-solid fa-code"></i></span>
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-black">Režim vývojář</h3>
+                                <p class="text-[10px] text-slate-500">Správa interních možností aplikace. Přístup je chráněný heslem.</p>
+                            </div>
+                        </div>
+                        <span id="developer-status" class="developer-status locked"><i class="fa-solid fa-lock"></i>Uzamčeno</span>
+                    </div>
+
+                    <div id="developer-login-area" class="mt-4">
+                        <div class="developer-login">
+                            <input id="developer-password" type="password" autocomplete="off" placeholder="Heslo vývojáře"
+                                onkeydown="if(event.key==='Enter') developerLogin()"
+                                class="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-violet-500">
+                            <button onclick="developerLogin()" class="px-5 py-2.5 rounded-xl bg-violet-500 hover:bg-violet-600 text-white font-black text-xs">
+                                <i class="fa-solid fa-unlock mr-1.5"></i>Přihlásit
+                            </button>
+                        </div>
+                        <p id="developer-login-message" class="text-[10px] text-slate-500 mt-2">Zadej heslo vývojáře pro odemknutí interních nastavení.</p>
+                    </div>
+
+                    <div id="developer-tools-area" class="hidden mt-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div>
+                                <b class="text-xs">Co zobrazovat v Nastavení</b>
+                                <p class="text-[10px] text-slate-500">Vypnutím položku skryješ běžným uživatelům v Nastavení. Data ani funkce se nemažou.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="developerShowAllSettings()" class="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-bold">Zobrazit vše</button>
+                                <button onclick="developerLogout()" class="px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold"><i class="fa-solid fa-lock mr-1"></i>Odhlásit</button>
+                            </div>
+                        </div>
+                        <div id="developer-settings-list" class="mt-2"></div>
+                    </div>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="settings-card">
+                    <div class="settings-card dev-setting-card" data-dev-setting="appearance">
                         <div class="flex items-center gap-3 mb-4"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-palette"></i></span><div><h3 class="text-sm font-black">Vzhled</h3><p class="text-[10px] text-slate-500">Barvy a režim aplikace</p></div></div>
                         <div class="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800"><button id="theme-btn-light" onclick="setThemeMode('light')" class="flex-1 py-2.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-sun mr-1.5"></i>Světlý</button><button id="theme-btn-dark" onclick="setThemeMode('dark')" class="flex-1 py-2.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-moon mr-1.5"></i>Tmavý</button></div>
                         <div class="mt-4"><p class="text-[10px] text-slate-500 mb-2 uppercase tracking-wider font-bold">Akcent</p><div class="flex flex-wrap gap-3">
@@ -1742,12 +1855,12 @@
                             <button onclick="changeThemeColor('violet')" data-theme-color="violet" class="theme-swatch w-9 h-9 rounded-full bg-violet-500"></button>
                         </div></div>
                     </div>
-                    <div class="settings-card">
+                    <div class="settings-card dev-setting-card" data-dev-setting="library-layout">
                         <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-display"></i></span><div><h3 class="text-sm font-black">Rozložení knihovny</h3><p class="text-[10px] text-slate-500">Kolik titulů chceš vidět najednou</p></div></div>
                         <div class="grid grid-cols-3 gap-2 mt-4"><button onclick="setCardSize('small')" data-card-size="small" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800"><i class="fa-solid fa-grip mr-1"></i>Malé</button><button onclick="setCardSize('normal')" data-card-size="normal" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">Normální</button><button onclick="setCardSize('large')" data-card-size="large" class="card-size-btn py-3 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">Velké</button></div>
                         <div class="setting-row mt-2"><div><b class="text-xs">Jemné animace</b><p class="text-[10px] text-slate-500">Pohyby a přechody v rozhraní</p></div><label class="switch"><input id="setting-animations" type="checkbox" onchange="setAnimations(this.checked)"><span></span></label></div>
                     </div>
-                    <div class="settings-card">
+                    <div class="settings-card dev-setting-card" data-dev-setting="home-previews">
                         <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-images"></i></span><div><h3 class="text-sm font-black">Náhledy na Domů</h3><p class="text-[10px] text-slate-500">Velikost posterů v doporučeních</p></div></div>
                         <div class="grid grid-cols-3 gap-2 mt-3">
                             <button type="button" data-home-card-size="small" onclick="setHomeCardSize('small')" class="home-card-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Malé</button>
@@ -1755,7 +1868,7 @@
                             <button type="button" data-home-card-size="large" onclick="setHomeCardSize('large')" class="home-card-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Velké</button>
                         </div>
                     </div>
-                    <div class="settings-card">
+                    <div class="settings-card dev-setting-card" data-dev-setting="continue-watching">
                         <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="fa-solid fa-play"></i></span><div><h3 class="text-sm font-black">Pokračovat ve sledování</h3><p class="text-[10px] text-slate-500">Velikost náhledů na domovské obrazovce</p></div></div>
                         <div class="grid grid-cols-3 gap-2 mt-3">
                             <button type="button" data-home-continue-size="small" onclick="setHomeContinueSize('small')" class="home-continue-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Malé</button>
@@ -1763,27 +1876,27 @@
                             <button type="button" data-home-continue-size="large" onclick="setHomeContinueSize('large')" class="home-continue-size-btn py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold">Velké</button>
                         </div>
                     </div>
-                    <div class="settings-card">
+                    <div class="settings-card dev-setting-card" data-dev-setting="sync">
                         <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-rotate"></i></span><div><h3 class="text-sm font-black">Synchronizace</h3><p class="text-[10px] text-slate-500">Aktualizace seriálů z TMDb</p></div></div>
                         <div class="setting-row"><div><b class="text-xs">Synchronizovat automaticky</b><p class="text-[10px] text-slate-500">Po otevření aplikace</p></div><label class="switch"><input id="setting-auto-sync" type="checkbox" onchange="setAutoSync(this.checked)"><span></span></label></div>
                         <button onclick="syncAllShowsSilently()" class="w-full mt-2 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-800"><i class="fa-solid fa-rotate mr-1.5"></i>Synchronizovat teď</button>
                     </div>
-                    <div class="settings-card">
+                    <div class="settings-card dev-setting-card" data-dev-setting="notifications">
                         <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-regular fa-bell"></i></span><div><h3 class="text-sm font-black">Upozornění</h3><p class="text-[10px] text-slate-500">Nadcházející epizody</p></div></div>
                         <div class="setting-row"><div><b class="text-xs">Zobrazovat upozornění</b><p class="text-[10px] text-slate-500">Počet čekajících epizod u zvonku</p></div><label class="switch"><input id="setting-notifications" type="checkbox" onchange="setNotifications(this.checked)"><span></span></label></div>
                         <div class="mt-3"><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Upozornit předem</label><select id="setting-notification-days" onchange="setNotificationDays(this.value)" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs"><option value="0">V den vydání</option><option value="1">1 den předem</option><option value="3">3 dny předem</option><option value="7">7 dní předem</option><option value="14">14 dní předem</option><option value="30">30 dní předem</option><option value="60">2 měsíce předem</option><option value="90">3 měsíce předem</option></select></div>
                     </div>
                 </div>
-                <div class="settings-card">
+                <div class="settings-card dev-setting-card" data-dev-setting="behavior">
                     <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-sliders"></i></span><div><h3 class="text-sm font-black">Chování aplikace</h3><p class="text-[10px] text-slate-500">Drobnosti, které ovlivní používání</p></div></div>
                     <div class="setting-row"><div><b class="text-xs">Potvrdit mazání</b><p class="text-[10px] text-slate-500">Před odstraněním titulu zobrazit potvrzení</p></div><label class="switch"><input id="setting-confirm-delete" type="checkbox" onchange="setConfirmDelete(this.checked)"><span></span></label></div>
                     <div class="mt-3"><label class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Po spuštění otevřít</label><select id="setting-start-tab" onchange="setStartTab(this.value)" class="w-full mt-2 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs"><option value="home">Domů</option><option value="watchlist">Knihovnu</option><option value="upcoming">Nadcházející</option><option value="creator">Přidat / Vytvořit</option><option value="stats">Statistiky</option></select></div>
                 </div>
-                <div class="settings-card">
+                <div class="settings-card dev-setting-card" data-dev-setting="tmdb-api">
                     <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-key"></i></span><div><h3 class="text-sm font-black">TMDb API</h3><p class="text-[10px] text-slate-500">TMDb API klíč je nastaven přímo v aplikaci.</p></div></div>
                     <div class="flex flex-col sm:flex-row gap-2 mt-3"><input type="text" id="api-key-input" readonly placeholder="TMDb API klíč je nastaven automaticky" class="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-amber-500 theme-focus-border"><button onclick="saveApiKey()" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs theme-bg theme-text">Uložit klíč</button></div>
                 </div>
-                <div id="settings-profiles-card" class="settings-card">
+                <div id="settings-profiles-card" class="settings-card dev-setting-card" data-dev-setting="profiles">
                     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
                         <div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="fa-solid fa-users"></i></span><div><h3 class="text-sm font-black">Profily</h3><p class="text-[10px] text-slate-500">Každý profil má vlastní knihovnu, rozkoukané tituly a hodnocení. Profil samotný se zálohuje do cloudu.</p></div></div>
                         <button onclick="openProfileEditor()" class="px-3 py-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-black hover:bg-indigo-500/15"><i class="fa-solid fa-plus mr-1"></i>Přidat profil</button>
@@ -1794,7 +1907,7 @@
                     </div>
                 </div>
 
-                <div class="settings-card">
+                <div class="settings-card dev-setting-card" data-dev-setting="cloud-profiles">
                     <div class="flex items-center gap-3 mb-2">
                         <span class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud"></i></span>
                         <div><h3 class="text-sm font-black">Cloudové profily</h3><p class="text-[10px] text-slate-500">Profil se automaticky ukládá do Supabase. Knihovna a ostatní nastavení zůstávají v zařízení.</p></div>
@@ -1811,7 +1924,7 @@
                     <p id="supabase-status" class="text-[10px] text-slate-500 mt-2">Připojování k Supabase…</p>
                 </div>
 
-                <div class="settings-card">
+                <div class="settings-card dev-setting-card" data-dev-setting="app-data">
                     <div class="flex items-center gap-3 mb-2"><span class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-950 flex items-center justify-center"><i class="fa-solid fa-database"></i></span><div><h3 class="text-sm font-black">Data aplikace</h3><p class="text-[10px] text-slate-500">Resetování dat aktuálního profilu</p></div></div>
                     <div class="flex flex-wrap items-center gap-2 mt-3">
                         <span class="text-[10px] text-slate-500 mr-1">Aktivní profil: <b id="settings-active-profile-name" class="text-slate-700 dark:text-slate-300">—</b></span>
@@ -1819,6 +1932,8 @@
                     </div>
                     <p class="text-[10px] text-slate-500 mt-2">Export a import najdeš přímo u každého profilu. Tím se zabrání nechtěnému přepsání dat jiného profilu.</p>
                 </div>
+
+
             </div>
         </div>
     </div>
@@ -1827,6 +1942,119 @@
         const MFS_SUPABASE_URL = 'https://nrmyuhymgtdnfacdwweq.supabase.co';
         const MFS_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_2tmDf4nJ7MhbNEcLZKw6QQ_TGZwL7wl';
         const MFS_TMDB_API_KEY = 'f38cd66467f5737752cd8ccd7de73447';
+        // ===== REŽIM VÝVOJÁŘE =====
+        // Heslo je uloženo jako SHA-256 hash, ne jako prostý text.
+        // Pozn.: protože aplikace běží čistě v prohlížeči, nejde o skutečnou serverovou bezpečnost.
+        const MFS_DEVELOPER_PASSWORD_HASH = '6a5cfec8fef780347d7796bc7afd0cc91c5a683c1cf74436abb5f53bff874ad7';
+        const MFS_DEV_UNLOCK_KEY = 'mfs_developer_unlocked';
+        const MFS_DEV_HIDDEN_SETTINGS_KEY = 'mfs_developer_hidden_settings';
+        const MFS_DEV_SETTING_LABELS = {
+            'appearance':'Vzhled',
+            'library-layout':'Rozložení knihovny',
+            'home-previews':'Náhledy na Domů',
+            'continue-watching':'Pokračovat ve sledování',
+            'sync':'Synchronizace',
+            'notifications':'Upozornění',
+            'behavior':'Chování aplikace',
+            'tmdb-api':'TMDb API',
+            'profiles':'Profily',
+            'cloud-profiles':'Cloudové profily',
+            'app-data':'Data aplikace'
+        };
+
+        function isDeveloperUnlocked(){
+            return localStorage.getItem(MFS_DEV_UNLOCK_KEY) === 'true';
+        }
+        function getDeveloperHiddenSettings(){
+            try {
+                const value = JSON.parse(localStorage.getItem(MFS_DEV_HIDDEN_SETTINGS_KEY) || '[]');
+                return Array.isArray(value) ? value : [];
+            } catch { return []; }
+        }
+        function saveDeveloperHiddenSettings(value){
+            localStorage.setItem(MFS_DEV_HIDDEN_SETTINGS_KEY, JSON.stringify([...new Set(value)]));
+        }
+        async function sha256Hex(value){
+            const data = new TextEncoder().encode(value);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+        async function developerLogin(){
+            const input=document.getElementById('developer-password');
+            const msg=document.getElementById('developer-login-message');
+            if(!input) return;
+            const hash=await sha256Hex(input.value || '');
+            if(hash===MFS_DEVELOPER_PASSWORD_HASH){
+                localStorage.setItem(MFS_DEV_UNLOCK_KEY,'true');
+                input.value='';
+                if(msg) msg.textContent='Vývojářský režim je aktivní.';
+                renderDeveloperMode();
+            }else{
+                if(msg){
+                    msg.textContent='Nesprávné heslo.';
+                    msg.className='text-[10px] text-red-400 mt-2';
+                }
+                input.value='';
+            }
+        }
+        function developerLogout(){
+            localStorage.removeItem(MFS_DEV_UNLOCK_KEY);
+            renderDeveloperMode();
+        }
+        function developerSetHidden(settingKey, hidden){
+            const hiddenSettings=getDeveloperHiddenSettings().filter(k=>k!==settingKey);
+            if(hidden) hiddenSettings.push(settingKey);
+            saveDeveloperHiddenSettings(hiddenSettings);
+            applyDeveloperHiddenSettings();
+            renderDeveloperTools();
+        }
+        function developerShowAllSettings(){
+            saveDeveloperHiddenSettings([]);
+            applyDeveloperHiddenSettings();
+            renderDeveloperTools();
+        }
+        function applyDeveloperHiddenSettings(){
+            const hidden=new Set(getDeveloperHiddenSettings());
+            document.querySelectorAll('#settings-modal .dev-setting-card[data-dev-setting]').forEach(card=>{
+                card.classList.toggle('hidden', hidden.has(card.dataset.devSetting));
+            });
+        }
+        function renderDeveloperTools(){
+            const list=document.getElementById('developer-settings-list');
+            if(!list) return;
+            const hidden=new Set(getDeveloperHiddenSettings());
+            list.innerHTML=Object.entries(MFS_DEV_SETTING_LABELS).map(([key,label])=>`
+                <div class="developer-setting-row">
+                    <div class="min-w-0">
+                        <div class="developer-setting-name">${label}</div>
+                        <div class="developer-setting-key">${key}</div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        ${hidden.has(key)?'<span class="developer-hidden-badge">SKRYTÉ</span>':''}
+                        <label class="switch" title="${hidden.has(key)?'Zobrazit':'Skrýt'}">
+                            <input type="checkbox" ${hidden.has(key)?'':'checked'} onchange="developerSetHidden('${key}',!this.checked)">
+                            <span></span>
+                        </label>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function renderDeveloperMode(){
+            const tools=document.getElementById('developer-tools-area');
+            const login=document.getElementById('developer-login-area');
+            const status=document.getElementById('developer-status');
+            if(!tools||!login||!status) return;
+            const unlocked=isDeveloperUnlocked();
+            tools.classList.toggle('hidden',!unlocked);
+            login.classList.toggle('hidden',unlocked);
+            status.className=`developer-status ${unlocked?'unlocked':'locked'}`;
+            status.innerHTML=unlocked
+                ? '<i class="fa-solid fa-unlock"></i>Odemčeno'
+                : '<i class="fa-solid fa-lock"></i>Uzamčeno';
+            if(unlocked) renderDeveloperTools();
+            applyDeveloperHiddenSettings();
+        }
+
 
         
 // Odstranění prázdných/označených profilů z UI.
@@ -2253,6 +2481,7 @@ function cleanupDeletedProfileUI(){
         function openSettingsModal() {
             renderProfilesSettings();
             document.getElementById('settings-modal').classList.remove('hidden');
+            renderDeveloperMode();
             document.body.style.overflow = 'hidden';
         }
 
