@@ -1270,6 +1270,30 @@
 
 <style id="mfs-developer-mode-fix">
 /* Nenápadný vstup do vývojářského režimu. */
+/* ===== VÝVOJÁŘSKÉ OKNO – SCROLL POUZE UVNITŘ OKNA ===== */
+#developer-access-modal{
+    overflow:hidden;
+    overscroll-behavior:contain;
+    touch-action:none;
+}
+#developer-access-modal .developer-card{
+    max-height:calc(100dvh - 2rem);
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+}
+@media (max-width:640px){
+    #developer-access-modal{
+        align-items:center;
+        padding:12px;
+    }
+    #developer-access-modal .developer-card{
+        max-height:calc(100dvh - 24px);
+    }
+}
+
 .developer-access-btn{
     width:30px;height:30px;min-width:30px;padding:0;
     display:inline-flex;align-items:center;justify-content:center;
