@@ -1187,47 +1187,65 @@
 </style>
 
 <style id="mfs-modern-logo-and-developer">
-        /* ===== MODERNÍ HLAVNÍ LOGO ===== */
+        /* ===== NOVÉ RESPONSIVNÍ LOGO ===== */
         .mfs-main-logo{
             position:relative;
-            width:48px;height:48px;flex:0 0 48px;
+            width:clamp(36px,3.2vw,50px);
+            height:clamp(36px,3.2vw,50px);
+            flex:0 0 clamp(36px,3.2vw,50px);
             display:flex;align-items:center;justify-content:center;
-            border-radius:15px;
-            background:linear-gradient(145deg,#111827 0%,#1e293b 58%,#0f172a 100%);
-            color:#fbbf24;
-            border:1px solid rgba(251,191,36,.35);
-            box-shadow:0 10px 28px rgba(15,23,42,.22),inset 0 1px 0 rgba(255,255,255,.10);
+            border-radius:clamp(11px,1vw,16px);
+            background:
+                radial-gradient(circle at 28% 22%,rgba(255,255,255,.22),transparent 27%),
+                linear-gradient(145deg,#f59e0b 0%,#d97706 42%,#7c3aed 100%);
+            color:#fff;
+            border:1px solid rgba(255,255,255,.30);
+            box-shadow:0 8px 24px rgba(124,58,237,.22),inset 0 1px 0 rgba(255,255,255,.32);
             overflow:hidden;
+            isolation:isolate;
+            transition:width .2s,height .2s,flex-basis .2s,border-radius .2s,transform .2s;
         }
         .mfs-main-logo:before{
-            content:'';position:absolute;width:30px;height:30px;border-radius:9px;
-            border:1px solid rgba(251,191,36,.30);
-            transform:rotate(45deg);
+            content:'';position:absolute;inset:8%;border:1px solid rgba(255,255,255,.25);
+            border-radius:inherit;transform:rotate(45deg) scale(.72);
+            opacity:.75;z-index:-1;
         }
         .mfs-main-logo:after{
-            content:'';position:absolute;inset:1px;border-radius:14px;
-            background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 45%,rgba(251,191,36,.06));
-            pointer-events:none;
+            content:'';position:absolute;left:-25%;top:-35%;width:150%;height:60%;
+            background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.25) 48%,transparent 68%);
+            transform:rotate(-18deg);pointer-events:none;
         }
         .mfs-main-logo-icon{
-            position:relative;z-index:2;font-size:17px;line-height:1;
-            filter:drop-shadow(0 2px 5px rgba(251,191,36,.25));
+            position:relative;z-index:2;
+            font-size:clamp(14px,1.15vw,19px);
+            line-height:1;
+            filter:drop-shadow(0 2px 4px rgba(0,0,0,.24));
         }
         .mfs-main-logo-mark{
-            position:absolute;z-index:3;right:5px;bottom:4px;
-            font-size:7px;font-weight:1000;letter-spacing:.04em;
-            color:#fff;opacity:.95;
+            position:absolute;z-index:3;right:clamp(3px,.45vw,6px);bottom:clamp(2px,.35vw,5px);
+            font-size:clamp(5px,.48vw,7px);font-weight:1000;letter-spacing:.08em;
+            color:#fff;opacity:.96;text-shadow:0 1px 3px rgba(0,0,0,.35);
         }
-        .dark .mfs-main-logo{
-            box-shadow:0 12px 32px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.10);
+        .mfs-main-logo:hover{transform:translateY(-1px) scale(1.025)}
+        .mfs-brand-name{
+            font-size:clamp(.82rem,1.15vw,1.05rem);
+            line-height:1;letter-spacing:.02em;
+            white-space:nowrap;
         }
-        .mfs-brand-name{font-size:1.05rem;line-height:1;letter-spacing:.025em}
         @media(max-width:639px){
-            .mfs-main-logo{width:42px;height:42px;flex-basis:42px;border-radius:13px}
-            .mfs-main-logo:before{width:26px;height:26px}
-            .mfs-main-logo-icon{font-size:15px}
-            .mfs-main-logo-mark{right:4px;bottom:3px;font-size:6px}
-            .mfs-brand-name{font-size:.96rem}
+            .mfs-main-logo{
+                width:clamp(34px,11vw,42px);
+                height:clamp(34px,11vw,42px);
+                flex-basis:clamp(34px,11vw,42px);
+                border-radius:12px;
+            }
+            .mfs-main-logo-icon{font-size:clamp(13px,4vw,16px)}
+            .mfs-main-logo-mark{font-size:6px;right:4px;bottom:3px}
+            .mfs-brand-name{font-size:clamp(.78rem,3.6vw,.95rem)}
+        }
+        @media(max-width:390px){
+            .mfs-brand-name{font-size:.78rem}
+            .mfs-main-logo{width:36px;height:36px;flex-basis:36px;border-radius:11px}
         }
 
         /* ===== REŽIM VÝVOJÁŘE – nastavení ===== */
@@ -1244,20 +1262,38 @@
         .developer-login input{min-width:0;flex:1 1 180px}
         .developer-hidden-badge{font-size:8px;font-weight:900;padding:3px 6px;border-radius:999px;background:rgba(239,68,68,.10);color:#f87171}
         @media(max-width:639px){
-            .mfs-main-logo{width:46px;height:46px;flex-basis:46px;border-radius:14px}
-            .mfs-main-logo-icon{top:7px;left:8px;font-size:13px}
-            .mfs-main-logo-mark{right:6px;bottom:5px;font-size:9px}
             .developer-setting-row{align-items:flex-start}
             .developer-login{align-items:stretch}
             .developer-login input,.developer-login button{width:100%;flex-basis:100%}
         }
-
+</style>
 
 <style id="mfs-developer-mode-fix">
-#developer-mode-card{display:block!important;position:relative;z-index:2}
+/* Nenápadný vstup do vývojářského režimu. */
+.developer-access-btn{
+    width:30px;height:30px;min-width:30px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid transparent;border-radius:9px;
+    background:transparent;color:#64748b;opacity:.38;
+    font-size:11px;cursor:pointer;transition:opacity .18s,background .18s,color .18s,border-color .18s,transform .18s;
+}
+.developer-access-btn:hover{
+    opacity:.85;background:rgba(148,163,184,.08);
+    color:#8b5cf6;border-color:rgba(139,92,246,.16);transform:scale(1.04);
+}
+.developer-access-btn:focus-visible{
+    opacity:1;outline:none;box-shadow:0 0 0 3px rgba(139,92,246,.18);
+}
+#developer-mode-card .developer-login{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+#developer-mode-card .developer-login input{width:100%;flex:none}
 #developer-mode-card .developer-login button{min-height:42px}
 #developer-mode-card .developer-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-@media(max-width:639px){#developer-mode-card .developer-login{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}#developer-mode-card .developer-login input,#developer-mode-card .developer-login button{width:100%;min-width:0}}
+@media(max-width:639px){
+    .developer-access-btn{width:28px;height:28px;min-width:28px;font-size:10px}
+    #developer-mode-card .developer-login{display:flex;flex-direction:column}
+    #developer-mode-card .developer-login > div{width:100%}
+    #developer-mode-card .developer-login button{min-height:42px}
+}
 </style>
 </head>
 <body class="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-12 selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300">
@@ -1792,52 +1828,79 @@
         </div>
     </div>
 
+    <!-- VÝVOJÁŘSKÝ PŘÍSTUP -->
+    <div id="developer-access-modal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[70] flex items-center justify-center p-4"
+         onclick="if(event.target===this) closeDeveloperAccess()">
+        <div id="developer-mode-card" class="settings-card developer-card w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center">
+                        <i class="fa-solid fa-code"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <h3 class="text-sm font-black">Vývojářský režim</h3>
+                        <p class="text-[10px] text-slate-500">Interní nastavení aplikace</p>
+                    </div>
+                </div>
+                <span id="developer-status" class="developer-status locked"><i class="fa-solid fa-lock"></i>Uzamčeno</span>
+            </div>
+
+            <div id="developer-login-area" class="mt-5">
+                <label for="developer-password" class="block text-[10px] font-bold text-slate-500 mb-2">Heslo vývojáře</label>
+                <div class="developer-login">
+                    <input id="developer-password" type="password" autocomplete="off" placeholder="Zadej heslo"
+                        onkeydown="if(event.key==='Enter') developerLogin()"
+                        class="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-violet-500">
+                    <div class="flex gap-2">
+                        <button onclick="developerLogin()" class="flex-1 px-4 py-2.5 rounded-xl bg-violet-500 hover:bg-violet-600 text-white font-black text-xs">
+                            <i class="fa-solid fa-unlock mr-1.5"></i>Přihlásit
+                        </button>
+                        <button onclick="closeDeveloperAccess()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs">
+                            Zpět
+                        </button>
+                    </div>
+                </div>
+                <p id="developer-login-message" class="text-[10px] text-slate-500 mt-2">Pro vstup zadej heslo vývojáře.</p>
+            </div>
+
+            <div id="developer-tools-area" class="hidden mt-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <div>
+                        <b class="text-xs">Co zobrazovat v Nastavení</b>
+                        <p class="text-[10px] text-slate-500">Vypnutím položku skryješ běžným uživatelům v Nastavení. Data ani funkce se nemažou.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="developerShowAllSettings()" class="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-bold">Zobrazit vše</button>
+                        <button onclick="developerLogout()" class="px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold">
+                            <i class="fa-solid fa-lock mr-1"></i>Odhlásit
+                        </button>
+                    </div>
+                </div>
+                <div id="developer-settings-list" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- NASTAVENÍ MODAL -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5">
         <div class="glass-panel w-full max-w-4xl max-h-[92vh] rounded-3xl overflow-hidden flex flex-col shadow-2xl">
             <div class="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-500 theme-text flex items-center justify-center"><i class="fa-solid fa-sliders"></i></div><div><h2 class="text-xl font-black">Nastavení</h2><p class="text-xs text-slate-500 mt-0.5">Přizpůsob si My Films & Serials podle sebe.</p></div></div>
-                <button onclick="closeSettingsModal()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="openDeveloperAccess()" aria-label="Vývojářský přístup" title="Vývojářský přístup"
+                        class="developer-access-btn">
+                        <i class="fa-solid fa-code"></i>
+                    </button>
+                    <button onclick="closeSettingsModal()" aria-label="Zavřít nastavení"
+                        class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
             </div>
             <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar space-y-4">
-                <!-- REŽIM VÝVOJÁŘE -->
-                <div id="developer-mode-card" class="settings-card developer-card">
-                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <span class="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center"><i class="fa-solid fa-code"></i></span>
-                            <div class="min-w-0">
-                                <h3 class="text-sm font-black">Režim vývojář</h3>
-                                <p class="text-[10px] text-slate-500">Správa interních možností aplikace. Přístup je chráněný heslem.</p>
-                            </div>
-                        </div>
-                        <span id="developer-status" class="developer-status locked"><i class="fa-solid fa-lock"></i>Uzamčeno</span>
-                    </div>
-
-                    <div id="developer-login-area" class="mt-4">
-                        <div class="developer-login">
-                            <input id="developer-password" type="password" autocomplete="off" placeholder="Heslo vývojáře"
-                                onkeydown="if(event.key==='Enter') developerLogin()"
-                                class="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-violet-500">
-                            <button onclick="developerLogin()" class="px-5 py-2.5 rounded-xl bg-violet-500 hover:bg-violet-600 text-white font-black text-xs">
-                                <i class="fa-solid fa-unlock mr-1.5"></i>Přihlásit
-                            </button>
-                        </div>
-                        <p id="developer-login-message" class="text-[10px] text-slate-500 mt-2">Zadej heslo vývojáře pro odemknutí interních nastavení.</p>
-                    </div>
-
-                    <div id="developer-tools-area" class="hidden mt-4">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div>
-                                <b class="text-xs">Co zobrazovat v Nastavení</b>
-                                <p class="text-[10px] text-slate-500">Vypnutím položku skryješ běžným uživatelům v Nastavení. Data ani funkce se nemažou.</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="developerShowAllSettings()" class="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] font-bold">Zobrazit vše</button>
-                                <button onclick="developerLogout()" class="px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold"><i class="fa-solid fa-lock mr-1"></i>Odhlásit</button>
-                            </div>
-                        </div>
-                        <div id="developer-settings-list" class="mt-2"></div>
-                    </div>
+                <!-- VÝVOJÁŘSKÝ REŽIM: přístup je schovaný za malou ikonou v záhlaví Nastavení. -->
+                <div class="hidden" aria-hidden="true">
+                    <span>Režim vývojář</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="settings-card dev-setting-card" data-dev-setting="appearance">
@@ -1965,20 +2028,103 @@
         function isDeveloperUnlocked(){
             return localStorage.getItem(MFS_DEV_UNLOCK_KEY) === 'true';
         }
+        // Vývojářská konfigurace je globální a synchronizuje se přes Supabase.
+        // Odemčení heslem zůstává záměrně pouze na konkrétním zařízení.
+        const MFS_GLOBAL_CONFIG_ID = '__mfs_global_config__';
+        let mfsDeveloperHiddenSettings = [];
+        let mfsDeveloperConfigLoaded = false;
+        let mfsDeveloperConfigSaveTimer = null;
+
         function getDeveloperHiddenSettings(){
-            try {
-                const value = JSON.parse(localStorage.getItem(MFS_DEV_HIDDEN_SETTINGS_KEY) || '[]');
-                return Array.isArray(value) ? value : [];
-            } catch { return []; }
+            return Array.isArray(mfsDeveloperHiddenSettings)
+                ? [...mfsDeveloperHiddenSettings]
+                : [];
+        }
+        function setDeveloperHiddenSettingsLocal(value){
+            mfsDeveloperHiddenSettings=[...new Set(Array.isArray(value)?value:[])];
+            localStorage.setItem(MFS_DEV_HIDDEN_SETTINGS_KEY, JSON.stringify(mfsDeveloperHiddenSettings));
         }
         function saveDeveloperHiddenSettings(value){
-            localStorage.setItem(MFS_DEV_HIDDEN_SETTINGS_KEY, JSON.stringify([...new Set(value)]));
+            setDeveloperHiddenSettingsLocal(value);
+            clearTimeout(mfsDeveloperConfigSaveTimer);
+            mfsDeveloperConfigSaveTimer=setTimeout(()=>syncDeveloperConfigToSupabase(),120);
+        }
+        function loadDeveloperHiddenSettingsLocal(){
+            try {
+                const value=JSON.parse(localStorage.getItem(MFS_DEV_HIDDEN_SETTINGS_KEY)||'[]');
+                setDeveloperHiddenSettingsLocal(value);
+            } catch { setDeveloperHiddenSettingsLocal([]); }
+        }
+        loadDeveloperHiddenSettingsLocal();
+
+        async function syncDeveloperConfigToSupabase(){
+            if(!supabaseClient) return false;
+            try{
+                const payload={
+                    id:MFS_GLOBAL_CONFIG_ID,
+                    name:'__MFS_GLOBAL_CONFIG__',
+                    icon:'fa-sliders',
+                    color:'slate',
+                    watchlist:[],
+                    settings:{developer_hidden_settings:getDeveloperHiddenSettings()},
+                    api_key:'',
+                    search_type:'movie'
+                };
+                const {error}=await supabaseClient.from('mfs_profiles').upsert(payload,{onConflict:'id'});
+                if(error) throw error;
+                mfsDeveloperConfigLoaded=true;
+                return true;
+            }catch(e){
+                console.warn('Supabase vývojářská konfigurace:',e);
+                return false;
+            }
+        }
+        function applyDeveloperConfigFromCloud(row){
+            const cloud=Array.isArray(row?.settings?.developer_hidden_settings)
+                ? row.settings.developer_hidden_settings
+                : null;
+            if(!cloud) return false;
+            setDeveloperHiddenSettingsLocal(cloud);
+            mfsDeveloperConfigLoaded=true;
+            applyDeveloperHiddenSettings();
+            if(isDeveloperUnlocked()) renderDeveloperTools();
+            return true;
         }
         async function sha256Hex(value){
             const data = new TextEncoder().encode(value);
             const hash = await crypto.subtle.digest('SHA-256', data);
             return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2,'0')).join('');
         }
+        function openDeveloperAccess(){
+            const modal=document.getElementById('developer-access-modal');
+            if(!modal) return;
+            // Každé otevření znovu vyžádá heslo.
+            localStorage.removeItem(MFS_DEV_UNLOCK_KEY);
+            modal.classList.remove('hidden');
+            document.body.style.overflow='hidden';
+            const input=document.getElementById('developer-password');
+            const msg=document.getElementById('developer-login-message');
+            if(input) input.value='';
+            if(msg){
+                msg.textContent='Pro vstup zadej heslo vývojáře.';
+                msg.className='text-[10px] text-slate-500 mt-2';
+            }
+            renderDeveloperMode();
+            setTimeout(()=>input?.focus(),80);
+        }
+        function closeDeveloperAccess(){
+            localStorage.removeItem(MFS_DEV_UNLOCK_KEY);
+            const modal=document.getElementById('developer-access-modal');
+            if(modal) modal.classList.add('hidden');
+            const input=document.getElementById('developer-password');
+            if(input) input.value='';
+            if(!document.getElementById('settings-modal')?.classList.contains('hidden')){
+                document.body.style.overflow='hidden';
+            }else{
+                document.body.style.overflow='auto';
+            }
+        }
+
         async function developerLogin(){
             const input=document.getElementById('developer-password');
             const msg=document.getElementById('developer-login-message');
@@ -3775,7 +3921,6 @@ function cleanupDeletedProfileUI(){
         async function addTMDbItem(tmdbId, type) {
             try {
                 // TMDb používá pro seriály typ "tv", ale aplikace interně používá "show".
-                // Bez normalizace se nově přidané seriály neobjevily v doporučeních Domů.
                 const normalizedType = type === 'tv' ? 'show' : 'movie';
                 type = normalizedType;
 
@@ -3803,9 +3948,13 @@ function cleanupDeletedProfileUI(){
                     rating: 0,
                     notes: '',
                     addedAt: Date.now(),
-                    cast: []
+                    cast: [],
+                    genres: [],
+                    seasons: type === 'show' ? [] : undefined
                 };
 
+                // Nejprve stáhni pouze hlavní informace o titulu.
+                // Jakmile je máme, titul se okamžitě vloží do knihovny.
                 if (type === 'movie') {
                     const res = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
                     if (!res.ok) throw new Error(`TMDb movie ${res.status}`);
@@ -3818,19 +3967,12 @@ function cleanupDeletedProfileUI(){
                         backdrop_path: movie.backdrop_path,
                         runtime: movie.runtime || 120,
                         genres: (movie.genres || []).map(g => g.name),
-                        watched: false,
-                        cast: await fetchCast('movie', tmdbId).catch(() => [])
+                        watched: false
                     });
                 } else {
                     const res = await fetch(`https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`);
                     if (!res.ok) throw new Error(`TMDb TV ${res.status}`);
                     const show = await res.json();
-
-                    const seasonPromises = (show.seasons || []).filter(s => s.season_number > 0).map(s =>
-                        fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${s.season_number}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`).then(res => res.ok ? res.json() : null)
-                    );
-                    const seasonsData = (await Promise.all(seasonPromises)).filter(Boolean);
-
                     Object.assign(newItem, {
                         originalTitle: show.original_name,
                         title: show.name,
@@ -3838,7 +3980,32 @@ function cleanupDeletedProfileUI(){
                         poster_path: show.poster_path,
                         backdrop_path: show.backdrop_path,
                         genres: (show.genres || []).map(g => g.name),
-                        seasons: seasonsData.map(s => ({
+                        seasons: []
+                    });
+                }
+
+                // TITUL SE ZOBRAZÍ OKAMŽITĚ.
+                state.watchlist.push(newItem);
+                saveToLocalStorage();
+                checkDemoBanner();
+                renderWatchlist();
+                renderHome();
+                if (Array.isArray(window.mfsLastMediaResults)) renderMediaResults(window.mfsLastMediaResults);
+
+                // Zavři případný detail/preview a otevři právě přidaný titul.
+                openDetail(newItem.id);
+
+                // Pomalejší doplňování dat proběhne až po přidání do knihovny.
+                if (type === 'movie') {
+                    newItem.cast = await fetchCast('movie', tmdbId).catch(() => []);
+                } else {
+                    const show = await fetch(`https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`).then(res => res.ok ? res.json() : null);
+                    if (show) {
+                        const seasonPromises = (show.seasons || []).filter(s => s.season_number > 0).map(s =>
+                            fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${s.season_number}?api_key=${state.apiKey}&language=${encodeURIComponent(apiLanguage())}`).then(res => res.ok ? res.json() : null)
+                        );
+                        const seasonsData = (await Promise.all(seasonPromises)).filter(Boolean);
+                        newItem.seasons = seasonsData.map(s => ({
                             season_number: s.season_number,
                             name: s.name,
                             episodes: (s.episodes || []).map(e => ({
@@ -3849,16 +4016,17 @@ function cleanupDeletedProfileUI(){
                                 runtime: e.runtime || show.episode_run_time?.[0] || 45,
                                 watched: false
                             }))
-                        })),
-                        cast: await fetchCast('show', tmdbId).catch(() => [])
-                    });
+                        }));
+                    }
+                    newItem.cast = await fetchCast('show', tmdbId).catch(() => []);
                 }
-                state.watchlist.push(newItem);
+
+                // Doplňená data se uloží do stejného titulu a okamžitě se promítnou všude.
                 saveToLocalStorage();
-                checkDemoBanner();
+                renderWatchlist();
                 renderHome();
+                if (state.currentDetailId === newItem.id) openDetail(newItem.id);
                 if (Array.isArray(window.mfsLastMediaResults)) renderMediaResults(window.mfsLastMediaResults);
-                alert('Titul byl úspěšně importován z TMDb!');
             } catch (error) {
                 console.error(error);
                 alert('Chyba při stahování detailů z TMDb.');
@@ -4125,11 +4293,13 @@ function cleanupDeletedProfileUI(){
                 const localActiveId=activeProfileId;
                 const localMap=new Map(profiles.map(p=>[String(p.id),p]));
                 if(Array.isArray(data)) {
+                    const globalConfig=data.find(row=>String(row?.id||'')===MFS_GLOBAL_CONFIG_ID);
+                    if(globalConfig) applyDeveloperConfigFromCloud(globalConfig);
                     const cloudDeleted=collectDeletedIdsFromCloud(data);
                     const merged=[]; const used=new Set();
                     for(const row of data) {
                         const id=String(row.id||'');
-                        if(isDeletedProfileMarker(id)) continue;
+                        if(id===MFS_GLOBAL_CONFIG_ID || isDeletedProfileMarker(id)) continue;
                         if(deletedProfileIds.has(id) || cloudDeleted.has(id)) continue;
                         const local=localMap.get(id);
                         const watchlist=Array.isArray(row.watchlist)?row.watchlist:(local?.watchlist||[]);
@@ -4180,7 +4350,7 @@ function cleanupDeletedProfileUI(){
 
         async function saveProfileToSupabase(profile) {
             if (!supabaseClient || !profile) return false;
-            if (deletedProfileIds.has(String(profile.id))) return false;
+            if (String(profile.id)===MFS_GLOBAL_CONFIG_ID || deletedProfileIds.has(String(profile.id))) return false;
             try {
                 const payload = {
                     id: cloudProfileId(profile.id),
@@ -4210,9 +4380,10 @@ function cleanupDeletedProfileUI(){
             let ok=true;
             // Nejprve uložíme lokální profily.
             for(const p of profiles) {
-                if(deletedProfileIds.has(String(p.id))) continue;
+                if(deletedProfileIds.has(String(p.id)) || String(p.id)===MFS_GLOBAL_CONFIG_ID) continue;
                 if(!(await saveProfileToSupabase(p))) {ok=false;break;}
             }
+            if(ok && !(await syncDeveloperConfigToSupabase())) ok=false;
             const el=document.getElementById('supabase-status');
             if(el) el.textContent=ok?'Supabase připojeno · všechna data profilů synchronizována.':'Supabase připojeno, ale některá data se nepodařilo uložit.';
             if(showAlert) alert(ok?'Všechna data profilů byla synchronizována.':'Synchronizace se nepodařila.');
@@ -4229,12 +4400,14 @@ function cleanupDeletedProfileUI(){
 
                 const localMap=new Map(profiles.map(p=>[p.id,p]));
                 if(Array.isArray(data) && data.length) {
+                    const globalConfig=data.find(row=>String(row?.id||'')===MFS_GLOBAL_CONFIG_ID);
+                    if(globalConfig) applyDeveloperConfigFromCloud(globalConfig);
                     const cloudDeleted=collectDeletedIdsFromCloud(data);
                     const merged=[];
                     const used=new Set();
                     for(const row of data) {
                         const rawId=String(row?.id||'');
-                        if(isDeletedProfileMarker(rawId)) continue;
+                        if(rawId===MFS_GLOBAL_CONFIG_ID || isDeletedProfileMarker(rawId)) continue;
                         const id=localProfileIdFromCloud(row.id);
                         if(deletedProfileIds.has(String(id)) || cloudDeleted.has(String(id))) continue;
                         const local=localMap.get(id);
@@ -4281,7 +4454,8 @@ function cleanupDeletedProfileUI(){
                 } else {
                     await syncProfilesToSupabase(false);
                 }
-                if(el) el.textContent='Supabase připojeno · profily a jejich data jsou synchronizované.';
+                if(!mfsDeveloperConfigLoaded) await syncDeveloperConfigToSupabase();
+                if(el) el.textContent='Supabase připojeno · profily, nastavení a vývojářská konfigurace jsou synchronizované.';
             } catch(e) {
                 console.warn('Supabase načtení dat:',e);
                 if(el) el.textContent='Supabase není dostupné – data dál fungují lokálně.';
@@ -4415,6 +4589,10 @@ function cleanupDeletedProfileUI(){
           search_type text not null default 'movie',
           created_at timestamptz not null default now()
         );
+
+        -- Globální konfigurace aplikace se ukládá jako speciální řádek
+        -- id = __mfs_global_config__ v JSON sloupci settings. Nejde o profil.
+        -- Díky tomu se vývojářská nastavení synchronizují mezi všemi zařízeními.
 
         -- Migrace staré verze tabulky, pokud už mfs_profiles existuje.
         alter table public.mfs_profiles add column if not exists watchlist jsonb not null default '[]'::jsonb;
