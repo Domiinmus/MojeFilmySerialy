@@ -1595,8 +1595,9 @@
                     <i class="fa-solid fa-rotate mr-1.5"></i> Synchronizovat
                 </button>
             </div>
-            <div id="upcoming-list" class="space-y-4">
-                <!-- Zde se vygeneruje seznam nadcházejících epizod -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between gap-3"><h3 class="text-lg font-black"><i class="fa-solid fa-tv text-amber-500 mr-2"></i>Epizody z mé knihovny</h3><span id="upcoming-count" class="text-xs text-slate-500"></span></div>
+                <div id="upcoming-list" class="space-y-3"></div>
             </div>
         </section>
 
@@ -3246,63 +3247,79 @@ function cleanupDeletedProfileUI(){
             applyHomeContinueSize(state.homeContinueSize);
         }
 
-        // --- NADCHÁZEJÍCÍ EPIZODY ---
+        // --- NADCHÁZEJÍCÍ EPIZODY: pouze synchronizovaná data z vlastní knihovny ---
         async function renderUpcomingEpisodes() {
             const container = document.getElementById('upcoming-list');
-            container.innerHTML = `<div class="text-center text-slate-500 dark:text-slate-400 py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Načítám nadcházející epizody...</div>`;
-
+            container.innerHTML = `<div class="text-center text-slate-500 dark:text-slate-400 py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Načítám kalendář...</div>`;
             if (!state.apiKey) {
-                container.innerHTML = `<div class="text-center text-red-500 py-8"><i class="fa-solid fa-key mr-2"></i>Pro tuto funkci je nutné nastavit TMDb API klíč v nastavení.</div>`;
+                container.innerHTML = `<div class="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 text-sm text-slate-500"><i class="fa-solid fa-key text-amber-500 mr-2"></i>Pro automatickou synchronizaci epizod z TMDb a TVmaze nastav TMDb API klíč v Nastavení.</div>`;
                 return;
             }
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const today = new Date(); today.setHours(0,0,0,0);
             const upcoming = [];
             state.watchlist.filter(item => item.type === 'show' && item.tmdbId && getProgressPercent(item) < 100).forEach(show => {
+                const showName = show.title || show.originalTitle;
                 (show.seasons || []).forEach(season => (season.episodes || []).forEach(ep => {
                     if (!ep.air_date) return;
                     const date = new Date(`${ep.air_date}T00:00:00`);
-                    if (!Number.isNaN(date.getTime()) && date >= today) {
-                        upcoming.push({
-                            showId: show.id,
-                            showName: show.title || show.originalTitle,
-                            showPoster: show.poster_path,
-                            seasonNumber: season.season_number,
-                            episodeNumber: ep.episode_number,
-                            name: ep.name || `Epizoda ${ep.episode_number}`,
-                            overview: ep.overview || '',
-                            air_date: ep.air_date,
-                            runtime: ep.runtime
-                        });
-                    }
+                    if (!Number.isNaN(date.getTime()) && date >= today) upcoming.push({
+                        showId: show.id, showName, showPoster: show.poster_path,
+                        seasonNumber: season.season_number, episodeNumber: ep.episode_number,
+                        name: ep.name || `Epizoda ${ep.episode_number}`, overview: ep.overview || '', air_date: ep.air_date, runtime: ep.runtime, source: 'TMDb'
+                    });
                 }));
+                // TVmaze je doplňkový zdroj; přidá jen epizody, které v TMDb seznamu chybí.
+                (show.tvmazeUpcomingEpisodes || []).forEach(ep => {
+                    if (!ep.air_date) return;
+                    const date = new Date(`${ep.air_date}T00:00:00`);
+                    if (Number.isNaN(date.getTime()) || date < today) return;
+                    const duplicate = upcoming.some(existing => existing.showId === show.id && existing.seasonNumber === Number(ep.season) && existing.episodeNumber === Number(ep.number));
+                    if (!duplicate) upcoming.push({
+                        showId: show.id, showName, showPoster: show.poster_path,
+                        seasonNumber: Number(ep.season) || 0, episodeNumber: Number(ep.number) || 0,
+                        name: ep.name || `Epizoda ${ep.number || ''}`, overview: ep.summary ? String(ep.summary).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : '',
+                        air_date: ep.air_date, runtime: ep.runtime, source: 'TVmaze'
+                    });
+                });
             });
-
-            upcoming.sort((a, b) => new Date(a.air_date) - new Date(b.air_date) || a.showName.localeCompare(b.showName));
-
+            upcoming.sort((a,b) => new Date(a.air_date)-new Date(b.air_date) || a.showName.localeCompare(b.showName));
+            const count = document.getElementById('upcoming-count');
+            if (count) count.textContent = `${upcoming.length} ${upcoming.length === 1 ? 'epizoda' : upcoming.length >= 2 && upcoming.length <= 4 ? 'epizody' : 'epizod'}`;
             if (!upcoming.length) {
-                container.innerHTML = `<div class="text-center text-slate-500 dark:text-slate-400 py-8"><i class="fa-solid fa-calendar-xmark mr-2"></i>Žádné budoucí epizody nejsou v uložených datech. Klikni na Synchronizovat.</div>`;
-                return;
+                container.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-6 text-center text-sm text-slate-500"><i class="fa-solid fa-calendar-xmark text-2xl mb-2 block"></i>V uložených datech nejsou žádné budoucí epizody. Stiskni „Synchronizovat“ a načti aktuální data svých seriálů.</div>`;
+            } else {
+                const groups = {};
+                upcoming.forEach(ep => { const key = ep.air_date.slice(0,7); (groups[key] ||= []).push(ep); });
+                container.innerHTML = Object.entries(groups).map(([month, episodes]) => {
+                    const monthDate = new Date(`${month}-01T00:00:00`);
+                    return `<section class="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"><div class="px-4 py-3 bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between"><h4 class="font-black capitalize">${monthDate.toLocaleDateString('cs-CZ',{month:'long',year:'numeric'})}</h4><span class="text-xs text-slate-500">${episodes.length} ${episodes.length === 1 ? 'epizoda' : episodes.length >= 2 && episodes.length <= 4 ? 'epizody' : 'epizod'}</span></div><div class="divide-y divide-slate-200 dark:divide-slate-800">${episodes.map(ep => {
+                        const date = new Date(`${ep.air_date}T00:00:00`);
+                        const poster = ep.showPoster ? (ep.showPoster.startsWith('http') ? ep.showPoster : `https://image.tmdb.org/t/p/w92${ep.showPoster}`) : 'https://via.placeholder.com/92x138?text=N/A';
+                        const dateLabel = date.toLocaleDateString('cs-CZ',{day:'numeric',month:'short'});
+                        const weekdayLabel = date.toLocaleDateString('cs-CZ',{weekday:'short'}).replace('.', '');
+                        return `<article class="group p-3 sm:p-4 flex items-stretch gap-3 sm:gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors">
+                            <div class="w-[58px] sm:w-[68px] flex-shrink-0 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col items-center justify-center text-center px-1 py-2">
+                                <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">${weekdayLabel}</span>
+                                <span class="text-lg sm:text-xl leading-tight font-black text-slate-900 dark:text-white">${date.getDate()}</span>
+                                <span class="text-[10px] font-semibold text-slate-500">${date.toLocaleDateString('cs-CZ',{month:'short'}).replace('.', '')}</span>
+                            </div>
+                            <img src="${poster}" alt="${escapeHtml(ep.showName)}" loading="lazy" class="w-12 sm:w-[68px] object-cover rounded-lg shadow-sm flex-shrink-0 self-start">
+                            <div class="flex-1 min-w-0 py-0.5">
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <p class="text-xs sm:text-sm text-amber-600 dark:text-amber-400 font-extrabold truncate">${escapeHtml(ep.showName)}</p>
+                                    ${ep.source === 'TVmaze' ? '<span class="text-[9px] uppercase tracking-wide font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-500">TVmaze</span>' : ''}
+                                </div>
+                                <h5 class="font-bold text-sm sm:text-base leading-snug">${escapeHtml(ep.name)}</h5>
+                                <div class="flex flex-wrap items-center gap-2 mt-2">
+                                    <span class="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-1 text-[10px] sm:text-[11px] font-mono font-bold text-slate-600 dark:text-slate-300">S${String(ep.seasonNumber).padStart(2,'0')}E${String(ep.episodeNumber).padStart(2,'0')}</span>
+                                    ${ep.runtime ? `<span class="text-[10px] text-slate-500"><i class="fa-regular fa-clock mr-1"></i>${ep.runtime} min</span>` : ''}
+                                </div>
+                                ${ep.overview ? `<p class="text-xs text-slate-500 mt-2 line-clamp-2 hidden sm:block">${escapeHtml(ep.overview)}</p>` : ''}
+                            </div>
+                        </article>`;
+                    }).join('')}</div></section>`;
+                }).join('');
             }
-
-            container.innerHTML = upcoming.map(ep => {
-                const posterUrl = ep.showPoster ? (ep.showPoster.startsWith('http') ? ep.showPoster : `https://image.tmdb.org/t/p/w92${ep.showPoster}`) : 'https://via.placeholder.com/92x138?text=N/A';
-                const airDate = new Date(`${ep.air_date}T00:00:00`);
-                return `<div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-start gap-4">
-                    <img src="${posterUrl}" alt="${escapeHtml(ep.showName)}" class="w-16 rounded-md shadow-md hidden sm:block">
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs text-amber-500 theme-text font-bold truncate">${escapeHtml(ep.showName)}</p>
-                        <h4 class="text-lg font-bold text-slate-900 dark:text-white">${escapeHtml(ep.name)}</h4>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 font-mono">S${String(ep.seasonNumber).padStart(2, '0')}E${String(ep.episodeNumber).padStart(2, '0')} · ${ep.runtime || '—'} min</p>
-                        ${ep.overview ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2">${escapeHtml(ep.overview)}</p>` : ''}
-                    </div>
-                    <div class="text-right flex-shrink-0">
-                        <p class="text-lg font-bold text-slate-900 dark:text-white">${airDate.toLocaleDateString(apiLanguage(), { day: 'numeric', month: 'long' })}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">${airDate.toLocaleDateString(apiLanguage(), { weekday: 'long' })}</p>
-                    </div>
-                </div>`;
-            }).join('');
             applyThemeColor(state.themeColor);
             updateNotificationBell();
         }
@@ -4095,6 +4112,49 @@ function cleanupDeletedProfileUI(){
             return true;
         }
 
+        // TVmaze doplňuje chybějící budoucí epizody. ID seriálu hledáme nejprve přes IMDb ID z TMDb;
+        // při jeho absenci použijeme jen přesnou shodu názvu, aby se minimalizovalo chybné spárování.
+        async function syncTVmazeShow(show) {
+            const normalizeTitle = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+            let tvmazeShow = null;
+            try {
+                const externalRes = await fetch(`https://api.themoviedb.org/3/tv/${show.tmdbId}/external_ids?api_key=${state.apiKey}`);
+                if (externalRes.ok) {
+                    const external = await externalRes.json();
+                    if (external.imdb_id) {
+                        const lookupRes = await fetch(`https://api.tvmaze.com/lookup/shows?imdb=${encodeURIComponent(external.imdb_id)}`);
+                        if (lookupRes.ok) tvmazeShow = await lookupRes.json();
+                    }
+                }
+                if (!tvmazeShow) {
+                    const title = show.originalTitle || show.title;
+                    if (title) {
+                        const searchRes = await fetch(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(title)}`);
+                        if (searchRes.ok) {
+                            const matches = await searchRes.json();
+                            const wanted = normalizeTitle(title);
+                            const exact = matches.find(entry => normalizeTitle(entry.show?.name) === wanted);
+                            if (exact) tvmazeShow = exact.show;
+                        }
+                    }
+                }
+                if (!tvmazeShow?.id) { show.tvmazeUpcomingEpisodes = []; return false; }
+                const episodesRes = await fetch(`https://api.tvmaze.com/shows/${tvmazeShow.id}/episodes`);
+                if (!episodesRes.ok) { show.tvmazeUpcomingEpisodes = []; return false; }
+                const episodes = await episodesRes.json();
+                const today = new Date(); today.setHours(0,0,0,0);
+                show.tvmazeUpcomingEpisodes = episodes.filter(ep => ep && ep.airdate && ep.season != null && ep.number != null)
+                    .filter(ep => { const d = new Date(`${ep.airdate}T00:00:00`); return !Number.isNaN(d.getTime()) && d >= today; })
+                    .map(ep => ({ season: ep.season, number: ep.number, name: ep.name, summary: ep.summary, air_date: ep.airdate, runtime: ep.runtime }));
+                show.tvmazeShowId = tvmazeShow.id;
+                return true;
+            } catch (error) {
+                console.warn(`TVmaze synchronizace (${show.title || show.originalTitle}):`, error);
+                // Při výpadku TVmaze zachováme poslední úspěšně uložená data.
+                return false;
+            }
+        }
+
         async function syncUpcomingEpisodes() {
             const btn = document.getElementById('sync-upcoming-btn');
             if (!state.apiKey) {
@@ -4110,7 +4170,10 @@ function cleanupDeletedProfileUI(){
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Synchronizuji...';
             try {
-                for (const show of shows) await syncShowData(show);
+                for (const show of shows) {
+                    await syncShowData(show);
+                    await syncTVmazeShow(show);
+                }
                 saveToLocalStorage();
                 renderWatchlist();
                 await renderUpcomingEpisodes();
